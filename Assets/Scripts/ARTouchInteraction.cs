@@ -1,4 +1,7 @@
 using UnityEngine;
+using UnityEngine.InputSystem;
+using UnityEngine.InputSystem.EnhancedTouch;
+using Touch = UnityEngine.InputSystem.EnhancedTouch.Touch;
 
 public class ARTouchInteraction : MonoBehaviour
 {
@@ -8,19 +11,31 @@ public class ARTouchInteraction : MonoBehaviour
 
     private float lastTapTime;
 
+    private void OnEnable()
+    {
+        EnhancedTouchSupport.Enable();
+    }
+
+    private void OnDisable()
+    {
+        EnhancedTouchSupport.Disable();
+    }
+
     private void Update()
     {
         if (Time.time - lastTapTime < tapCooldown) return;
 
         Vector2 screenPos;
 
-        if (Input.touchCount > 0 && Input.GetTouch(0).phase == TouchPhase.Began)
+        // Touch input (mobile)
+        if (Touch.activeTouches.Count > 0 && Touch.activeTouches[0].phase == UnityEngine.InputSystem.TouchPhase.Began)
         {
-            screenPos = Input.GetTouch(0).position;
+            screenPos = Touch.activeTouches[0].screenPosition;
         }
-        else if (Input.GetMouseButtonDown(0))
+        // Mouse input (editor testing)
+        else if (Mouse.current != null && Mouse.current.leftButton.wasPressedThisFrame)
         {
-            screenPos = Input.mousePosition;
+            screenPos = Mouse.current.position.ReadValue();
         }
         else
         {

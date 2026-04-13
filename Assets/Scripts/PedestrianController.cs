@@ -5,65 +5,96 @@ public class PedestrianController : MonoBehaviour
     [Header("Crossing")]
     [SerializeField] private Transform startPoint;
     [SerializeField] private Transform endPoint;
-    [SerializeField] private float speed = 0.3f;
+    [SerializeField] private float speed = 0.8f;
 
     [Header("Idle Animation")]
-    [SerializeField] private float bobAmplitude = 0.002f;
+    [SerializeField] private float bobAmplitude = 0.01f;
     [SerializeField] private float bobFrequency = 3f;
+
+    [Header("Group - all transforms to move together")]
+    [SerializeField] private Transform[] linkedParts;
 
     private bool canCross;
     private bool isCrossing;
     private bool goingToEnd = true;
     private float waitTimer;
     private float waitDuration = 2f;
-    private Vector3 basePosition;
+
+    private Vector3 wpPosition;
+    private Vector3 myOffset;
+    private Vector3[] partOffsets;
 
     private void Start()
     {
         if (startPoint != null)
         {
-            transform.position = startPoint.position;
+            wpPosition = startPoint.localPosition;
+            myOffset = transform.localPosition - wpPosition;
         }
-        basePosition = transform.position;
+        else
+        {
+            wpPosition = transform.localPosition;
+            myOffset = Vector3.zero;
+        }
+
+        // Store offsets of linked parts relative to this transform
+        if (linkedParts != null)
+        {
+            partOffsets = new Vector3[linkedParts.Length];
+            for (int i = 0; i < linkedParts.Length; i++)
+            {
+                if (linkedParts[i] != null)
+                    partOffsets[i] = linkedParts[i].localPosition - transform.localPosition;
+            }
+        }
     }
 
     private void Update()
     {
         if (!isCrossing)
         {
-            // Idle bobbing
             float bob = Mathf.Sin(Time.time * bobFrequency) * bobAmplitude;
-            transform.position = basePosition + Vector3.up * bob;
+            transform.localPosition = wpPosition + myOffset + Vector3.up * bob;
 
             if (canCross)
             {
                 isCrossing = true;
                 goingToEnd = true;
+                transform.localPosition = wpPosition + myOffset;
             }
             return;
         }
 
-        // Crossing
         Transform target = goingToEnd ? endPoint : startPoint;
         if (target == null) return;
 
-        transform.position = Vector3.MoveTowards(
-            transform.position, target.position, speed * Time.deltaTime
-        );
+        Vector3 oldWp = wpPosition;
+        wpPosition = Vector3.MoveTowards(wpPosition, target.localPosition, speed * Time.deltaTime);
+        Vector3 delta = wpPosition - oldWp;
 
-        // Look toward target
-        Vector3 dir = target.position - transform.position;
-        if (dir.sqrMagnitude > 0.001f)
+        transform.localPosition = wpPosition + myOffset;
+
+        // Move linked parts by same delta
+        if (linkedParts != null)
         {
-            transform.rotation = Quaternion.LookRotation(dir.normalized);
+            for (int i = 0; i < linkedParts.Length; i++)
+            {
+                if (linkedParts[i] != null)
+                    linkedParts[i].localPosition += delta;
+            }
         }
 
-        // Arrived at target
-        if (Vector3.Distance(transform.position, target.position) < 0.05f)
+        if (Vector3.Distance(wpPosition, target.localPosition) < 0.2f)
         {
             if (goingToEnd)
             {
-                // Wait at the other side, then walk back
+                // Arrived at end — if still allowed to cross, wait then return
+                // If no longer allowed, stay and stop crossing
+                if (!canCross)
+                {
+                    isCrossing = false;
+                    return;
+                }
                 waitTimer += Time.deltaTime;
                 if (waitTimer >= waitDuration)
                 {
@@ -73,9 +104,7 @@ public class PedestrianController : MonoBehaviour
             }
             else
             {
-                // Back at start
                 isCrossing = false;
-                basePosition = transform.position;
             }
         }
     }

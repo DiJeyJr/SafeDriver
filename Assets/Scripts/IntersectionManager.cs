@@ -19,6 +19,11 @@ public class IntersectionManager : MonoBehaviour
     [Header("Score")]
     [SerializeField] private ScoreManager scoreManager;
 
+    private void Start()
+    {
+        UpdatePermissions();
+    }
+
     private void OnEnable()
     {
         if (northLight) northLight.OnStateChanged += OnNorthSouthChanged;
@@ -102,8 +107,5 @@ public class IntersectionManager : MonoBehaviour
             foreach (var ped in eastWestPedestrians)
                 ped.SetCanCross(!ewGreen);
 
-        // Score for safe pedestrian crossing
-        if (scoreManager != null && (!nsGreen || !ewGreen))
-            scoreManager.AddPoints(5);
     }
 }

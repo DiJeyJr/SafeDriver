@@ -4,16 +4,18 @@ public class CarController : MonoBehaviour
 {
     [Header("Movement")]
     [SerializeField] private Transform[] waypoints;
-    [SerializeField] private float speed = 0.5f;
-    [SerializeField] private float rotationSpeed = 5f;
-    [SerializeField] private float stopDistance = 0.15f;
+    [SerializeField] private float speed = 1.5f;
+    [SerializeField] private float stopDistance = 0.3f;
 
     [Header("Traffic")]
     [SerializeField] private Transform stopLine;
-    [SerializeField] private float stopLineThreshold = 0.2f;
+    [SerializeField] private float stopLineThreshold = 0.5f;
+
+    [Header("Linked parts (move together)")]
+    [SerializeField] private Transform[] linkedParts;
 
     private int currentWaypointIndex;
-    private bool canProceed = true;
+    private bool canProceed = false;
     private bool isWaitingAtStop;
 
     public bool CanProceed => canProceed;
@@ -22,49 +24,43 @@ public class CarController : MonoBehaviour
     {
         if (waypoints == null || waypoints.Length == 0) return;
 
-        Transform target = waypoints[currentWaypointIndex];
-        Vector3 direction = target.position - transform.position;
-        float distance = direction.magnitude;
+        Vector3 targetPos = waypoints[currentWaypointIndex].localPosition;
+        Vector3 myPos = transform.localPosition;
+        float distance = Vector3.Distance(myPos, targetPos);
 
-        // Check if we should stop at the stop line
         if (!canProceed && stopLine != null && !isWaitingAtStop)
         {
-            float distToStop = Vector3.Distance(transform.position, stopLine.position);
-            if (distToStop < stopLineThreshold)
-            {
+            if (Vector3.Distance(myPos, stopLine.localPosition) < stopLineThreshold)
                 isWaitingAtStop = true;
-            }
         }
-
         if (isWaitingAtStop && !canProceed) return;
+        if (isWaitingAtStop && canProceed) isWaitingAtStop = false;
 
-        if (isWaitingAtStop && canProceed)
-        {
-            isWaitingAtStop = false;
-        }
+        Vector3 newPos = Vector3.MoveTowards(myPos, targetPos, speed * Time.deltaTime);
+        Vector3 delta = newPos - myPos;
 
-        // Move toward current waypoint
-        transform.position = Vector3.MoveTowards(
-            transform.position, target.position, speed * Time.deltaTime
-        );
+        // Move self
+        transform.localPosition = newPos;
 
-        // Rotate toward waypoint
-        if (direction.sqrMagnitude > 0.001f)
-        {
-            Quaternion targetRot = Quaternion.LookRotation(direction.normalized);
-            transform.rotation = Quaternion.Slerp(
-                transform.rotation, targetRot, rotationSpeed * Time.deltaTime
-            );
-        }
+        // Move all linked parts by same delta
+        if (linkedParts != null)
+            foreach (var part in linkedParts)
+                if (part != null)
+                    part.localPosition += delta;
 
-        // Reached waypoint — advance
+        // Next waypoint
         if (distance < stopDistance)
         {
             currentWaypointIndex++;
             if (currentWaypointIndex >= waypoints.Length)
             {
+                Vector3 loopDelta = waypoints[0].localPosition - transform.localPosition;
+                transform.localPosition = waypoints[0].localPosition;
+                if (linkedParts != null)
+                    foreach (var part in linkedParts)
+                        if (part != null)
+                            part.localPosition += loopDelta;
                 currentWaypointIndex = 0;
-                transform.position = waypoints[0].position;
             }
         }
     }
