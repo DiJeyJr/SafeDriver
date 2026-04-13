@@ -1,4 +1,5 @@
 using UnityEngine;
+using System.Collections;
 
 public class IntersectionManager : MonoBehaviour
 {
@@ -19,67 +20,75 @@ public class IntersectionManager : MonoBehaviour
     [Header("Score")]
     [SerializeField] private ScoreManager scoreManager;
 
+    [Header("Transition")]
+    [SerializeField] private float yellowDuration = 2.5f;
+
+    private bool nsIsGreen = false;
+    private bool isTransitioning = false;
+
+    public bool IsTransitioning => isTransitioning;
+
     private void Start()
     {
+        // Initial state: all red
+        SetLights(northLight, southLight, TrafficLightController.LightState.Red);
+        SetLights(eastLight, westLight, TrafficLightController.LightState.Red);
         UpdatePermissions();
     }
 
-    private void OnEnable()
+    /// <summary>
+    /// Called by the UI button. Starts the transition sequence.
+    /// </summary>
+    public void ToggleLights()
     {
-        if (northLight) northLight.OnStateChanged += OnNorthSouthChanged;
-        if (southLight) southLight.OnStateChanged += OnNorthSouthChanged;
-        if (eastLight) eastLight.OnStateChanged += OnEastWestChanged;
-        if (westLight) westLight.OnStateChanged += OnEastWestChanged;
+        if (isTransitioning) return;
+        StartCoroutine(TransitionSequence());
     }
 
-    private void OnDisable()
+    private IEnumerator TransitionSequence()
     {
-        if (northLight) northLight.OnStateChanged -= OnNorthSouthChanged;
-        if (southLight) southLight.OnStateChanged -= OnNorthSouthChanged;
-        if (eastLight) eastLight.OnStateChanged -= OnEastWestChanged;
-        if (westLight) westLight.OnStateChanged -= OnEastWestChanged;
-    }
+        isTransitioning = true;
 
-    private void OnNorthSouthChanged(TrafficLightController light, TrafficLightController.LightState state)
-    {
-        // Sync the other N/S light
-        var other = light == northLight ? southLight : northLight;
-        if (other != null) other.SetState(state);
-
-        // Set opposing lights
-        if (state == TrafficLightController.LightState.Green)
+        if (nsIsGreen)
         {
-            if (eastLight) eastLight.SetState(TrafficLightController.LightState.Red);
-            if (westLight) westLight.SetState(TrafficLightController.LightState.Red);
-            if (scoreManager) scoreManager.AddPoints(10);
+            // N/S green → yellow → red, then E/W → green
+            SetLights(northLight, southLight, TrafficLightController.LightState.Yellow);
+            UpdatePermissions();
+
+            yield return new WaitForSeconds(yellowDuration);
+
+            SetLights(northLight, southLight, TrafficLightController.LightState.Red);
+            SetLights(eastLight, westLight, TrafficLightController.LightState.Green);
+            nsIsGreen = false;
         }
-        else if (state == TrafficLightController.LightState.Red)
+        else
         {
-            if (eastLight) eastLight.SetState(TrafficLightController.LightState.Green);
-            if (westLight) westLight.SetState(TrafficLightController.LightState.Green);
+            // E/W green → yellow → red, then N/S → green
+            // (first time: all red → just go green)
+            if (eastLight.CurrentState == TrafficLightController.LightState.Green)
+            {
+                SetLights(eastLight, westLight, TrafficLightController.LightState.Yellow);
+                UpdatePermissions();
+
+                yield return new WaitForSeconds(yellowDuration);
+
+                SetLights(eastLight, westLight, TrafficLightController.LightState.Red);
+            }
+
+            SetLights(northLight, southLight, TrafficLightController.LightState.Green);
+            nsIsGreen = true;
         }
 
         UpdatePermissions();
+        if (scoreManager) scoreManager.AddPoints(10);
+
+        isTransitioning = false;
     }
 
-    private void OnEastWestChanged(TrafficLightController light, TrafficLightController.LightState state)
+    private void SetLights(TrafficLightController a, TrafficLightController b, TrafficLightController.LightState state)
     {
-        var other = light == eastLight ? westLight : eastLight;
-        if (other != null) other.SetState(state);
-
-        if (state == TrafficLightController.LightState.Green)
-        {
-            if (northLight) northLight.SetState(TrafficLightController.LightState.Red);
-            if (southLight) southLight.SetState(TrafficLightController.LightState.Red);
-            if (scoreManager) scoreManager.AddPoints(10);
-        }
-        else if (state == TrafficLightController.LightState.Red)
-        {
-            if (northLight) northLight.SetState(TrafficLightController.LightState.Green);
-            if (southLight) southLight.SetState(TrafficLightController.LightState.Green);
-        }
-
-        UpdatePermissions();
+        if (a) a.SetState(state);
+        if (b) b.SetState(state);
     }
 
     private void UpdatePermissions()
@@ -89,7 +98,6 @@ public class IntersectionManager : MonoBehaviour
         bool ewGreen = eastLight != null &&
                        eastLight.CurrentState == TrafficLightController.LightState.Green;
 
-        // Cars go on green
         if (northSouthCars != null)
             foreach (var car in northSouthCars)
                 car.SetCanProceed(nsGreen);
@@ -98,7 +106,6 @@ public class IntersectionManager : MonoBehaviour
             foreach (var car in eastWestCars)
                 car.SetCanProceed(ewGreen);
 
-        // Pedestrians cross when cars are stopped
         if (northSouthPedestrians != null)
             foreach (var ped in northSouthPedestrians)
                 ped.SetCanCross(!nsGreen);
@@ -106,6 +113,5 @@ public class IntersectionManager : MonoBehaviour
         if (eastWestPedestrians != null)
             foreach (var ped in eastWestPedestrians)
                 ped.SetCanCross(!ewGreen);
-
     }
 }
