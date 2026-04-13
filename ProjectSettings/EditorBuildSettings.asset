@@ -6,9 +6,14 @@ EditorBuildSettings:
   serializedVersion: 2
   m_Scenes:
   - enabled: 1
+    path: Assets/XR/CompositionLayers/CompositionSplash.unity
+    guid: 7a16d1d22a5873d4f986f1655655b07b
+  - enabled: 1
     path: Assets/Scenes/SampleScene.unity
     guid: 99c9720ab356a0642a771bea13969a05
   m_configObjects:
+    Unity.XR.Oculus.Settings: {fileID: 11400000, guid: d4bacb8c66d71174b969845b955d610b, type: 2}
     com.unity.input.settings.actions: {fileID: -944628639613478452, guid: 052faaac586de48259a63d0c4782560b, type: 3}
     com.unity.xr.management.loader_settings: {fileID: 11400000, guid: 235834621ac50fd4eb204fb4d50a5287, type: 2}
+    com.unity.xr.openxr.settings4: {fileID: 11400000, guid: 006173b16459e6847871b6129bd04e11, type: 2}
   m_UseUCBPForAssetBundles: 0
