@@ -21,7 +21,7 @@ namespace SafeDriver.Scoring
     ///   4. Auto sale → OnTriggerExit: reset flags
     /// </summary>
     [RequireComponent(typeof(Collider))]
-    public class PedestrianCrossingDetector : InfractionDetector
+    public class PedestrianCrossingDetector : InfractionDetector, IPedestrianCrossingNotifier
     {
         [Header("Config")]
         [Tooltip("Segundos que el auto debe estar detenido para contar como 'cedió el paso'.")]
