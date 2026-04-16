@@ -4,7 +4,8 @@
     "references": [
         "SafeDriver.Core",
         "SafeDriver.Scoring",
-        "UnityEngine.UI"
+        "UnityEngine.UI",
+        "Unity.TextMeshPro"
     ],
     "includePlatforms": [],
     "excludePlatforms": [],

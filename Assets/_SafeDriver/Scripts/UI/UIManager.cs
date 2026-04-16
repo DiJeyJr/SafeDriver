@@ -50,7 +50,8 @@ namespace SafeDriver.UI
                     break;
 
                 case GameState.SafeFail:
-                    ShowSafeFailScreen(GameManager.Instance != null ? GameManager.Instance.LastInfractionMessage : "");
+                    if (GameManager.Instance != null)
+                        ShowSafeFailScreen(GameManager.Instance.LastInfractionType);
                     break;
 
                 case GameState.LevelEnd:
@@ -67,9 +68,9 @@ namespace SafeDriver.UI
             }
         }
 
-        public void ShowSafeFailScreen(string message)
+        public void ShowSafeFailScreen(InfractionType type)
         {
-            if (safeFailScreen != null) safeFailScreen.Show(message);
+            if (safeFailScreen != null) safeFailScreen.Show(type);
         }
 
         private void HandleLevelComplete() { /* TODO: mostrar LevelEndPanel con exito */ }

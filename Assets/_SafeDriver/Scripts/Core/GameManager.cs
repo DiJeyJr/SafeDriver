@@ -21,6 +21,9 @@ namespace SafeDriver.Core
         /// <summary>Ultimo mensaje de infraccion. La UI lo lee al entrar a SafeFail.</summary>
         public string LastInfractionMessage { get; private set; } = string.Empty;
 
+        /// <summary>Ultimo tipo de infraccion. SafeFailScreen lo usa para lookup del contenido pedagogico.</summary>
+        public InfractionType LastInfractionType { get; private set; }
+
         void Awake()
         {
             if (Instance != null && Instance != this) { Destroy(gameObject); return; }
@@ -70,6 +73,7 @@ namespace SafeDriver.Core
 
         private void CacheInfractionMessage(InfractionType type, string message)
         {
+            LastInfractionType = type;
             LastInfractionMessage = message;
         }
 
