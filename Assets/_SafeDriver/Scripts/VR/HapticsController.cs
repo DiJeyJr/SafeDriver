@@ -1,14 +1,14 @@
 using UnityEngine;
 
-namespace SafeDriver
+namespace SafeDriver.VR
 {
     /// <summary>
-    /// Helper de haptics para SafeDriver.
-    /// - PlaySoft: buzz suave para warnings de infracciones.
-    /// - PlayPositive: patron ascendente para feedback de aciertos.
-    /// Usa OVRHaptics (sample-based) y OVRInput.SetControllerVibration como fallback.
+    /// Controlador central de haptics.
+    /// - PlaySoft: buzz suave para infracciones.
+    /// - PlayPositive: patron ascendente para aciertos.
+    /// Combina OVRHaptics (clip sample-based, alta fidelidad) + OVRInput.SetControllerVibration (fallback universal).
     /// </summary>
-    public class DrivingHaptics : MonoBehaviour
+    public class HapticsController : MonoBehaviour
     {
         public enum HandSide { Left, Right, Both }
 
@@ -35,15 +35,8 @@ namespace SafeDriver
             Trigger(positiveClip, side, 0.70f, 0.25f);
         }
 
-        public void PlaySoftBoth()
-        {
-            PlaySoft(HandSide.Both);
-        }
-
-        public void PlayPositiveBoth()
-        {
-            PlayPositive(HandSide.Both);
-        }
+        public void PlaySoftBoth()     { PlaySoft(HandSide.Both); }
+        public void PlayPositiveBoth() { PlayPositive(HandSide.Both); }
 
         private void Trigger(OVRHapticsClip clip, HandSide side, float amp, float seconds)
         {
@@ -64,25 +57,15 @@ namespace SafeDriver
             }
         }
 
-        private void StopLeft()
-        {
-            OVRInput.SetControllerVibration(0f, 0f, OVRInput.Controller.LTouch);
-        }
-
-        private void StopRight()
-        {
-            OVRInput.SetControllerVibration(0f, 0f, OVRInput.Controller.RTouch);
-        }
+        private void StopLeft()  { OVRInput.SetControllerVibration(0f, 0f, OVRInput.Controller.LTouch); }
+        private void StopRight() { OVRInput.SetControllerVibration(0f, 0f, OVRInput.Controller.RTouch); }
 
         private OVRHapticsClip MakeSoftPattern()
         {
             const int samples = 64;
             byte level = (byte)Mathf.Clamp(90f * globalStrength, 0f, 255f);
             OVRHapticsClip c = new OVRHapticsClip(samples);
-            for (int i = 0; i < samples; i++)
-            {
-                c.WriteSample(level);
-            }
+            for (int i = 0; i < samples; i++) c.WriteSample(level);
             return c;
         }
 
@@ -93,15 +76,9 @@ namespace SafeDriver
             for (int i = 0; i < samples; i++)
             {
                 float t = i / (float)(samples - 1);
-                float env;
-                if (t < 0.7f)
-                {
-                    env = Mathf.Lerp(0.25f, 0.65f, t / 0.7f);
-                }
-                else
-                {
-                    env = Mathf.Lerp(0.65f, 0.95f, (t - 0.7f) / 0.3f);
-                }
+                float env = t < 0.7f
+                    ? Mathf.Lerp(0.25f, 0.65f, t / 0.7f)
+                    : Mathf.Lerp(0.65f, 0.95f, (t - 0.7f) / 0.3f);
                 byte level = (byte)Mathf.Clamp(env * 230f * globalStrength, 0f, 255f);
                 c.WriteSample(level);
             }

@@ -1,0 +1,16 @@
+{
+    "name": "SafeDriver.Traffic",
+    "rootNamespace": "SafeDriver.Traffic",
+    "references": [
+        "SafeDriver.Core"
+    ],
+    "includePlatforms": [],
+    "excludePlatforms": [],
+    "allowUnsafeCode": false,
+    "overrideReferences": false,
+    "precompiledReferences": [],
+    "autoReferenced": true,
+    "defineConstraints": [],
+    "versionDefines": [],
+    "noEngineReferences": false
+}

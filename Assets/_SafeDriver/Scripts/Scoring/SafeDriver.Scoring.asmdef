@@ -1,0 +1,18 @@
+{
+    "name": "SafeDriver.Scoring",
+    "rootNamespace": "SafeDriver.Scoring",
+    "references": [
+        "SafeDriver.Core",
+        "SafeDriver.Vehicle",
+        "SafeDriver.Traffic"
+    ],
+    "includePlatforms": [],
+    "excludePlatforms": [],
+    "allowUnsafeCode": false,
+    "overrideReferences": false,
+    "precompiledReferences": [],
+    "autoReferenced": true,
+    "defineConstraints": [],
+    "versionDefines": [],
+    "noEngineReferences": false
+}

@@ -1,0 +1,17 @@
+{
+    "name": "SafeDriver.Vehicle",
+    "rootNamespace": "SafeDriver.Vehicle",
+    "references": [
+        "SafeDriver.Core",
+        "Oculus.VR"
+    ],
+    "includePlatforms": [],
+    "excludePlatforms": [],
+    "allowUnsafeCode": false,
+    "overrideReferences": false,
+    "precompiledReferences": [],
+    "autoReferenced": true,
+    "defineConstraints": [],
+    "versionDefines": [],
+    "noEngineReferences": false
+}

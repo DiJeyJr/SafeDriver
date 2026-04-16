@@ -1,0 +1,17 @@
+{
+    "name": "SafeDriver.Audio",
+    "rootNamespace": "SafeDriver.Audio",
+    "references": [
+        "SafeDriver.Core",
+        "SafeDriver.Vehicle"
+    ],
+    "includePlatforms": [],
+    "excludePlatforms": [],
+    "allowUnsafeCode": false,
+    "overrideReferences": false,
+    "precompiledReferences": [],
+    "autoReferenced": true,
+    "defineConstraints": [],
+    "versionDefines": [],
+    "noEngineReferences": false
+}
