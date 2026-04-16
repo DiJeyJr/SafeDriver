@@ -12,6 +12,12 @@
     "precompiledReferences": [],
     "autoReferenced": true,
     "defineConstraints": [],
-    "versionDefines": [],
+    "versionDefines": [
+        {
+            "name": "com.unity.fmod",
+            "expression": "",
+            "define": "FMOD_AVAILABLE"
+        }
+    ],
     "noEngineReferences": false
 }

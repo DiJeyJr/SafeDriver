@@ -2160,6 +2160,7 @@ GameObject:
   - component: {fileID: 316796413}
   - component: {fileID: 316796412}
   - component: {fileID: 316796414}
+  - component: {fileID: 316796415}
   m_Layer: 0
   m_Name: GameplayManager
   m_TagString: Untagged
@@ -2208,6 +2209,18 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: SafeDriver.VR::SafeDriver.VR.HapticsController
   globalStrength: 1
+--- !u!114 &316796415
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 316796411}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: f19003916038ad04b9ff6711d9702a57, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: SafeDriver.Audio::SafeDriver.Audio.FMODAudioManager
 --- !u!1 &331596029
 GameObject:
   m_ObjectHideFlags: 0
