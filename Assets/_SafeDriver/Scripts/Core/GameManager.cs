@@ -8,8 +8,9 @@ namespace SafeDriver.Core
     /// No referencia directamente a capas superiores (Vehicle, UI, etc.) — esas capas
     /// se suscriben al evento y reaccionan desde su propio codigo.
     ///
-    /// Tambien cachea el ultimo InfractionMessage para que la capa UI pueda leerlo al
-    /// entrar en SafeFail y mostrar el texto pedagogico correspondiente.
+    /// NOTA: la decision de cuando ir a SafeFail la toma ScoreManager (infraccion grave)
+    /// o cualquier otro sistema que llame TransitionTo(SafeFail). GameManager solo ejecuta
+    /// la transicion y publica el evento.
     /// </summary>
     public class GameManager : MonoBehaviour
     {
@@ -29,12 +30,13 @@ namespace SafeDriver.Core
 
         void OnEnable()
         {
-            EventBus.OnInfractionDetected += HandleInfraction;
+            // Cachea el ultimo mensaje de infraccion (para que UIManager pueda mostrarlo en SafeFail)
+            EventBus.OnInfractionDetected += CacheInfractionMessage;
         }
 
         void OnDisable()
         {
-            EventBus.OnInfractionDetected -= HandleInfraction;
+            EventBus.OnInfractionDetected -= CacheInfractionMessage;
             if (Instance == this) Instance = null;
         }
 
@@ -54,8 +56,6 @@ namespace SafeDriver.Core
             var previous = CurrentState;
             CurrentState = newState;
 
-            // Hook local opcional — util para logging/debug/telemetry sin
-            // hardcodear dependencias a otras capas.
             switch (newState)
             {
                 case GameState.Driving:  OnEnterDriving(previous);  break;
@@ -65,37 +65,28 @@ namespace SafeDriver.Core
                 case GameState.MainMenu: OnEnterMainMenu(previous); break;
             }
 
-            // Publicar al bus para que capas superiores (Vehicle/UI/Audio) reaccionen.
             EventBus.Dispatch_GameStateChanged(previous, newState);
         }
 
-        private void HandleInfraction(InfractionType type, string message)
+        private void CacheInfractionMessage(InfractionType type, string message)
         {
             LastInfractionMessage = message;
-            // Politica actual: una infraccion dispara SafeFail.
-            // Si se quiere cambiar a "X infracciones acumuladas -> SafeFail" se ajusta aqui.
-            TransitionTo(GameState.SafeFail);
         }
 
-        // ---------- Hooks locales (solo logging / telemetry, NO refs a otras capas) ----------
+        // ---------- Hooks locales ----------
 
         private void OnEnterDriving(GameState previous)
         {
-            // p.e. Time.timeScale = 1f; (pero si Paused ya lo hizo, lo deshace aca)
             Time.timeScale = 1f;
         }
 
         private void OnEnterSafeFail(GameState previous)
         {
-            // Detener vehiculo suavemente -> lo hace VehicleController suscrito al evento.
-            // Mostrar pantalla pedagogica      -> lo hace UIManager suscrito al evento.
-            // Aqui solo logging / analytics.
-            Debug.Log($"[GameManager] SafeFail: {LastInfractionMessage}");
+            Debug.Log("[GameManager] SafeFail: " + LastInfractionMessage);
         }
 
         private void OnEnterLevelEnd(GameState previous)
         {
-            // Detener el juego cuando se muestra resumen.
             Time.timeScale = 0f;
         }
 
