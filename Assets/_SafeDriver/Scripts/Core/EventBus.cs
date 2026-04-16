@@ -17,12 +17,18 @@ namespace SafeDriver.Core
         public static event Action        OnEngineStarted;
         public static event Action        OnEngineStopped;
         public static event Action<float> OnSteeringChanged;     // angulo normalizado -1..+1
+        public static event Action<float> OnSpeedLimitChanged;  // nuevo limite de zona (km/h)
 
         // ==========================================================
         //   Eventos de infracciones y aciertos
         // ==========================================================
         public static event Action<InfractionType, string> OnInfractionDetected;
         public static event Action<ActionType, int>        OnCorrectActionPerformed;
+
+        // ==========================================================
+        //   Eventos de trafico
+        // ==========================================================
+        public static event Action<UnityEngine.GameObject, LightState> OnTrafficLightChanged;
 
         // ==========================================================
         //   Eventos de scoring / progresion
@@ -47,6 +53,7 @@ namespace SafeDriver.Core
         public static void Dispatch_EngineStarted()               => OnEngineStarted?.Invoke();
         public static void Dispatch_EngineStopped()               => OnEngineStopped?.Invoke();
         public static void Dispatch_SteeringChanged(float axis)   => OnSteeringChanged?.Invoke(axis);
+        public static void Dispatch_SpeedLimitChanged(float limitKmh) => OnSpeedLimitChanged?.Invoke(limitKmh);
 
         // -- Infracciones / aciertos --
         public static void Dispatch_Infraction(InfractionType type, string message)
@@ -54,6 +61,10 @@ namespace SafeDriver.Core
 
         public static void Dispatch_CorrectAction(ActionType type, int bonus)
             => OnCorrectActionPerformed?.Invoke(type, bonus);
+
+        // -- Trafico --
+        public static void Dispatch_TrafficLightChanged(UnityEngine.GameObject source, LightState state)
+            => OnTrafficLightChanged?.Invoke(source, state);
 
         // -- Scoring --
         public static void Dispatch_ScoreChanged(int newTotal)    => OnScoreChanged?.Invoke(newTotal);
@@ -75,12 +86,14 @@ namespace SafeDriver.Core
             OnEngineStarted = null;
             OnEngineStopped = null;
             OnSteeringChanged = null;
+            OnSpeedLimitChanged = null;
             OnInfractionDetected = null;
             OnCorrectActionPerformed = null;
             OnScoreChanged = null;
             OnScoreDelta = null;
             OnLevelComplete = null;
             OnLevelFailed = null;
+            OnTrafficLightChanged = null;
             OnGameStateChanged = null;
         }
     }

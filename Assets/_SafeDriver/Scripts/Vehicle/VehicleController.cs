@@ -38,9 +38,19 @@ namespace SafeDriver.Vehicle
         [Tooltip("Segundos para detener el vehiculo en SafeFail.")]
         [SerializeField] private float smoothStopSeconds = 1.5f;
 
+        [Header("Stop Detection")]
+        [Tooltip("Velocidad en km/h por debajo de la cual el vehiculo se considera 'detenido'.")]
+        [SerializeField] private float stoppedThresholdKmh = 2f;
+
         private Rigidbody rb;
         private float currentSpeed; // km/h
         private bool isSmoothStopping;
+
+        /// <summary>True si la velocidad actual es menor al threshold de 'detenido'.</summary>
+        public bool IsStopped() => currentSpeed < stoppedThresholdKmh;
+
+        /// <summary>Velocidad actual del vehiculo en km/h.</summary>
+        public float CurrentSpeedKmh => currentSpeed;
 
         void Awake()
         {

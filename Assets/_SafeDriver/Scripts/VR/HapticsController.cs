@@ -1,42 +1,101 @@
 using UnityEngine;
+using SafeDriver.Core;
 
 namespace SafeDriver.VR
 {
     /// <summary>
-    /// Controlador central de haptics.
-    /// - PlaySoft: buzz suave para infracciones.
-    /// - PlayPositive: patron ascendente para aciertos.
-    /// Combina OVRHaptics (clip sample-based, alta fidelidad) + OVRInput.SetControllerVibration (fallback universal).
+    /// Controlador central de haptics para los controllers Quest.
+    /// Expone Instance singleton y reacciona automaticamente a EventBus:
+    ///   - OnInfractionDetected  → PlayInfractionPattern()
+    ///   - OnCorrectActionPerformed → PlaySuccessPattern()
+    ///
+    /// Tambien se puede llamar directo desde scripts de la capa VR si se quiere
+    /// un patron custom (ej: rumble de motor, impacto de bache, etc.)
     /// </summary>
     public class HapticsController : MonoBehaviour
     {
+        public static HapticsController Instance { get; private set; }
+
         public enum HandSide { Left, Right, Both }
 
         [Header("Intensidad global (0-1)")]
         [Range(0f, 1f)]
         public float globalStrength = 1f;
 
-        private OVRHapticsClip softClip;
-        private OVRHapticsClip positiveClip;
+        private OVRHapticsClip infractionClip;
+        private OVRHapticsClip successClip;
 
         void Awake()
         {
-            softClip = MakeSoftPattern();
-            positiveClip = MakeRisingPattern();
+            if (Instance != null && Instance != this) { Destroy(this); return; }
+            Instance = this;
+
+            infractionClip = BuildInfractionClip();
+            successClip    = BuildSuccessClip();
         }
 
+        void OnDestroy()
+        {
+            if (Instance == this) Instance = null;
+        }
+
+        void OnEnable()
+        {
+            EventBus.OnInfractionDetected    += HandleInfraction;
+            EventBus.OnCorrectActionPerformed += HandleCorrectAction;
+        }
+
+        void OnDisable()
+        {
+            EventBus.OnInfractionDetected    -= HandleInfraction;
+            EventBus.OnCorrectActionPerformed -= HandleCorrectAction;
+        }
+
+        // ============================================================
+        //   API publica
+        // ============================================================
+
+        /// <summary>Patron de infraccion: doble pulso fuerte y corto. Alerta sin susto.</summary>
+        public void PlayInfractionPattern()
+        {
+            Trigger(infractionClip, HandSide.Both, 0.55f, 0.30f);
+        }
+
+        /// <summary>Patron de exito: rampa ascendente suave. Sensacion de "bien hecho".</summary>
+        public void PlaySuccessPattern()
+        {
+            Trigger(successClip, HandSide.Both, 0.45f, 0.25f);
+        }
+
+        /// <summary>Patron soft generico (para avisos leves, cambio de carril, etc.)</summary>
         public void PlaySoft(HandSide side)
         {
-            Trigger(softClip, side, 0.35f, 0.20f);
+            Trigger(infractionClip, side, 0.25f, 0.15f);
         }
 
+        /// <summary>Patron positivo generico.</summary>
         public void PlayPositive(HandSide side)
         {
-            Trigger(positiveClip, side, 0.70f, 0.25f);
+            Trigger(successClip, side, 0.45f, 0.25f);
         }
 
-        public void PlaySoftBoth()     { PlaySoft(HandSide.Both); }
-        public void PlayPositiveBoth() { PlayPositive(HandSide.Both); }
+        // ============================================================
+        //   Event handlers (auto-reaccion al bus — capa VR sin que Scoring lo llame)
+        // ============================================================
+
+        private void HandleInfraction(InfractionType type, string message)
+        {
+            PlayInfractionPattern();
+        }
+
+        private void HandleCorrectAction(ActionType type, int bonus)
+        {
+            PlaySuccessPattern();
+        }
+
+        // ============================================================
+        //   Internals
+        // ============================================================
 
         private void Trigger(OVRHapticsClip clip, HandSide side, float amp, float seconds)
         {
@@ -60,16 +119,27 @@ namespace SafeDriver.VR
         private void StopLeft()  { OVRInput.SetControllerVibration(0f, 0f, OVRInput.Controller.LTouch); }
         private void StopRight() { OVRInput.SetControllerVibration(0f, 0f, OVRInput.Controller.RTouch); }
 
-        private OVRHapticsClip MakeSoftPattern()
+        /// <summary>Doble pulso: 60%-0%-80% sobre 96 samples (~300ms). Alerta sin susto.</summary>
+        private OVRHapticsClip BuildInfractionClip()
         {
-            const int samples = 64;
-            byte level = (byte)Mathf.Clamp(90f * globalStrength, 0f, 255f);
+            const int samples = 96;
             OVRHapticsClip c = new OVRHapticsClip(samples);
-            for (int i = 0; i < samples; i++) c.WriteSample(level);
+            for (int i = 0; i < samples; i++)
+            {
+                float t = i / (float)(samples - 1);
+                float env;
+                if      (t < 0.20f) env = 0.60f;                // primer pulso
+                else if (t < 0.35f) env = 0.0f;                 // silencio entre pulsos
+                else if (t < 0.60f) env = 0.80f;                // segundo pulso (mas fuerte)
+                else                env = Mathf.Lerp(0.80f, 0f, (t - 0.60f) / 0.40f); // decay
+                byte level = (byte)Mathf.Clamp(env * 220f * globalStrength, 0f, 255f);
+                c.WriteSample(level);
+            }
             return c;
         }
 
-        private OVRHapticsClip MakeRisingPattern()
+        /// <summary>Rampa 25% -> 65% -> 95% sobre 80 samples (~250ms). Satisfaccion.</summary>
+        private OVRHapticsClip BuildSuccessClip()
         {
             const int samples = 80;
             OVRHapticsClip c = new OVRHapticsClip(samples);

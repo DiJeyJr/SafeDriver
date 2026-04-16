@@ -24,8 +24,8 @@ namespace SafeDriver.VR
         public float rearMirrorAngle  =  15f;
 
         [Header("Recompensas")]
-        [Tooltip("Bonus points por chequear un espejo (rising edge).")]
-        [SerializeField] private int checkBonus = 2;
+        [Tooltip("Bonus points por chequear un espejo (rising edge). Si es <= 0 se usa ActionPoints.CheckedMirrorsBeforeTurn.")]
+        [SerializeField] private int checkBonusOverride = 0;
 
         private bool checkedLeftMirror;
         private bool checkedRightMirror;
@@ -88,9 +88,10 @@ namespace SafeDriver.VR
 
         private void DispatchChecked(MirrorType mirror)
         {
-            // Una sola familia de evento: ActionType.MirrorChecked + bonus.
-            // Si en el futuro se quiere distinguir por mirror, se puede ampliar EventBus.
-            EventBus.Dispatch_CorrectAction(ActionType.MirrorChecked, checkBonus);
+            int bonus = checkBonusOverride > 0
+                ? checkBonusOverride
+                : ActionPoints.CheckedMirrorsBeforeTurn;
+            EventBus.Dispatch_CorrectAction(ActionType.CheckedMirrorsBeforeTurn, bonus);
         }
 
         private static float NormalizeAngle(float a)
