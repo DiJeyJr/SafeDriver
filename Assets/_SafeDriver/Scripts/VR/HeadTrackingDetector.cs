@@ -5,8 +5,8 @@ namespace SafeDriver.VR
 {
     /// <summary>
     /// Detecta si el jugador giro la cabeza para chequear espejos.
-    /// Se adjunta al CenterEyeAnchor del OVRCameraRig — el Update lee localEulerAngles,
-    /// que representa la rotacion de la cabeza respecto a la TrackingSpace del rig.
+    /// Se adjunta al Main Camera del Camera Rig (Building Block) — el Update lee localEulerAngles,
+    /// que representa la rotacion de la cabeza respecto al tracking space del rig.
     ///
     /// Publica EventBus.Dispatch_CorrectAction(MirrorChecked, bonus) en el edge rising
     /// (primera vez que el jugador mira un espejo desde el ultimo ResetMirrorChecks).

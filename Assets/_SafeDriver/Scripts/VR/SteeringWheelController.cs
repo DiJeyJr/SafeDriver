@@ -1,162 +1,85 @@
 using UnityEngine;
+using Oculus.Interaction;
 using SafeDriver.Core;
 using SafeDriver.Vehicle;
 
 namespace SafeDriver.VR
 {
     /// <summary>
-    /// Controla la rotacion del volante con los controllers Quest (NO hand tracking).
+    /// Lector de rotacion del volante integrado con Interaction SDK.
     ///
-    /// Mecanica:
-    ///   - El jugador mantiene GRIP en cualquier controller (L o R o ambos)
-    ///   - Mientras mantiene grip, la rotacion YAW del controller se mapea a la rotacion
-    ///     del volante alrededor de su eje local Z
-    ///   - Al soltar grip, el volante vuelve suavemente a centro (return-to-center)
-    ///   - La rotacion normalizada (-1..+1) se envia a VehicleInput para mover el auto
+    /// Responsabilidades:
+    ///   - NO maneja grab ni snap de manos: eso lo hace ISDK (Grabbable + HandGrab/GrabInteractable).
+    ///   - NO rota el volante mientras esta agarrado: eso lo hace OneGrabRotateTransformer.
+    ///   - SI aplica return-to-center cuando se suelta.
+    ///   - SI lee el angulo actual y lo empuja a VehicleInput y EventBus.
     ///
-    /// Setup:
-    ///   1. Agregar este componente al GameObject del SteeringWheel
-    ///   2. El script rota el transform del mismo objeto
-    ///   3. VehicleInput.Instance recibe el steering automaticamente
+    /// Setup esperado en el GameObject del volante:
+    ///   - Rigidbody (kinematic)
+    ///   - Grabbable (referenciada abajo)
+    ///   - OneGrabRotateTransformer con Axis = Up y Constraints Min=-maxSteeringAngle, Max=+maxSteeringAngle
+    ///   - GrabInteractable (controllers) y/o HandGrabInteractable (hand tracking)
+    ///   - Collider
     /// </summary>
+    [DefaultExecutionOrder(200)]
     public class SteeringWheelController : MonoBehaviour
     {
         [Header("Config")]
-        [Tooltip("Angulo maximo del volante en grados (un solo lado). 180 = media vuelta.")]
         [SerializeField] private float maxSteeringAngle = 180f;
-
-        [Tooltip("Velocidad de retorno a centro cuando se suelta el grip (grados/seg).")]
         [SerializeField] private float returnSpeed = 180f;
 
-        [Tooltip("Sensibilidad: cuantos grados de volante por grado de rotacion del controller.")]
-        [SerializeField] private float sensitivity = 2.5f;
+        [Header("Eje visual (0=X, 1=Y, 2=Z). Debe coincidir con OneGrabRotateTransformer.")]
+        [SerializeField] private int rotationAxis = 1;
 
-        [Tooltip("Zona muerta del controller en grados (evita drift).")]
-        [SerializeField] private float deadZone = 3f;
+        [Header("Referencias ISDK")]
+        [Tooltip("Grabbable del volante. Si queda vacio se busca en este GameObject.")]
+        [SerializeField] private Grabbable grabbable;
 
-        private float currentAngle; // grados acumulados del volante (-maxSteeringAngle..+maxSteeringAngle)
-        private float grabStartYaw; // yaw del controller al momento del grab
-        private float grabStartAngle; // angulo del volante al momento del grab
-        private bool isGrabbed;
-        private bool useLeftHand;
-        private Quaternion originalLocalRotation; // rotacion original del mesh (inclinacion del tablero)
+        private Quaternion originalLocalRotation;
 
-        void Start()
+        void Awake()
         {
-            // Guardar la rotacion original del volante (incluye la inclinacion del tablero del FBX).
-            // La rotacion de steering se aplica ENCIMA de esta como delta en Z local.
             originalLocalRotation = transform.localRotation;
+            if (grabbable == null) grabbable = GetComponent<Grabbable>();
         }
 
         void Update()
         {
-            // Detectar grip press/release
-            bool leftGrip  = OVRInput.Get(OVRInput.Button.PrimaryHandTrigger);
-            bool rightGrip = OVRInput.Get(OVRInput.Button.SecondaryHandTrigger);
+            bool isGrabbed = grabbable != null && grabbable.SelectingPointsCount > 0;
 
-            if (!isGrabbed && (leftGrip || rightGrip))
-            {
-                BeginGrab(leftGrip);
-            }
-            else if (isGrabbed && !leftGrip && !rightGrip)
-            {
-                EndGrab();
-            }
-
-            if (isGrabbed)
-            {
-                UpdateGrabbedRotation();
-            }
-            else
-            {
+            if (!isGrabbed)
                 ReturnToCenter();
-            }
 
-            // Aplicar rotacion visual al mesh del volante
-            ApplyVisualRotation();
+            float currentAngle = ReadAngle();
+            float normalized = Mathf.Clamp(currentAngle / maxSteeringAngle, -1f, 1f);
 
-            // Enviar a VehicleInput
-            float normalized = currentAngle / maxSteeringAngle; // -1..+1
             if (VehicleInput.Instance != null)
                 VehicleInput.Instance.SetSteering(normalized);
-
-            // Publicar para el HUD (SpeedometerNeedle del volante si hay)
             EventBus.Dispatch_SteeringChanged(normalized);
         }
 
-        private void BeginGrab(bool isLeft)
+        /// <summary>
+        /// Angulo firmado (-max..+max) sobre el eje configurado, relativo a la rotacion inicial.
+        /// </summary>
+        private float ReadAngle()
         {
-            isGrabbed = true;
-            useLeftHand = isLeft;
-            grabStartYaw = GetControllerYaw();
-            grabStartAngle = currentAngle;
-        }
-
-        private void EndGrab()
-        {
-            isGrabbed = false;
-        }
-
-        private void UpdateGrabbedRotation()
-        {
-            float currentYaw = GetControllerYaw();
-            float delta = currentYaw - grabStartYaw;
-
-            // Zona muerta
-            if (Mathf.Abs(delta) < deadZone)
-                delta = 0f;
-            else
-                delta -= Mathf.Sign(delta) * deadZone;
-
-            // Aplicar sensibilidad y sumar al angulo base del grab
-            float targetAngle = grabStartAngle + delta * sensitivity;
-            currentAngle = Mathf.Clamp(targetAngle, -maxSteeringAngle, maxSteeringAngle);
+            Quaternion delta = Quaternion.Inverse(originalLocalRotation) * transform.localRotation;
+            Vector3 euler = delta.eulerAngles;
+            float a = euler[rotationAxis];
+            if (a > 180f) a -= 360f;
+            // Invertir para que giro horario visual del volante = steering positivo (derecha).
+            return -a;
         }
 
         private void ReturnToCenter()
         {
-            // Volante vuelve a 0 suavemente (como un auto real con caster)
-            if (Mathf.Abs(currentAngle) > 0.5f)
-            {
-                currentAngle = Mathf.MoveTowards(currentAngle, 0f, returnSpeed * Time.deltaTime);
-            }
-            else
-            {
-                currentAngle = 0f;
-            }
-        }
+            float currentAngle = ReadAngle();
+            if (Mathf.Abs(currentAngle) < 0.5f) return;
 
-        [Header("Eje de rotacion visual")]
-        [Tooltip("Eje local del mesh alrededor del cual gira el volante (columna de direccion). 0=X, 1=Y, 2=Z.")]
-        [SerializeField] private int rotationAxis = 1; // Y por defecto (Blender Z-up → Unity Y)
-
-        private void ApplyVisualRotation()
-        {
-            // Preservar la inclinacion original del volante (del FBX/tablero)
-            // y agregar la rotacion de steering en el eje de la columna de direccion.
+            float targetAngle = Mathf.MoveTowards(currentAngle, 0f, returnSpeed * Time.deltaTime);
             Vector3 euler = Vector3.zero;
-            euler[rotationAxis] = -currentAngle;
+            euler[rotationAxis] = -targetAngle;
             transform.localRotation = originalLocalRotation * Quaternion.Euler(euler);
-        }
-
-        /// <summary>
-        /// Lee el yaw (rotacion horizontal) del controller activo.
-        /// Para el volante nos interesa la rotacion roll (Z) del controller,
-        /// que es cuando el jugador gira la muneca como girando un volante.
-        /// </summary>
-        private float GetControllerYaw()
-        {
-            OVRInput.Controller ctrl = useLeftHand
-                ? OVRInput.Controller.LTouch
-                : OVRInput.Controller.RTouch;
-
-            Quaternion rot = OVRInput.GetLocalControllerRotation(ctrl);
-            // El roll del controller (Z axis) mapea a la rotacion del volante
-            // Cuando el jugador gira la muneca clockwise, el roll cambia
-            Vector3 euler = rot.eulerAngles;
-            float roll = euler.z;
-            if (roll > 180f) roll -= 360f;
-            return roll;
         }
     }
 }

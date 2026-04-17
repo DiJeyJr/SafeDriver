@@ -9,7 +9,7 @@ namespace SafeDriver.UI
     /// - Layer: UI
     /// - Distancia al jugador: 0.8 a 1.2m
     /// - Font size minimo: 0.06 Unity units (aprox 60pt a 1m)
-    /// - Posicion relativa al OVRCameraRig (se mueve con el jugador)
+    /// - Posicion relativa al Camera Rig (se mueve con el jugador)
     ///
     /// Attach este componente al Canvas y llamar Setup() en Awake, o usar los
     /// metodos estaticos CreateDiegeticCanvas / CreateNotificationCanvas para
@@ -47,7 +47,7 @@ namespace SafeDriver.UI
             // 3. Scale: metros, no pixeles
             transform.localScale = Vector3.one * canvasScale;
 
-            // 4. No event camera para world space VR (el OVR rig maneja raycasts)
+            // 4. No event camera para world space VR (el ray/poke interactor de ISDK maneja raycasts)
             canvas.worldCamera = null;
         }
     }

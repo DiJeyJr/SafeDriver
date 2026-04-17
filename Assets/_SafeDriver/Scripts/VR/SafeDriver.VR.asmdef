@@ -4,7 +4,8 @@
     "references": [
         "SafeDriver.Core",
         "SafeDriver.Vehicle",
-        "Oculus.VR"
+        "Oculus.Interaction",
+        "Unity.XR.CoreUtils"
     ],
     "includePlatforms": [],
     "excludePlatforms": [],

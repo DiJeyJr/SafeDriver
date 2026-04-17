@@ -1,16 +1,17 @@
+using System.Collections;
 using UnityEngine;
+using UnityEngine.XR;
 using SafeDriver.Core;
 
 namespace SafeDriver.VR
 {
     /// <summary>
-    /// Controlador central de haptics para los controllers Quest.
-    /// Expone Instance singleton y reacciona automaticamente a EventBus:
-    ///   - OnInfractionDetected  → PlayInfractionPattern()
-    ///   - OnCorrectActionPerformed → PlaySuccessPattern()
+    /// Controlador central de haptics. Usa la API estandar de Unity XR
+    /// (InputDevice.SendHapticImpulse), no la API clasica de OVR.
     ///
-    /// Tambien se puede llamar directo desde scripts de la capa VR si se quiere
-    /// un patron custom (ej: rumble de motor, impacto de bache, etc.)
+    /// Reacciona automaticamente a EventBus:
+    ///   - OnInfractionDetected       → PlayInfractionPattern()
+    ///   - OnCorrectActionPerformed   → PlaySuccessPattern()
     /// </summary>
     public class HapticsController : MonoBehaviour
     {
@@ -22,16 +23,18 @@ namespace SafeDriver.VR
         [Range(0f, 1f)]
         public float globalStrength = 1f;
 
-        private OVRHapticsClip infractionClip;
-        private OVRHapticsClip successClip;
+        [Tooltip("Canal de haptics. Casi siempre 0.")]
+        [SerializeField] private uint hapticChannel = 0u;
+
+        private InputDevice leftDevice;
+        private InputDevice rightDevice;
+        private Coroutine leftRoutine;
+        private Coroutine rightRoutine;
 
         void Awake()
         {
             if (Instance != null && Instance != this) { Destroy(this); return; }
             Instance = this;
-
-            infractionClip = BuildInfractionClip();
-            successClip    = BuildSuccessClip();
         }
 
         void OnDestroy()
@@ -41,13 +44,13 @@ namespace SafeDriver.VR
 
         void OnEnable()
         {
-            EventBus.OnInfractionDetected    += HandleInfraction;
+            EventBus.OnInfractionDetected     += HandleInfraction;
             EventBus.OnCorrectActionPerformed += HandleCorrectAction;
         }
 
         void OnDisable()
         {
-            EventBus.OnInfractionDetected    -= HandleInfraction;
+            EventBus.OnInfractionDetected     -= HandleInfraction;
             EventBus.OnCorrectActionPerformed -= HandleCorrectAction;
         }
 
@@ -55,104 +58,111 @@ namespace SafeDriver.VR
         //   API publica
         // ============================================================
 
-        /// <summary>Patron de infraccion: doble pulso fuerte y corto. Alerta sin susto.</summary>
-        public void PlayInfractionPattern()
-        {
-            Trigger(infractionClip, HandSide.Both, 0.55f, 0.30f);
-        }
+        /// <summary>Doble pulso fuerte y corto. Alerta sin susto.</summary>
+        public void PlayInfractionPattern() => PlayPattern(HandSide.Both, InfractionEnvelope);
 
-        /// <summary>Patron de exito: rampa ascendente suave. Sensacion de "bien hecho".</summary>
-        public void PlaySuccessPattern()
-        {
-            Trigger(successClip, HandSide.Both, 0.45f, 0.25f);
-        }
+        /// <summary>Rampa ascendente suave. Sensacion de "bien hecho".</summary>
+        public void PlaySuccessPattern() => PlayPattern(HandSide.Both, SuccessEnvelope);
 
-        /// <summary>Patron soft generico (para avisos leves, cambio de carril, etc.)</summary>
-        public void PlaySoft(HandSide side)
-        {
-            Trigger(infractionClip, side, 0.25f, 0.15f);
-        }
+        public void PlaySoft(HandSide side)     => PlayPattern(side, SoftEnvelope);
+        public void PlayPositive(HandSide side) => PlayPattern(side, SuccessEnvelope);
 
-        /// <summary>Patron positivo generico.</summary>
-        public void PlayPositive(HandSide side)
+        /// <summary>Impulso plano one-shot (amp 0-1, duracion en segundos).</summary>
+        public void PlayImpulse(HandSide side, float amplitude, float duration)
         {
-            Trigger(successClip, side, 0.45f, 0.25f);
+            float amp = Mathf.Clamp01(amplitude * globalStrength);
+            if (side == HandSide.Left  || side == HandSide.Both) SendImpulse(ref leftDevice,  XRNode.LeftHand,  amp, duration);
+            if (side == HandSide.Right || side == HandSide.Both) SendImpulse(ref rightDevice, XRNode.RightHand, amp, duration);
         }
 
         // ============================================================
-        //   Event handlers (auto-reaccion al bus — capa VR sin que Scoring lo llame)
+        //   Event handlers
         // ============================================================
 
-        private void HandleInfraction(InfractionType type, string message)
-        {
-            PlayInfractionPattern();
-        }
-
-        private void HandleCorrectAction(ActionType type, int bonus)
-        {
-            PlaySuccessPattern();
-        }
+        private void HandleInfraction(InfractionType type, string message) => PlayInfractionPattern();
+        private void HandleCorrectAction(ActionType type, int bonus)       => PlaySuccessPattern();
 
         // ============================================================
         //   Internals
         // ============================================================
 
-        private void Trigger(OVRHapticsClip clip, HandSide side, float amp, float seconds)
+        private delegate float Envelope(float t);
+
+        private void PlayPattern(HandSide side, Envelope env)
         {
-            float s = Mathf.Clamp01(amp * globalStrength);
             if (side == HandSide.Left || side == HandSide.Both)
             {
-                if (clip != null) OVRHaptics.LeftChannel.Preempt(clip);
-                OVRInput.SetControllerVibration(1f, s, OVRInput.Controller.LTouch);
-                CancelInvoke(nameof(StopLeft));
-                Invoke(nameof(StopLeft), seconds);
+                if (leftRoutine != null) StopCoroutine(leftRoutine);
+                leftRoutine = StartCoroutine(RunPattern(XRNode.LeftHand, env, true));
             }
             if (side == HandSide.Right || side == HandSide.Both)
             {
-                if (clip != null) OVRHaptics.RightChannel.Preempt(clip);
-                OVRInput.SetControllerVibration(1f, s, OVRInput.Controller.RTouch);
-                CancelInvoke(nameof(StopRight));
-                Invoke(nameof(StopRight), seconds);
+                if (rightRoutine != null) StopCoroutine(rightRoutine);
+                rightRoutine = StartCoroutine(RunPattern(XRNode.RightHand, env, false));
             }
         }
 
-        private void StopLeft()  { OVRInput.SetControllerVibration(0f, 0f, OVRInput.Controller.LTouch); }
-        private void StopRight() { OVRInput.SetControllerVibration(0f, 0f, OVRInput.Controller.RTouch); }
-
-        /// <summary>Doble pulso: 60%-0%-80% sobre 96 samples (~300ms). Alerta sin susto.</summary>
-        private OVRHapticsClip BuildInfractionClip()
+        /// <summary>
+        /// Emite impulsos cortos consecutivos siguiendo la envelope (0..1 sobre 0..1 segundos).
+        /// Resolucion ~20ms — similar al viejo sistema basado en samples.
+        /// </summary>
+        private IEnumerator RunPattern(XRNode node, Envelope envelope, bool isLeft)
         {
-            const int samples = 96;
-            OVRHapticsClip c = new OVRHapticsClip(samples);
-            for (int i = 0; i < samples; i++)
+            const float dt = 0.02f;
+            const float patternDuration = 0.30f;
+            int steps = Mathf.CeilToInt(patternDuration / dt);
+
+            for (int i = 0; i < steps; i++)
             {
-                float t = i / (float)(samples - 1);
-                float env;
-                if      (t < 0.20f) env = 0.60f;                // primer pulso
-                else if (t < 0.35f) env = 0.0f;                 // silencio entre pulsos
-                else if (t < 0.60f) env = 0.80f;                // segundo pulso (mas fuerte)
-                else                env = Mathf.Lerp(0.80f, 0f, (t - 0.60f) / 0.40f); // decay
-                byte level = (byte)Mathf.Clamp(env * 220f * globalStrength, 0f, 255f);
-                c.WriteSample(level);
+                float t = i / (float)(steps - 1);
+                float amp = Mathf.Clamp01(envelope(t) * globalStrength);
+                if (amp > 0.01f)
+                {
+                    if (isLeft) SendImpulse(ref leftDevice,  node, amp, dt * 1.5f);
+                    else        SendImpulse(ref rightDevice, node, amp, dt * 1.5f);
+                }
+                yield return new WaitForSeconds(dt);
             }
-            return c;
+
+            if (isLeft) leftRoutine = null;
+            else        rightRoutine = null;
         }
 
-        /// <summary>Rampa 25% -> 65% -> 95% sobre 80 samples (~250ms). Satisfaccion.</summary>
-        private OVRHapticsClip BuildSuccessClip()
+        private void SendImpulse(ref InputDevice cached, XRNode node, float amp, float seconds)
         {
-            const int samples = 80;
-            OVRHapticsClip c = new OVRHapticsClip(samples);
-            for (int i = 0; i < samples; i++)
-            {
-                float t = i / (float)(samples - 1);
-                float env = t < 0.7f
-                    ? Mathf.Lerp(0.25f, 0.65f, t / 0.7f)
-                    : Mathf.Lerp(0.65f, 0.95f, (t - 0.7f) / 0.3f);
-                byte level = (byte)Mathf.Clamp(env * 230f * globalStrength, 0f, 255f);
-                c.WriteSample(level);
-            }
-            return c;
+            if (!cached.isValid) cached = InputDevices.GetDeviceAtXRNode(node);
+            if (!cached.isValid) return;
+            if (cached.TryGetHapticCapabilities(out var caps) && caps.supportsImpulse)
+                cached.SendHapticImpulse(hapticChannel, amp, seconds);
+        }
+
+        // ============================================================
+        //   Envelopes
+        // ============================================================
+
+        /// <summary>Doble pulso: 60% → silencio → 80% → decay.</summary>
+        private static float InfractionEnvelope(float t)
+        {
+            if (t < 0.20f) return 0.60f;
+            if (t < 0.35f) return 0f;
+            if (t < 0.60f) return 0.80f;
+            return Mathf.Lerp(0.80f, 0f, (t - 0.60f) / 0.40f);
+        }
+
+        /// <summary>Rampa 25% → 65% → 95%.</summary>
+        private static float SuccessEnvelope(float t)
+        {
+            return t < 0.7f
+                ? Mathf.Lerp(0.25f, 0.65f, t / 0.7f)
+                : Mathf.Lerp(0.65f, 0.95f, (t - 0.7f) / 0.3f);
+        }
+
+        /// <summary>Pulso suave corto.</summary>
+        private static float SoftEnvelope(float t)
+        {
+            return t < 0.5f
+                ? Mathf.Lerp(0f, 0.35f, t / 0.5f)
+                : Mathf.Lerp(0.35f, 0f, (t - 0.5f) / 0.5f);
         }
     }
 }

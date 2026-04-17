@@ -1,26 +1,28 @@
 using UnityEngine;
+using UnityEngine.InputSystem;
 
 namespace SafeDriver.Vehicle
 {
     /// <summary>
-    /// Lee input del jugador desde los controllers Quest via OVRInput.
-    /// - Gatillo derecho (Secondary trigger) = acelerador
-    /// - Gatillo izquierdo (Primary trigger) = freno
-    /// - Steering: seteado externamente por SteeringWheelController (NO se lee de manos)
+    /// Lee input del jugador via Unity Input System (XR bindings).
+    /// - Throttle action  = gatillo derecho
+    /// - Brake action     = gatillo izquierdo
+    /// - Steering         = seteado externamente por SteeringWheelController
     ///
-    /// Nota: hand tracking esta desactivado. Todo el input es via controllers.
+    /// Las InputActions se asignan por Inspector. Bindings esperados:
+    ///   throttleAction → &lt;XRController&gt;{RightHand}/trigger  (Value / Axis)
+    ///   brakeAction    → &lt;XRController&gt;{LeftHand}/trigger   (Value / Axis)
     /// </summary>
     public class VehicleInput : MonoBehaviour
     {
         public static VehicleInput Instance { get; private set; }
 
-        /// <summary>Steering normalizado. -1 = izquierda, +1 = derecha. Seteado por SteeringWheelController.</summary>
+        [Header("Input Actions (XR triggers)")]
+        [SerializeField] private InputActionProperty throttleAction;
+        [SerializeField] private InputActionProperty brakeAction;
+
         public float SteerInput    { get; private set; }
-
-        /// <summary>Acelerador normalizado. 0 = sin acelerar, 1 = full.</summary>
         public float ThrottleInput { get; private set; }
-
-        /// <summary>Freno normalizado. 0 = sin frenar, 1 = full.</summary>
         public float BrakeInput    { get; private set; }
 
         void Awake()
@@ -34,21 +36,26 @@ namespace SafeDriver.Vehicle
             if (Instance == this) Instance = null;
         }
 
-        void Update()
+        void OnEnable()
         {
-            // Gatillo derecho = acelerador
-            ThrottleInput = OVRInput.Get(OVRInput.Axis1D.SecondaryIndexTrigger);
-
-            // Gatillo izquierdo = freno
-            BrakeInput = OVRInput.Get(OVRInput.Axis1D.PrimaryIndexTrigger);
-
-            // SteerInput NO se lee aca — lo setea SteeringWheelController via SetSteering()
+            throttleAction.action?.Enable();
+            brakeAction.action?.Enable();
         }
 
-        /// <summary>Llamado por SteeringWheelController cada frame para setear el steering.</summary>
+        void OnDisable()
+        {
+            throttleAction.action?.Disable();
+            brakeAction.action?.Disable();
+        }
+
+        void Update()
+        {
+            ThrottleInput = throttleAction.action?.ReadValue<float>() ?? 0f;
+            BrakeInput    = brakeAction.action?.ReadValue<float>()    ?? 0f;
+        }
+
         public void SetSteering(float value) { SteerInput = Mathf.Clamp(value, -1f, 1f); }
 
-        /// <summary>Override para debug en editor sin headset.</summary>
         public void SetThrottle(float value) { ThrottleInput = Mathf.Clamp01(value); }
         public void SetBrake(float value)    { BrakeInput    = Mathf.Clamp01(value); }
     }
