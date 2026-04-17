@@ -13,13 +13,14 @@ namespace SafeDriver.VR
     ///   - NO rota el volante mientras esta agarrado: eso lo hace OneGrabRotateTransformer.
     ///   - SI aplica return-to-center cuando se suelta.
     ///   - SI lee el angulo actual y lo empuja a VehicleInput y EventBus.
-    ///   - SI ignora colisiones entre su Rigidbody kinematic y los colliders del auto padre
-    ///     (previene depenetration que despegaria el volante al moverse el auto).
     ///
     /// Setup esperado:
-    ///   - Rigidbody (kinematic)
     ///   - Grabbable / OneGrabRotateTransformer / GrabInteractable / HandGrabInteractable
-    ///   - Collider (no trigger — ISDK lo usa para detectar hover/grab)
+    ///     con sus _rigidbody apuntando al Rigidbody del auto padre (NO uno propio).
+    ///   - Collider (no trigger) — ISDK lo usa para detectar hover/grab; al no tener
+    ///     Rigidbody propio, el collider pertenece al Rigidbody del auto (compound).
+    ///   - Sin Rigidbody propio: evita el bug de nested Rigidbodies que causaba
+    ///     despegue/jitter cuando el auto se movia por fisica.
     /// </summary>
     [DefaultExecutionOrder(200)]
     public class SteeringWheelController : MonoBehaviour
@@ -39,46 +40,12 @@ namespace SafeDriver.VR
         [SerializeField] private bool logInputs = false;
 
         private Quaternion originalLocalRotation;
-        private Vector3 storedLocalPosition;
-        private Rigidbody ownRb;
-        private Transform parentT;
         private float lastLogTime;
 
         void Awake()
         {
             originalLocalRotation = transform.localRotation;
-            storedLocalPosition   = transform.localPosition;
-            parentT = transform.parent;
             if (grabbable == null) grabbable = GetComponent<Grabbable>();
-            ownRb = GetComponent<Rigidbody>();
-        }
-
-        void Start()
-        {
-            // Ignorar colisiones entre este Rigidbody kinematic y los colliders del auto padre.
-            // Sin esto, la depenetration entre el sphere collider del volante y el box collider
-            // del chassis despegaria el volante cuando el auto se mueve.
-            IgnoreCollisionsWithParentRigidbody();
-        }
-
-        void LateUpdate()
-        {
-            // Pin del volante al auto padre en cada frame visual.
-            // El calculo explicito parent.TransformPoint(localPos) evita el bug de nested Rigidbody
-            // que mantiene al volante en su worldPos anterior cuando el auto se mueve por fisica.
-            // La LOCAL rotation (que controla OneGrabRotateTransformer / ReturnToCenter) se preserva.
-            if (parentT == null) return;
-
-            Vector3  worldPos = parentT.TransformPoint(storedLocalPosition);
-            Quaternion worldRot = parentT.rotation * transform.localRotation;
-
-            transform.SetPositionAndRotation(worldPos, worldRot);
-
-            if (ownRb != null && ownRb.isKinematic)
-            {
-                ownRb.position = worldPos;
-                ownRb.rotation = worldRot;
-            }
         }
 
         void Update()
@@ -103,31 +70,6 @@ namespace SafeDriver.VR
                     ? "VehicleInput.Instance == NULL"
                     : $"throttle={vi.ThrottleInput:F2} brake={vi.BrakeInput:F2} steer={vi.SteerInput:F2}";
                 Debug.Log($"[WheelDebug] angle={currentAngle:F1}° grabbed={isGrabbed} | {viState}");
-            }
-        }
-
-        private void IgnoreCollisionsWithParentRigidbody()
-        {
-            if (ownRb == null) return;
-            var parentRb = GetComponentInParent<Rigidbody>();
-            // Si el parent Rigidbody es el propio, subir un nivel.
-            if (parentRb == ownRb)
-            {
-                var parent = transform.parent;
-                parentRb = parent != null ? parent.GetComponentInParent<Rigidbody>() : null;
-            }
-            if (parentRb == null) return;
-
-            var ownCols = GetComponentsInChildren<Collider>(true);
-            var parentCols = parentRb.GetComponentsInChildren<Collider>(true);
-            foreach (var a in ownCols)
-            {
-                if (a == null || a.attachedRigidbody != ownRb) continue;
-                foreach (var b in parentCols)
-                {
-                    if (b == null || b.attachedRigidbody != parentRb) continue;
-                    Physics.IgnoreCollision(a, b, true);
-                }
             }
         }
 
