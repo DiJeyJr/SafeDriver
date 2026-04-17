@@ -22,6 +22,10 @@ namespace SafeDriver.Vehicle
         public float brakeForce   = 30f;   // escala de brake torque
         public float steerAngle   = 32f;   // grados, front wheels
 
+        [Header("Debug")]
+        [SerializeField] private bool logPhysics = false;
+        private float lastLogTime;
+
         [Header("Wheel Colliders")]
         public WheelCollider wheelFL;
         public WheelCollider wheelFR;
@@ -93,6 +97,17 @@ namespace SafeDriver.Vehicle
 
             UpdateWheelMeshes();
             UpdateSpeedAndDispatch();
+
+            if (logPhysics && Time.time - lastLogTime > 1f)
+            {
+                lastLogTime = Time.time;
+                string inputState = input == null ? "INPUT==NULL" : $"t={input.ThrottleInput:F2} s={input.SteerInput:F2} b={input.BrakeInput:F2}";
+                float rlTorque = wheelRL != null ? wheelRL.motorTorque : -1f;
+                float rlRpm    = wheelRL != null ? wheelRL.rpm : -1f;
+                bool rlGrounded = wheelRL != null && wheelRL.isGrounded;
+                Vector3 vel = rb != null ? rb.linearVelocity : Vector3.zero;
+                Debug.Log($"[VCDebug] {inputState} | RL torque={rlTorque:F0} rpm={rlRpm:F1} grounded={rlGrounded} | carSpeed={vel.magnitude*3.6f:F1}km/h pos={transform.position}");
+            }
         }
 
         // ============================================================
