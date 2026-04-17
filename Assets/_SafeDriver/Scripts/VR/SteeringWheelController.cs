@@ -39,12 +39,16 @@ namespace SafeDriver.VR
         [SerializeField] private bool logInputs = false;
 
         private Quaternion originalLocalRotation;
+        private Vector3 storedLocalPosition;
         private Rigidbody ownRb;
+        private Transform parentT;
         private float lastLogTime;
 
         void Awake()
         {
             originalLocalRotation = transform.localRotation;
+            storedLocalPosition   = transform.localPosition;
+            parentT = transform.parent;
             if (grabbable == null) grabbable = GetComponent<Grabbable>();
             ownRb = GetComponent<Rigidbody>();
         }
@@ -57,15 +61,23 @@ namespace SafeDriver.VR
             IgnoreCollisionsWithParentRigidbody();
         }
 
-        void FixedUpdate()
+        void LateUpdate()
         {
-            // Sincroniza fisicamente el Rigidbody kinematic con su transform (que sigue la jerarquia).
-            // Sin esto, el Rigidbody del volante se queda en la pose world anterior cuando el auto se mueve,
-            // aunque la transform jerarquica SI este actualizada. Clasico nested-Rigidbody issue.
+            // Pin del volante al auto padre en cada frame visual.
+            // El calculo explicito parent.TransformPoint(localPos) evita el bug de nested Rigidbody
+            // que mantiene al volante en su worldPos anterior cuando el auto se mueve por fisica.
+            // La LOCAL rotation (que controla OneGrabRotateTransformer / ReturnToCenter) se preserva.
+            if (parentT == null) return;
+
+            Vector3  worldPos = parentT.TransformPoint(storedLocalPosition);
+            Quaternion worldRot = parentT.rotation * transform.localRotation;
+
+            transform.SetPositionAndRotation(worldPos, worldRot);
+
             if (ownRb != null && ownRb.isKinematic)
             {
-                ownRb.position = transform.position;
-                ownRb.rotation = transform.rotation;
+                ownRb.position = worldPos;
+                ownRb.rotation = worldRot;
             }
         }
 
