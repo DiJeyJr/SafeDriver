@@ -2207,17 +2207,6 @@ Transform:
   m_Children: []
   m_Father: {fileID: 1995048771}
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
---- !u!114 &298091621 stripped
-MonoBehaviour:
-  m_CorrespondingSourceObject: {fileID: 3774012668400742812, guid: 0a7d2469f24041c4284c66706f84c45e, type: 3}
-  m_PrefabInstance: {fileID: 254514160}
-  m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 0}
-  m_Enabled: 1
-  m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: 9067480af55f5874d8f613b16812f968, type: 3}
-  m_Name: 
-  m_EditorClassIdentifier: 
 --- !u!1 &299082508
 GameObject:
   m_ObjectHideFlags: 0
@@ -6337,7 +6326,7 @@ MonoBehaviour:
   returnSpeed: 180
   rotationAxis: 1
   grabbable: {fileID: 869236504}
-  logInputs: 1
+  logInputs: 0
 --- !u!114 &869236502
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -6480,19 +6469,11 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: SafeDriver.VR::SafeDriver.VR.SteeringWheelHandFollower
   wheel: {fileID: 0}
-  leftGrabInteractors:
-  - {fileID: 1473062269}
-  leftHandGrabInteractors:
-  - {fileID: 1993512539}
-  - {fileID: 1455356556}
+  wheelInteractable: {fileID: 0}
+  leftInteractor: {fileID: 1473062269}
   leftHandVisual: {fileID: 1410535742}
-  rightGrabInteractors:
-  - {fileID: 491719384}
-  rightHandGrabInteractors:
-  - {fileID: 298091621}
-  - {fileID: 1808268364}
+  rightInteractor: {fileID: 491719384}
   rightHandVisual: {fileID: 348282382}
-  logDebug: 1
 --- !u!1 &871816932
 GameObject:
   m_ObjectHideFlags: 0
@@ -9670,17 +9651,6 @@ Transform:
   m_Children: []
   m_Father: {fileID: 1995048771}
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
---- !u!114 &1455356556 stripped
-MonoBehaviour:
-  m_CorrespondingSourceObject: {fileID: 2799540847211230969, guid: 0a7d2469f24041c4284c66706f84c45e, type: 3}
-  m_PrefabInstance: {fileID: 254514160}
-  m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 0}
-  m_Enabled: 1
-  m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: 9067480af55f5874d8f613b16812f968, type: 3}
-  m_Name: 
-  m_EditorClassIdentifier: 
 --- !u!114 &1473062269 stripped
 MonoBehaviour:
   m_CorrespondingSourceObject: {fileID: 1232386753682569213, guid: 0a7d2469f24041c4284c66706f84c45e, type: 3}
@@ -11793,17 +11763,6 @@ Transform:
   - {fileID: 467546595}
   m_Father: {fileID: 481962038}
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
---- !u!114 &1808268364 stripped
-MonoBehaviour:
-  m_CorrespondingSourceObject: {fileID: 2252330519885212821, guid: 0a7d2469f24041c4284c66706f84c45e, type: 3}
-  m_PrefabInstance: {fileID: 254514160}
-  m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 0}
-  m_Enabled: 1
-  m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: 9067480af55f5874d8f613b16812f968, type: 3}
-  m_Name: 
-  m_EditorClassIdentifier: 
 --- !u!1 &1826405624
 GameObject:
   m_ObjectHideFlags: 0
@@ -12570,17 +12529,6 @@ Transform:
   m_Children: []
   m_Father: {fileID: 780732315}
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
---- !u!114 &1993512539 stripped
-MonoBehaviour:
-  m_CorrespondingSourceObject: {fileID: 993019234162732016, guid: 0a7d2469f24041c4284c66706f84c45e, type: 3}
-  m_PrefabInstance: {fileID: 254514160}
-  m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 0}
-  m_Enabled: 1
-  m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: 9067480af55f5874d8f613b16812f968, type: 3}
-  m_Name: 
-  m_EditorClassIdentifier: 
 --- !u!1 &1995048770
 GameObject:
   m_ObjectHideFlags: 0
