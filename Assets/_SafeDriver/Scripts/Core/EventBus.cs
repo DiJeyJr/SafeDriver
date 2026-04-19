@@ -39,6 +39,11 @@ namespace SafeDriver.Core
         public static event Action        OnLevelFailed;
 
         // ==========================================================
+        //   Eventos de caja / marcha
+        // ==========================================================
+        public static event Action<GearState> OnGearChanged;
+
+        // ==========================================================
         //   Eventos de estado del juego
         // ==========================================================
         public static event Action<GameState, GameState> OnGameStateChanged;  // (previous, current)
@@ -72,6 +77,9 @@ namespace SafeDriver.Core
         public static void Dispatch_LevelComplete()               => OnLevelComplete?.Invoke();
         public static void Dispatch_LevelFailed()                 => OnLevelFailed?.Invoke();
 
+        // -- Marcha --
+        public static void Dispatch_GearChanged(GearState gear) => OnGearChanged?.Invoke(gear);
+
         // -- Estado del juego --
         public static void Dispatch_GameStateChanged(GameState previous, GameState current)
             => OnGameStateChanged?.Invoke(previous, current);
@@ -94,6 +102,7 @@ namespace SafeDriver.Core
             OnLevelComplete = null;
             OnLevelFailed = null;
             OnTrafficLightChanged = null;
+            OnGearChanged = null;
             OnGameStateChanged = null;
         }
     }
