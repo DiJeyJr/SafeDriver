@@ -4200,6 +4200,11 @@ Transform:
   m_Children: []
   m_Father: {fileID: 564638193}
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
+--- !u!4 &591486803 stripped
+Transform:
+  m_CorrespondingSourceObject: {fileID: 1150507824815711990, guid: 67b8190c32d25b14a903ac21f3b2f156, type: 3}
+  m_PrefabInstance: {fileID: 610838610}
+  m_PrefabAsset: {fileID: 0}
 --- !u!1 &592150863
 GameObject:
   m_ObjectHideFlags: 0
@@ -4440,6 +4445,22 @@ PrefabInstance:
     - target: {fileID: -8679921383154817045, guid: 67b8190c32d25b14a903ac21f3b2f156, type: 3}
       propertyPath: m_LocalEulerAnglesHint.z
       value: 0
+      objectReference: {fileID: 0}
+    - target: {fileID: -7937412807485853533, guid: 67b8190c32d25b14a903ac21f3b2f156, type: 3}
+      propertyPath: m_Name
+      value: Wheel_RearRight
+      objectReference: {fileID: 0}
+    - target: {fileID: -4768358446002747535, guid: 67b8190c32d25b14a903ac21f3b2f156, type: 3}
+      propertyPath: m_Name
+      value: Wheel_FrontLeft
+      objectReference: {fileID: 0}
+    - target: {fileID: -3054209798180997818, guid: 67b8190c32d25b14a903ac21f3b2f156, type: 3}
+      propertyPath: m_Name
+      value: Wheel_FrontRight
+      objectReference: {fileID: 0}
+    - target: {fileID: -255110245502738039, guid: 67b8190c32d25b14a903ac21f3b2f156, type: 3}
+      propertyPath: m_Name
+      value: Wheel_RearLeft
       objectReference: {fileID: 0}
     - target: {fileID: 919132149155446097, guid: 67b8190c32d25b14a903ac21f3b2f156, type: 3}
       propertyPath: m_Name
@@ -5909,7 +5930,7 @@ GameObject:
   - component: {fileID: 812776777}
   - component: {fileID: 812776776}
   m_Layer: 0
-  m_Name: WheelCollider_RL
+  m_Name: WheelCollider_FR
   m_TagString: Untagged
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
@@ -6337,6 +6358,7 @@ MonoBehaviour:
   returnSpeed: 180
   rotationAxis: 1
   grabbable: {fileID: 869236504}
+  rotateTransformer: {fileID: 0}
   logInputs: 1
 --- !u!114 &869236502
 MonoBehaviour:
@@ -8071,7 +8093,7 @@ GameObject:
   - component: {fileID: 1138597234}
   - component: {fileID: 1138597233}
   m_Layer: 0
-  m_Name: WheelCollider_FL
+  m_Name: WheelCollider_RR
   m_TagString: Untagged
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
@@ -8850,7 +8872,7 @@ GameObject:
   - component: {fileID: 1328694728}
   - component: {fileID: 1328694727}
   m_Layer: 0
-  m_Name: WheelCollider_FR
+  m_Name: WheelCollider_RL
   m_TagString: Untagged
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
@@ -10414,6 +10436,11 @@ Transform:
   m_Children: []
   m_Father: {fileID: 1474241814}
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
+--- !u!4 &1547254075 stripped
+Transform:
+  m_CorrespondingSourceObject: {fileID: 5715243859724021344, guid: 67b8190c32d25b14a903ac21f3b2f156, type: 3}
+  m_PrefabInstance: {fileID: 610838610}
+  m_PrefabAsset: {fileID: 0}
 --- !u!1 &1551990432
 GameObject:
   m_ObjectHideFlags: 0
@@ -11149,6 +11176,11 @@ Transform:
   m_Children: []
   m_Father: {fileID: 1838450613}
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
+--- !u!4 &1711600543 stripped
+Transform:
+  m_CorrespondingSourceObject: {fileID: 5688619171522285524, guid: 67b8190c32d25b14a903ac21f3b2f156, type: 3}
+  m_PrefabInstance: {fileID: 610838610}
+  m_PrefabAsset: {fileID: 0}
 --- !u!1 &1717702877
 GameObject:
   m_ObjectHideFlags: 0
@@ -11233,14 +11265,14 @@ MonoBehaviour:
   brakeForce: 30
   steerAngle: 32
   logPhysics: 0
-  wheelFL: {fileID: 1138597233}
-  wheelFR: {fileID: 1328694727}
-  wheelRL: {fileID: 812776776}
-  wheelRR: {fileID: 1946635447}
-  wheelMeshFL: {fileID: 733755237}
-  wheelMeshFR: {fileID: 834082239}
-  wheelMeshRL: {fileID: 677244244}
-  wheelMeshRR: {fileID: 1038492837}
+  wheelFL: {fileID: 1946635447}
+  wheelFR: {fileID: 812776776}
+  wheelRL: {fileID: 1328694727}
+  wheelRR: {fileID: 1138597233}
+  wheelMeshFL: {fileID: 591486803}
+  wheelMeshFR: {fileID: 1547254075}
+  wheelMeshRL: {fileID: 1869154913}
+  wheelMeshRR: {fileID: 1711600543}
   smoothStopSeconds: 1.5
   stoppedThresholdKmh: 2
 --- !u!54 &1738792991
@@ -12056,6 +12088,11 @@ Transform:
   - {fileID: 45181353}
   m_Father: {fileID: 1784807919}
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
+--- !u!4 &1869154913 stripped
+Transform:
+  m_CorrespondingSourceObject: {fileID: -2661747155269784573, guid: 67b8190c32d25b14a903ac21f3b2f156, type: 3}
+  m_PrefabInstance: {fileID: 610838610}
+  m_PrefabAsset: {fileID: 0}
 --- !u!1 &1882244191
 GameObject:
   m_ObjectHideFlags: 0
@@ -12360,7 +12397,7 @@ GameObject:
   - component: {fileID: 1946635448}
   - component: {fileID: 1946635447}
   m_Layer: 0
-  m_Name: WheelCollider_RR
+  m_Name: WheelCollider_FL
   m_TagString: Untagged
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
