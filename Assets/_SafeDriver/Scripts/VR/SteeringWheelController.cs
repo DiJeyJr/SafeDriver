@@ -97,9 +97,19 @@ namespace SafeDriver.VR
 
         /// <summary>
         /// Angulo firmado (-max..+max) sobre el eje configurado, relativo a la rotacion inicial.
+        ///
+        /// Lee directo de _constrainedRelativeAngle del transformer cuando esta disponible:
+        /// es signed, unwrapped y ya clampado. Evita el wraparound de Quaternion.eulerAngles
+        /// cerca del tope (±180°) que provocaba salto de steering al lado opuesto.
         /// </summary>
         private float ReadAngle()
         {
+            if (rotateTransformer != null && s_constrainedRelativeAngleField != null)
+            {
+                float aField = (float)s_constrainedRelativeAngleField.GetValue(rotateTransformer);
+                return -aField;
+            }
+
             Quaternion delta = Quaternion.Inverse(originalLocalRotation) * transform.localRotation;
             Vector3 euler = delta.eulerAngles;
             float a = euler[rotationAxis];
