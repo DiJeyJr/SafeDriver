@@ -22,6 +22,14 @@ namespace SafeDriver.Vehicle
         public float brakeForce   = 30f;   // escala de brake torque
         public float steerAngle   = 32f;   // grados, front wheels
 
+        [Header("Reverse")]
+        [Tooltip("Velocidad maxima en reversa, km/h.")]
+        [SerializeField] private float maxReverseSpeedKmh = 10f;
+        [Tooltip("Segundos sosteniendo el freno parado antes de cambiar de marcha (D<->R).")]
+        [SerializeField] private float gearSwitchHoldSeconds = 2f;
+        [Tooltip("Input de freno por encima del cual se considera 'sostenido' para armar cambio de marcha.")]
+        [SerializeField, Range(0.1f, 1f)] private float gearSwitchBrakeThreshold = 0.5f;
+
         [Header("Debug")]
         [SerializeField] private bool logPhysics = false;
         private float lastLogTime;
@@ -50,6 +58,17 @@ namespace SafeDriver.Vehicle
         private float currentSpeed; // km/h
         private bool isSmoothStopping;
 
+        private GearState currentGear = GearState.Drive;
+        private float gearSwitchTimer;
+        // Latch: exige soltar el freno antes de permitir un arming. Se activa (a) al
+        // completarse un arming previo y (b) al pasar de moviendo -> parado, para que el
+        // freno que se venia sosteniendo al frenar no arme inmediatamente el cambio:
+        // el usuario tiene que estar quieto y recien ahi re-apretar el gatillo.
+        private bool brakeReleaseRequired;
+        private bool wasStoppedLastFrame;
+
+        public GearState CurrentGear => currentGear;
+
         // Offset de rotacion inicial de cada mesh respecto a la rotacion mundial de su WheelCollider.
         // Los meshes importados suelen traer una rotacion base (artistica) que debemos preservar; si
         // copiaramos tal cual la rotacion del collider, los meshes quedarian orientados al reves.
@@ -77,6 +96,8 @@ namespace SafeDriver.Vehicle
             meshOffsetFR = CaptureMeshOffset(wheelFR, wheelMeshFR);
             meshOffsetRL = CaptureMeshOffset(wheelRL, wheelMeshRL);
             meshOffsetRR = CaptureMeshOffset(wheelRR, wheelMeshRR);
+
+            EventBus.Dispatch_GearChanged(currentGear);
         }
 
         void OnDestroy()
@@ -106,9 +127,14 @@ namespace SafeDriver.Vehicle
             var input = VehicleInput.Instance;
             if (input != null)
             {
+                UpdateGear(input.ThrottleInput, input.BrakeInput);
                 ApplyMotor(input.ThrottleInput);
                 ApplySteering(input.SteerInput);
                 ApplyBrakes(input.BrakeInput);
+            }
+            else
+            {
+                UpdateGear(0f, 0f);
             }
 
             UpdateWheelMeshes();
@@ -173,14 +199,123 @@ namespace SafeDriver.Vehicle
         }
 
         // ============================================================
+        //   Gear state machine
+        // ============================================================
+
+        // Transiciones:
+        //   Drive    + parado + freno mantenido  -> ReverseArming (inicia timer)
+        //   ReverseArming + freno liberado       -> Neutral (cancela)
+        //   ReverseArming + timer expira         -> Reverse
+        //   Reverse  + parado + freno mantenido  -> DriveArming simetrico via el mismo flag
+        //   (por simplicidad reutilizamos ReverseArming para D->R y tratamos R->D igual,
+        //    diferenciando con el gear de origen)
+        //
+        // Simplificacion: el timer de 2s es simetrico. Mientras se arma, el gear activo para
+        // motor sigue siendo el anterior (no se aplica torque reversa hasta que termine el timer).
+        private void UpdateGear(float throttle, float brake)
+        {
+            bool stopped = currentSpeed < stoppedThresholdKmh;
+            bool brakeHeld = brake >= gearSwitchBrakeThreshold;
+            bool throttlePressed = throttle > 0.05f;
+
+            // Edge: al pasar de moviendo -> parado, exigir que el freno se suelte al menos
+            // una vez antes de poder armar. Asi el freno que se venia sosteniendo para frenar
+            // no cuenta; hay que estar quieto y recien ahi re-apretar el gatillo.
+            if (stopped && !wasStoppedLastFrame) brakeReleaseRequired = true;
+            wasStoppedLastFrame = stopped;
+
+            if (!brakeHeld) brakeReleaseRequired = false;
+            bool canArm = stopped && brakeHeld && !brakeReleaseRequired;
+
+            switch (currentGear)
+            {
+                case GearState.Drive:
+                    if (canArm)
+                    {
+                        gearSwitchTimer = 0f;
+                        SetGear(GearState.ReverseArming);
+                    }
+                    break;
+
+                case GearState.Reverse:
+                    if (canArm)
+                    {
+                        gearSwitchTimer = 0f;
+                        SetGear(GearState.DriveArming);
+                    }
+                    break;
+
+                case GearState.ReverseArming:
+                    if (throttlePressed)
+                    {
+                        gearSwitchTimer = 0f;
+                        SetGear(GearState.Drive);
+                        break;
+                    }
+                    if (!stopped || !brakeHeld)
+                    {
+                        gearSwitchTimer = 0f;
+                        SetGear(GearState.Drive);
+                        break;
+                    }
+                    gearSwitchTimer += Time.fixedDeltaTime;
+                    if (gearSwitchTimer >= gearSwitchHoldSeconds)
+                    {
+                        gearSwitchTimer = 0f;
+                        brakeReleaseRequired = true;
+                        SetGear(GearState.Reverse);
+                    }
+                    break;
+
+                case GearState.DriveArming:
+                    if (throttlePressed)
+                    {
+                        gearSwitchTimer = 0f;
+                        SetGear(GearState.Reverse);
+                        break;
+                    }
+                    if (!stopped || !brakeHeld)
+                    {
+                        gearSwitchTimer = 0f;
+                        SetGear(GearState.Reverse);
+                        break;
+                    }
+                    gearSwitchTimer += Time.fixedDeltaTime;
+                    if (gearSwitchTimer >= gearSwitchHoldSeconds)
+                    {
+                        gearSwitchTimer = 0f;
+                        brakeReleaseRequired = true;
+                        SetGear(GearState.Drive);
+                    }
+                    break;
+            }
+        }
+
+        private void SetGear(GearState next)
+        {
+            if (next == currentGear) return;
+            currentGear = next;
+            EventBus.Dispatch_GearChanged(currentGear);
+        }
+
+        // ============================================================
         //   Helpers WheelCollider
         // ============================================================
 
         private void ApplyMotor(float input)
         {
-            // RWD: tracción trasera. Si supera maxSpeed, corta el motor pero mantiene momentum.
-            float torque = input * acceleration * 100f;
-            if (currentSpeed >= maxSpeed) torque = 0f;
+            // RWD: traccion trasera. En D empuja adelante, en R empuja atras con cap bajo.
+            // En Neutral/ReverseArming el motor queda libre (el freno, si lo hay, lo detiene).
+            float torque = 0f;
+            switch (currentGear)
+            {
+                case GearState.Drive:
+                    if (currentSpeed < maxSpeed) torque = input * acceleration * 100f;
+                    break;
+                case GearState.Reverse:
+                    if (currentSpeed < maxReverseSpeedKmh) torque = -input * acceleration * 100f;
+                    break;
+            }
             if (wheelRL != null) wheelRL.motorTorque = torque;
             if (wheelRR != null) wheelRR.motorTorque = torque;
         }
