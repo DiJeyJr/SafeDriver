@@ -1,3 +1,4 @@
+using System.Reflection;
 using UnityEngine;
 using Oculus.Interaction;
 using SafeDriver.Core;
@@ -35,6 +36,8 @@ namespace SafeDriver.VR
         [Header("Referencias ISDK")]
         [Tooltip("Grabbable del volante. Si queda vacio se busca en este GameObject.")]
         [SerializeField] private Grabbable grabbable;
+        [Tooltip("Transformer que rota el volante. Si queda vacio se busca en este GameObject.")]
+        [SerializeField] private OneGrabRotateTransformer rotateTransformer;
 
         [Header("Debug")]
         [SerializeField] private bool logInputs = false;
@@ -42,10 +45,26 @@ namespace SafeDriver.VR
         private Quaternion originalLocalRotation;
         private float lastLogTime;
 
+        // Reflection cache: OneGrabRotateTransformer guarda su angulo en campos privados que
+        // persisten entre grabs. Al soltar y re-agarrar, el rango util queda recortado al
+        // restante hasta MaxAngle. Sincronizamos estos campos con el angulo visual mientras
+        // el volante NO esta agarrado para que la proxima BeginTransform parta desde el pose real.
+        private static FieldInfo s_relativeAngleField;
+        private static FieldInfo s_constrainedRelativeAngleField;
+
         void Awake()
         {
             originalLocalRotation = transform.localRotation;
             if (grabbable == null) grabbable = GetComponent<Grabbable>();
+            if (rotateTransformer == null) rotateTransformer = GetComponent<OneGrabRotateTransformer>();
+
+            if (s_relativeAngleField == null)
+            {
+                var t = typeof(OneGrabRotateTransformer);
+                const BindingFlags flags = BindingFlags.NonPublic | BindingFlags.Instance;
+                s_relativeAngleField = t.GetField("_relativeAngle", flags);
+                s_constrainedRelativeAngleField = t.GetField("_constrainedRelativeAngle", flags);
+            }
         }
 
         void Update()
@@ -53,7 +72,10 @@ namespace SafeDriver.VR
             bool isGrabbed = grabbable != null && grabbable.SelectingPointsCount > 0;
 
             if (!isGrabbed)
+            {
                 ReturnToCenter();
+                SyncTransformerAngleToVisual();
+            }
 
             float currentAngle = ReadAngle();
             float normalized = Mathf.Clamp(currentAngle / maxSteeringAngle, -1f, 1f);
@@ -95,6 +117,22 @@ namespace SafeDriver.VR
             Vector3 euler = Vector3.zero;
             euler[rotationAxis] = -targetAngle;
             transform.localRotation = originalLocalRotation * Quaternion.Euler(euler);
+        }
+
+        // Escribe el angulo visual crudo (pre-invert, en la convencion del transformer)
+        // en los campos privados del OneGrabRotateTransformer para que la proxima BeginTransform
+        // use _startAngle = angulo actual, restaurando el rango completo [MinAngle, MaxAngle].
+        private void SyncTransformerAngleToVisual()
+        {
+            if (rotateTransformer == null || s_relativeAngleField == null) return;
+
+            Quaternion delta = Quaternion.Inverse(originalLocalRotation) * transform.localRotation;
+            Vector3 euler = delta.eulerAngles;
+            float a = euler[rotationAxis];
+            if (a > 180f) a -= 360f;
+
+            s_relativeAngleField.SetValue(rotateTransformer, a);
+            s_constrainedRelativeAngleField.SetValue(rotateTransformer, a);
         }
     }
 }
