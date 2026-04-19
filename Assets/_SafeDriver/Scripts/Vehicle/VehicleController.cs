@@ -50,6 +50,14 @@ namespace SafeDriver.Vehicle
         private float currentSpeed; // km/h
         private bool isSmoothStopping;
 
+        // Offset de rotacion inicial de cada mesh respecto a la rotacion mundial de su WheelCollider.
+        // Los meshes importados suelen traer una rotacion base (artistica) que debemos preservar; si
+        // copiaramos tal cual la rotacion del collider, los meshes quedarian orientados al reves.
+        private Quaternion meshOffsetFL = Quaternion.identity;
+        private Quaternion meshOffsetFR = Quaternion.identity;
+        private Quaternion meshOffsetRL = Quaternion.identity;
+        private Quaternion meshOffsetRR = Quaternion.identity;
+
         /// <summary>True si la velocidad actual es menor al threshold de 'detenido'.</summary>
         public bool IsStopped() => currentSpeed < stoppedThresholdKmh;
 
@@ -61,6 +69,14 @@ namespace SafeDriver.Vehicle
             if (Instance != null && Instance != this) { Destroy(gameObject); return; }
             Instance = this;
             rb = GetComponent<Rigidbody>();
+        }
+
+        void Start()
+        {
+            meshOffsetFL = CaptureMeshOffset(wheelFL, wheelMeshFL);
+            meshOffsetFR = CaptureMeshOffset(wheelFR, wheelMeshFR);
+            meshOffsetRL = CaptureMeshOffset(wheelRL, wheelMeshRL);
+            meshOffsetRR = CaptureMeshOffset(wheelRR, wheelMeshRR);
         }
 
         void OnDestroy()
@@ -187,17 +203,24 @@ namespace SafeDriver.Vehicle
 
         private void UpdateWheelMeshes()
         {
-            SyncWheel(wheelFL, wheelMeshFL);
-            SyncWheel(wheelFR, wheelMeshFR);
-            SyncWheel(wheelRL, wheelMeshRL);
-            SyncWheel(wheelRR, wheelMeshRR);
+            SyncWheel(wheelFL, wheelMeshFL, meshOffsetFL);
+            SyncWheel(wheelFR, wheelMeshFR, meshOffsetFR);
+            SyncWheel(wheelRL, wheelMeshRL, meshOffsetRL);
+            SyncWheel(wheelRR, wheelMeshRR, meshOffsetRR);
         }
 
-        private static void SyncWheel(WheelCollider col, Transform mesh)
+        private static Quaternion CaptureMeshOffset(WheelCollider col, Transform mesh)
+        {
+            if (col == null || mesh == null) return Quaternion.identity;
+            col.GetWorldPose(out _, out Quaternion colRot);
+            return Quaternion.Inverse(colRot) * mesh.rotation;
+        }
+
+        private static void SyncWheel(WheelCollider col, Transform mesh, Quaternion offset)
         {
             if (col == null || mesh == null) return;
             col.GetWorldPose(out Vector3 pos, out Quaternion rot);
-            mesh.SetPositionAndRotation(pos, rot);
+            mesh.SetPositionAndRotation(pos, rot * offset);
         }
 
         private void UpdateSpeedAndDispatch()
