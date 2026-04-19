@@ -187,7 +187,10 @@ namespace SafeDriver.Vehicle
 
         private void ApplySteering(float input)
         {
-            float angle = input * steerAngle;
+            // Negamos para que input positivo (volante CW = derecha en EventBus) resulte en
+            // giro del auto hacia la derecha con las delanteras. El signo de WheelCollider.steerAngle
+            // en este rig queda cruzado respecto a la convencion del volante.
+            float angle = -input * steerAngle;
             if (wheelFL != null) wheelFL.steerAngle = angle;
             if (wheelFR != null) wheelFR.steerAngle = angle;
         }
