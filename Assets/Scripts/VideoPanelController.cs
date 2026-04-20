@@ -9,6 +9,7 @@ public class VideoPanelController : MonoBehaviour
     [SerializeField] private RawImage videoDisplay;
     [SerializeField] private AspectRatioFitter aspectFitter;
     [SerializeField] private string githubUrl = "https://github.com/DiJeyJr/SafeDriver";
+    [SerializeField] private string surveyUrl = "https://docs.google.com/forms/d/e/1FAIpQLScjriPxtxhlOJ9T_fWArpkYAze6tl5-X4s21qa6Zcnt1fEzJA/viewform?usp=publish-editor";
 
     public void Open()
     {
@@ -35,6 +36,12 @@ public class VideoPanelController : MonoBehaviour
     {
         if (!string.IsNullOrEmpty(githubUrl))
             Application.OpenURL(githubUrl);
+    }
+
+    public void OpenSurvey()
+    {
+        if (!string.IsNullOrEmpty(surveyUrl))
+            Application.OpenURL(surveyUrl);
     }
 
     private void OnPrepared(VideoPlayer vp)
