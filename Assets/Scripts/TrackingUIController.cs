@@ -1,39 +1,76 @@
+using System.Collections;
 using UnityEngine;
+using Vuforia;
 
+[RequireComponent(typeof(CanvasGroup))]
 public class TrackingUIController : MonoBehaviour
 {
     [SerializeField] private CanvasGroup canvasGroup;
-    [SerializeField] private GameObject imageTarget;
+    [SerializeField] private ObserverBehaviour target;
+    [SerializeField] private float fadeDuration = 0.25f;
+    [SerializeField] private bool includeExtendedTracked = true;
 
-    private bool wasTracked;
+    private Coroutine fadeCoroutine;
+    private bool isVisible;
 
-    private void Start()
+    private void Reset()
     {
-        if (canvasGroup != null)
-            canvasGroup.alpha = 0;
+        canvasGroup = GetComponent<CanvasGroup>();
     }
 
-    private void Update()
+    private void Awake()
     {
-        if (imageTarget == null || canvasGroup == null) return;
+        if (canvasGroup == null) canvasGroup = GetComponent<CanvasGroup>();
+        ApplyInstant(false);
+    }
 
-        bool isTracked = imageTarget.activeInHierarchy &&
-                         imageTarget.transform.childCount > 0 &&
-                         imageTarget.transform.GetChild(0).gameObject.activeInHierarchy;
+    private void OnEnable()
+    {
+        if (target != null)
+            target.OnTargetStatusChanged += OnTargetStatusChanged;
+    }
 
-        if (isTracked && !wasTracked)
+    private void OnDisable()
+    {
+        if (target != null)
+            target.OnTargetStatusChanged -= OnTargetStatusChanged;
+    }
+
+    private void OnTargetStatusChanged(ObserverBehaviour behaviour, TargetStatus status)
+    {
+        bool tracked = status.Status == Status.TRACKED ||
+                       (includeExtendedTracked && status.Status == Status.EXTENDED_TRACKED);
+
+        if (tracked == isVisible) return;
+
+        isVisible = tracked;
+        if (fadeCoroutine != null) StopCoroutine(fadeCoroutine);
+        fadeCoroutine = StartCoroutine(FadeTo(tracked ? 1f : 0f));
+    }
+
+    private IEnumerator FadeTo(float targetAlpha)
+    {
+        bool interactive = targetAlpha > 0.5f;
+        canvasGroup.interactable = interactive;
+        canvasGroup.blocksRaycasts = interactive;
+
+        float start = canvasGroup.alpha;
+        float elapsed = 0f;
+        while (elapsed < fadeDuration)
         {
-            canvasGroup.alpha = 1;
-            canvasGroup.interactable = true;
-            canvasGroup.blocksRaycasts = true;
+            elapsed += Time.unscaledDeltaTime;
+            canvasGroup.alpha = Mathf.Lerp(start, targetAlpha, elapsed / fadeDuration);
+            yield return null;
         }
-        else if (!isTracked && wasTracked)
-        {
-            canvasGroup.alpha = 0;
-            canvasGroup.interactable = false;
-            canvasGroup.blocksRaycasts = false;
-        }
+        canvasGroup.alpha = targetAlpha;
+    }
 
-        wasTracked = isTracked;
+    private void ApplyInstant(bool show)
+    {
+        isVisible = show;
+        if (canvasGroup == null) return;
+        canvasGroup.alpha = show ? 1f : 0f;
+        canvasGroup.interactable = show;
+        canvasGroup.blocksRaycasts = show;
     }
 }

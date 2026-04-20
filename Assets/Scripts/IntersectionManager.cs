@@ -17,9 +17,6 @@ public class IntersectionManager : MonoBehaviour
     [SerializeField] private PedestrianController[] northSouthPedestrians;
     [SerializeField] private PedestrianController[] eastWestPedestrians;
 
-    [Header("Score")]
-    [SerializeField] private ScoreManager scoreManager;
-
     [Header("Transition")]
     [SerializeField] private float yellowDuration = 2.5f;
 
@@ -80,7 +77,6 @@ public class IntersectionManager : MonoBehaviour
         }
 
         UpdatePermissions();
-        if (scoreManager) scoreManager.AddPoints(10);
 
         isTransitioning = false;
     }

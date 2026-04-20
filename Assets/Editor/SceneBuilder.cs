@@ -353,43 +353,6 @@ public class SceneBuilder : EditorWindow
 
         infoPanel.AddComponent<InfoPanelController>();
 
-        // --- Score Panel ---
-        GameObject scorePanel = new GameObject("ScorePanel");
-        scorePanel.transform.SetParent(imageTarget.transform);
-        scorePanel.transform.localPosition = new Vector3(0.2f, 0.08f, 0);
-        scorePanel.transform.localScale = Vector3.one * 0.015f;
-
-        Canvas scoreCanvas = scorePanel.AddComponent<Canvas>();
-        scoreCanvas.renderMode = RenderMode.WorldSpace;
-        RectTransform scoreRect = scorePanel.GetComponent<RectTransform>();
-        scoreRect.sizeDelta = new Vector2(250, 60);
-
-        // Score BG
-        GameObject scoreBg = new GameObject("ScoreBG");
-        scoreBg.transform.SetParent(scorePanel.transform);
-        var scoreBgImg = scoreBg.AddComponent<UnityEngine.UI.Image>();
-        scoreBgImg.color = new Color(0, 0, 0, 0.6f);
-        RectTransform scoreBgRect = scoreBg.GetComponent<RectTransform>();
-        scoreBgRect.anchorMin = Vector2.zero;
-        scoreBgRect.anchorMax = Vector2.one;
-        scoreBgRect.offsetMin = Vector2.zero;
-        scoreBgRect.offsetMax = Vector2.zero;
-
-        // Score Text (using TextMeshPro for world space)
-        GameObject scoreTextObj = new GameObject("ScoreText");
-        scoreTextObj.transform.SetParent(scorePanel.transform);
-        var scoreTMP = scoreTextObj.AddComponent<TextMeshProUGUI>();
-        scoreTMP.text = "Puntaje: 0";
-        scoreTMP.fontSize = 36;
-        scoreTMP.fontStyle = FontStyles.Bold;
-        scoreTMP.alignment = TextAlignmentOptions.Center;
-        scoreTMP.color = Color.white;
-        RectTransform scoreTxtRect = scoreTextObj.GetComponent<RectTransform>();
-        scoreTxtRect.anchorMin = Vector2.zero;
-        scoreTxtRect.anchorMax = Vector2.one;
-        scoreTxtRect.offsetMin = Vector2.zero;
-        scoreTxtRect.offsetMax = Vector2.zero;
-
         // --- Tooltip ---
         GameObject tooltip = new GameObject("Tooltip");
         tooltip.transform.SetParent(imageTarget.transform);
@@ -449,16 +412,6 @@ public class SceneBuilder : EditorWindow
 
         // Set interactable layer mask
         SetSerializedField(touchScript, "interactableLayer", LayerMask.GetMask("Interactable"));
-
-        // Score Manager
-        GameObject scorePanelObj = GameObject.Find("ScorePanel");
-        if (scorePanelObj != null)
-        {
-            var scoreMgr = scorePanelObj.AddComponent<ScoreManager>();
-            // Find the score text
-            var scoreText = scorePanelObj.GetComponentInChildren<TextMeshProUGUI>();
-            // ScoreManager uses TextMeshPro (not UGUI), but for now this works in world space canvas
-        }
 
         Debug.Log("[SceneBuilder] Managers created");
     }

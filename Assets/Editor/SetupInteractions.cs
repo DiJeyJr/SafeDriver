@@ -39,9 +39,6 @@ public class SetupInteractions
         // Setup UI button and indicators
         SetupTrafficLightUI();
 
-        // Setup ScoreManager
-        SetupScoreManager();
-
         EditorUtility.SetDirty(miniCity);
         UnityEditor.SceneManagement.EditorSceneManager.MarkSceneDirty(
             UnityEditor.SceneManagement.EditorSceneManager.GetActiveScene());
@@ -370,10 +367,6 @@ public class SetupInteractions
             if (ped4) ewPeds.GetArrayElementAtIndex(1).objectReferenceValue = ped4.GetComponent<PedestrianController>();
         }
 
-        // Score Manager
-        ScoreManager scoreMgr = Object.FindFirstObjectByType<ScoreManager>();
-        if (scoreMgr) so.FindProperty("scoreManager").objectReferenceValue = scoreMgr;
-
         so.ApplyModifiedProperties();
         Debug.Log("[Setup] IntersectionManager wired (cars + pedestrians)");
     }
@@ -397,28 +390,6 @@ public class SetupInteractions
         so.ApplyModifiedProperties();
 
         Debug.Log("[Setup] ARTouchInteraction configured");
-    }
-
-    static void SetupScoreManager()
-    {
-        ScoreManager scoreMgr = Object.FindFirstObjectByType<ScoreManager>();
-        if (scoreMgr == null) return;
-
-        // Find score text
-        TextMeshProUGUI scoreTxt = scoreMgr.GetComponentInChildren<TextMeshProUGUI>();
-        if (scoreTxt != null)
-        {
-            // ScoreManager uses TextMeshPro (world space) - need to check type
-            SerializedObject so = new SerializedObject(scoreMgr);
-            SerializedProperty txtProp = so.FindProperty("scoreText");
-            if (txtProp != null)
-            {
-                // The component might need TextMeshPro instead of TextMeshProUGUI for world canvas
-                txtProp.objectReferenceValue = scoreTxt;
-                so.ApplyModifiedProperties();
-            }
-        }
-        Debug.Log("[Setup] ScoreManager configured");
     }
 
     static Material LoadOrCreateEmissiveMat(string name, Color color, float emission)
