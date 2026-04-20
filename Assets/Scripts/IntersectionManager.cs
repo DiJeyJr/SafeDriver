@@ -20,10 +20,20 @@ public class IntersectionManager : MonoBehaviour
     [Header("Transition")]
     [SerializeField] private float yellowDuration = 2.5f;
 
+    [Header("Pedestrian Control")]
+    [SerializeField] private bool pedestriansEnabled = true;
+
     private bool nsIsGreen = false;
     private bool isTransitioning = false;
 
     public bool IsTransitioning => isTransitioning;
+    public bool PedestriansEnabled => pedestriansEnabled;
+
+    public void TogglePedestrians()
+    {
+        pedestriansEnabled = !pedestriansEnabled;
+        UpdatePermissions();
+    }
 
     private void Start()
     {
@@ -104,10 +114,10 @@ public class IntersectionManager : MonoBehaviour
 
         if (northSouthPedestrians != null)
             foreach (var ped in northSouthPedestrians)
-                ped.SetCanCross(!nsGreen);
+                ped.SetCanCross(pedestriansEnabled && !nsGreen);
 
         if (eastWestPedestrians != null)
             foreach (var ped in eastWestPedestrians)
-                ped.SetCanCross(!ewGreen);
+                ped.SetCanCross(pedestriansEnabled && !ewGreen);
     }
 }
