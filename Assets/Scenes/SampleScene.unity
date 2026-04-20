@@ -6421,7 +6421,7 @@ MonoBehaviour:
   - {fileID: 163283179}
   - {fileID: 1621076412}
   - {fileID: 716061142}
-  rightTurnChance: 0.4
+  rightTurnChance: 0.5
   rotationSpeed: 540
 --- !u!1 &1477520314
 GameObject:
@@ -8058,7 +8058,7 @@ MonoBehaviour:
   - {fileID: 1499248943}
   - {fileID: 584608665}
   - {fileID: 956502983}
-  rightTurnChance: 0.4
+  rightTurnChance: 0.5
   rotationSpeed: 540
 --- !u!1 &1913828443
 GameObject:
@@ -13992,7 +13992,7 @@ MonoBehaviour:
   - {fileID: 1485080864}
   - {fileID: 75403112}
   - {fileID: 281919167}
-  rightTurnChance: 0.4
+  rightTurnChance: 0.35
   rotationSpeed: 540
 --- !u!33 &2666895873134750163
 MeshFilter:
@@ -24011,7 +24011,7 @@ MonoBehaviour:
   - {fileID: 2105460430}
   - {fileID: 1441534103}
   - {fileID: 542080926}
-  rightTurnChance: 0.4
+  rightTurnChance: 0.35
   rotationSpeed: 540
 --- !u!4 &8992138507986773892
 Transform:
