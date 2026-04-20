@@ -9,8 +9,8 @@ public class PedestrianToggleButton : MonoBehaviour
     [SerializeField] private TextMeshProUGUI label;
     [SerializeField] private Color activeColor = new Color(0.10f, 0.70f, 0.25f, 1f);
     [SerializeField] private Color inactiveColor = new Color(0.85f, 0.20f, 0.20f, 1f);
-    [SerializeField] private string activeText = "PEATONES ON";
-    [SerializeField] private string inactiveText = "PEATONES OFF";
+    [SerializeField] private string activeText = "CRUCE ON";
+    [SerializeField] private string inactiveText = "CRUCE OFF";
 
     private Button button;
 
