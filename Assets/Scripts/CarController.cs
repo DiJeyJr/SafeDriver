@@ -14,17 +14,50 @@ public class CarController : MonoBehaviour
     [Header("Linked parts (move together)")]
     [SerializeField] private Transform[] linkedParts;
 
+    [Header("Right Turn (optional)")]
+    [SerializeField] private Transform[] rightTurnWaypoints;
+    [SerializeField, Range(0f, 1f)] private float rightTurnChance = 0.4f;
+
+    [Header("Rotation")]
+    [SerializeField] private float rotationSpeed = 540f;
+
     private int currentWaypointIndex;
-    private bool canProceed = false;
+    private bool canProceed;
     private bool isWaitingAtStop;
+
+    private Transform[] currentPath;
+    private Quaternion initialRotationOffset = Quaternion.identity;
 
     public bool CanProceed => canProceed;
 
+    private void Start()
+    {
+        if (linkedParts != null)
+        {
+            foreach (var part in linkedParts)
+                if (part != null) part.SetParent(transform, true);
+        }
+
+        currentPath = waypoints;
+        ComputeInitialRotationOffset();
+        DecideNextPath();
+    }
+
+    private void ComputeInitialRotationOffset()
+    {
+        if (waypoints == null || waypoints.Length < 2 ||
+            waypoints[0] == null || waypoints[1] == null) return;
+
+        var initialDir = (waypoints[1].localPosition - waypoints[0].localPosition).normalized;
+        if (initialDir.sqrMagnitude > 0.001f)
+            initialRotationOffset = Quaternion.Inverse(Quaternion.LookRotation(initialDir)) * transform.localRotation;
+    }
+
     private void Update()
     {
-        if (waypoints == null || waypoints.Length == 0) return;
+        if (currentPath == null || currentPath.Length == 0) return;
 
-        Vector3 targetPos = waypoints[currentWaypointIndex].localPosition;
+        Vector3 targetPos = currentPath[currentWaypointIndex].localPosition;
         Vector3 myPos = transform.localPosition;
         float distance = Vector3.Distance(myPos, targetPos);
 
@@ -38,31 +71,41 @@ public class CarController : MonoBehaviour
 
         Vector3 newPos = Vector3.MoveTowards(myPos, targetPos, speed * Time.deltaTime);
         Vector3 delta = newPos - myPos;
-
-        // Move self
         transform.localPosition = newPos;
 
-        // Move all linked parts by same delta
-        if (linkedParts != null)
-            foreach (var part in linkedParts)
-                if (part != null)
-                    part.localPosition += delta;
+        if (delta.sqrMagnitude > 0.000001f)
+        {
+            var moveDir = delta.normalized;
+            var targetRot = Quaternion.LookRotation(moveDir) * initialRotationOffset;
+            transform.localRotation = Quaternion.RotateTowards(transform.localRotation, targetRot, rotationSpeed * Time.deltaTime);
+        }
 
-        // Next waypoint
         if (distance < stopDistance)
         {
             currentWaypointIndex++;
-            if (currentWaypointIndex >= waypoints.Length)
+            if (currentWaypointIndex >= currentPath.Length)
             {
-                Vector3 loopDelta = waypoints[0].localPosition - transform.localPosition;
                 transform.localPosition = waypoints[0].localPosition;
-                if (linkedParts != null)
-                    foreach (var part in linkedParts)
-                        if (part != null)
-                            part.localPosition += loopDelta;
+
+                if (waypoints.Length > 1)
+                {
+                    var initDir = (waypoints[1].localPosition - waypoints[0].localPosition).normalized;
+                    if (initDir.sqrMagnitude > 0.001f)
+                        transform.localRotation = Quaternion.LookRotation(initDir) * initialRotationOffset;
+                }
+
                 currentWaypointIndex = 0;
+                DecideNextPath();
             }
         }
+    }
+
+    private void DecideNextPath()
+    {
+        if (rightTurnWaypoints != null && rightTurnWaypoints.Length >= 2 && Random.value < rightTurnChance)
+            currentPath = rightTurnWaypoints;
+        else
+            currentPath = waypoints;
     }
 
     public void SetCanProceed(bool value)
