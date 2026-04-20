@@ -3446,12 +3446,6 @@ PrefabInstance:
     - targetCorrespondingSourceObject: {fileID: -8325689553952117475, guid: d28690eabd62a9c4d8c6ccc45974f98d, type: 3}
       insertIndex: -1
       addedObject: {fileID: 869236516}
-    - targetCorrespondingSourceObject: {fileID: -8325689553952117475, guid: d28690eabd62a9c4d8c6ccc45974f98d, type: 3}
-      insertIndex: -1
-      addedObject: {fileID: 869236517}
-    - targetCorrespondingSourceObject: {fileID: -8325689553952117475, guid: d28690eabd62a9c4d8c6ccc45974f98d, type: 3}
-      insertIndex: -1
-      addedObject: {fileID: 869236521}
   m_SourcePrefab: {fileID: 100100000, guid: d28690eabd62a9c4d8c6ccc45974f98d, type: 3}
 --- !u!4 &448988262 stripped
 Transform:
@@ -6697,7 +6691,7 @@ MonoBehaviour:
   m_PrefabInstance: {fileID: 0}
   m_PrefabAsset: {fileID: 0}
   m_GameObject: {fileID: 869236497}
-  m_Enabled: 0
+  m_Enabled: 1
   m_EditorHideFlags: 0
   m_Script: {fileID: 11500000, guid: 332ffe9a4853c1349b0d639a72f21207, type: 3}
   m_Name: 
@@ -6795,8 +6789,8 @@ SphereCollider:
   m_ProvidesContacts: 0
   m_Enabled: 1
   serializedVersion: 3
-  m_Radius: 0.22
-  m_Center: {x: 0, y: 0, z: 0}
+  m_Radius: 0.18
+  m_Center: {x: 0, y: -0.087435186, z: 0}
 --- !u!114 &869236507
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -6894,38 +6888,6 @@ MonoBehaviour:
   m_EditorClassIdentifier: SafeDriver.VR::SafeDriver.VR.WheelGrabDiagnostic
   logInterval: 1
   hitbox: {fileID: 0}
---- !u!114 &869236517
-MonoBehaviour:
-  m_ObjectHideFlags: 0
-  m_CorrespondingSourceObject: {fileID: 0}
-  m_PrefabInstance: {fileID: 0}
-  m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 869236497}
-  m_Enabled: 1
-  m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: 10641f4b2b0329f4db1fda547ab3bd19, type: 3}
-  m_Name: 
-  m_EditorClassIdentifier: SafeDriver.VR::SafeDriver.VR.HandGrabRigidbodyTracker
---- !u!114 &869236521
-MonoBehaviour:
-  m_ObjectHideFlags: 0
-  m_CorrespondingSourceObject: {fileID: 0}
-  m_PrefabInstance: {fileID: 0}
-  m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 869236497}
-  m_Enabled: 1
-  m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: 9f0b44b5d72f35b46a89c6bdaac79c64, type: 3}
-  m_Name: 
-  m_EditorClassIdentifier: SafeDriver.VR::SafeDriver.VR.SimpleWheelGrab
-  hitbox: {fileID: 0}
-  maxSteeringAngle: 180
-  returnSpeed: 180
-  rotationAxis: 1
-  invertRotation: 1
-  snapHandVisual: 1
-  hideHandVisualOnGrab: 0
-  logDebug: 1
 --- !u!1 &871816932
 GameObject:
   m_ObjectHideFlags: 0
