@@ -1,5 +1,6 @@
 using UnityEngine;
 using Oculus.Interaction;
+using Oculus.Interaction.HandGrab;
 
 namespace SafeDriver.VR
 {
@@ -11,6 +12,10 @@ namespace SafeDriver.VR
     /// Rigidbody asociado (chasis del auto), por lo que sin este filtro el volante
     /// se puede agarrar desde cualquier collider del auto. Asignar este componente
     /// al campo _interactorFilters de GrabInteractable.
+    ///
+    /// En el rig BB "Controller and Hand", los interactors tienen su transform fijo en
+    /// TrackingSpace; solo WristPoint/PalmPoint y el Rigidbody (via HandGrabRigidbodyTracker)
+    /// se actualizan con el tracking. Por eso probamos en orden: WristPoint > Rigidbody > transform.
     /// </summary>
     public class WheelGrabProximityFilter : MonoBehaviour, IGameObjectFilter
     {
@@ -20,7 +25,7 @@ namespace SafeDriver.VR
         [Tooltip("Multiplicador del radio para tolerancia. 1.0 = radio exacto.")]
         [SerializeField] private float radiusMultiplier = 1f;
 
-        [SerializeField] private bool logDebug = true;
+        [SerializeField] private bool logDebug = false;
         private float lastLog;
 
         void Awake()
@@ -39,15 +44,27 @@ namespace SafeDriver.VR
                             hitbox.transform.lossyScale.z)
                 * radiusMultiplier;
 
-            float dist = Vector3.Distance(interactorGameObject.transform.position, worldCenter);
+            Vector3 probe = ResolveTrackedPosition(interactorGameObject);
+            float dist = Vector3.Distance(probe, worldCenter);
             bool inside = dist <= worldRadius;
 
             if (logDebug && Time.time - lastLog > 0.5f)
             {
                 lastLog = Time.time;
-                Debug.Log($"[WheelFilter] interactor={interactorGameObject.name} pos={interactorGameObject.transform.position} wheelCenter={worldCenter} radius={worldRadius:F3} dist={dist:F3} inside={inside}");
+                Debug.Log($"[WheelFilter] interactor={interactorGameObject.name} probe={probe} wheelCenter={worldCenter} radius={worldRadius:F3} dist={dist:F3} inside={inside}");
             }
             return inside;
+        }
+
+        private static Vector3 ResolveTrackedPosition(GameObject interactorGO)
+        {
+            var hgi = interactorGO.GetComponent<HandGrabInteractor>();
+            if (hgi != null && hgi.WristPoint != null) return hgi.WristPoint.position;
+
+            var rb = interactorGO.GetComponent<Rigidbody>();
+            if (rb != null) return rb.position;
+
+            return interactorGO.transform.position;
         }
     }
 }

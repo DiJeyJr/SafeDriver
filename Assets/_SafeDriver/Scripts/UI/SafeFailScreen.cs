@@ -99,18 +99,6 @@ namespace SafeDriver.UI
             StartCoroutine(FadeIn());
         }
 
-        /// <summary>Overload legacy por si algun caller todavia pasa string.</summary>
-        public void Show(string reason)
-        {
-            // Intentar matchear por contenido del mensaje (fallback graceful)
-            if (titleText != null)       titleText.text        = "Infraccion";
-            if (descriptionText != null) descriptionText.text  = reason;
-            if (lawReferenceText != null) lawReferenceText.text = "";
-
-            if (safeFailCanvas != null)  safeFailCanvas.enabled = true;
-            StartCoroutine(FadeIn());
-        }
-
         public void Hide()
         {
             if (canvasGroup != null) canvasGroup.alpha = 0f;
