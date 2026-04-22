@@ -1,0 +1,11 @@
+﻿<Solution>
+  <Project Path="Assembly-CSharp.csproj" />
+  <Project Path="SafeDriver.Scoring.csproj" />
+  <Project Path="SafeDriver.Core.csproj" />
+  <Project Path="Assembly-CSharp-Editor.csproj" />
+  <Project Path="SafeDriver.UI.csproj" />
+  <Project Path="SafeDriver.Audio.csproj" />
+  <Project Path="SafeDriver.VR.csproj" />
+  <Project Path="SafeDriver.Vehicle.csproj" />
+  <Project Path="SafeDriver.Traffic.csproj" />
+</Solution>
