@@ -42,7 +42,6 @@ namespace SafeDriver.Traffic
         [SerializeField] private float arrivalThreshold = 0.5f;
 
         private int currentTarget;
-        private bool isStopped;
 
         void Start()
         {
@@ -54,12 +53,7 @@ namespace SafeDriver.Traffic
             if (route == null || route.Length == 0) return;
 
             // Evaluar si debe frenar por semaforo en rojo
-            if (ShouldStopForLight())
-            {
-                isStopped = true;
-                return;
-            }
-            isStopped = false;
+            if (ShouldStopForLight()) return;
 
             MoveTowardsTarget();
         }

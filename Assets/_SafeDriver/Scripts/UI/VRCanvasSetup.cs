@@ -7,13 +7,10 @@ namespace SafeDriver.UI
     /// - Render Mode: World Space (SIEMPRE — Screen Space causa problemas en VR)
     /// - Scale: 0.001 a 0.002 (texto en metros, no pixeles)
     /// - Layer: UI
-    /// - Distancia al jugador: 0.8 a 1.2m
     /// - Font size minimo: 0.06 Unity units (aprox 60pt a 1m)
-    /// - Posicion relativa al Camera Rig (se mueve con el jugador)
     ///
-    /// Attach este componente al Canvas y llamar Setup() en Awake, o usar los
-    /// metodos estaticos CreateDiegeticCanvas / CreateNotificationCanvas para
-    /// generar uno completo por codigo.
+    /// La distancia al jugador se maneja por posicionamiento del Canvas en escena
+    /// (parentado al Camera Rig a 0.8-1.2m del CenterEyeAnchor, zona de confort VR).
     /// </summary>
     [RequireComponent(typeof(Canvas))]
     public class VRCanvasSetup : MonoBehaviour
@@ -21,9 +18,6 @@ namespace SafeDriver.UI
         [Header("Reglas VR obligatorias")]
         [Tooltip("Escala del canvas. 0.001 = 1 pixel del canvas = 1mm en world. Rango: 0.001-0.002.")]
         [SerializeField] private float canvasScale = 0.001f;
-
-        [Tooltip("Distancia al jugador en metros (zona de confort visual VR: 0.8-1.2m).")]
-        [SerializeField] private float distanceFromPlayer = 1.0f;
 
         private Canvas canvas;
 
