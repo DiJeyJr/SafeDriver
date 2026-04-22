@@ -13,9 +13,6 @@ namespace SafeDriver.Core
         //   Eventos de vehiculo
         // ==========================================================
         public static event Action<float> OnSpeedChanged;        // velocidad actual en km/h
-        public static event Action<bool>  OnBrakePressed;        // true = pisado, false = liberado
-        public static event Action        OnEngineStarted;
-        public static event Action        OnEngineStopped;
         public static event Action<float> OnSteeringChanged;     // angulo normalizado -1..+1
         public static event Action<float> OnSpeedLimitChanged;  // nuevo limite de zona (km/h)
 
@@ -54,9 +51,6 @@ namespace SafeDriver.Core
 
         // -- Vehiculo --
         public static void Dispatch_SpeedChanged(float speedKmh)  => OnSpeedChanged?.Invoke(speedKmh);
-        public static void Dispatch_BrakePressed(bool pressed)    => OnBrakePressed?.Invoke(pressed);
-        public static void Dispatch_EngineStarted()               => OnEngineStarted?.Invoke();
-        public static void Dispatch_EngineStopped()               => OnEngineStopped?.Invoke();
         public static void Dispatch_SteeringChanged(float axis)   => OnSteeringChanged?.Invoke(axis);
         public static void Dispatch_SpeedLimitChanged(float limitKmh) => OnSpeedLimitChanged?.Invoke(limitKmh);
 
@@ -90,9 +84,6 @@ namespace SafeDriver.Core
         public static void Clear()
         {
             OnSpeedChanged = null;
-            OnBrakePressed = null;
-            OnEngineStarted = null;
-            OnEngineStopped = null;
             OnSteeringChanged = null;
             OnSpeedLimitChanged = null;
             OnInfractionDetected = null;

@@ -1,114 +1,78 @@
 using UnityEngine;
-using SafeDriver.Core;
-#if FMOD_AVAILABLE
-using FMODUnity;
-using FMOD.Studio;
-#endif
+using UnityEngine.Audio;
 
 namespace SafeDriver.Audio
 {
     /// <summary>
-    /// Emitter de audio 3D espacializado via FMOD.
+    /// Emitter de audio 3D espacializado usando AudioSource nativo de Unity.
     /// Adjuntar a: autos NPC, grupos de peatones, semaforos con sonido.
-    /// FMOD maneja el spatializing automaticamente — NO configurar nada en Unity AudioSource.
     ///
-    /// AttachInstanceToGameObject() hace que FMOD actualice posicion y velocidad (doppler)
-    /// cada frame internamente. Esto reemplaza completamente:
-    ///   - AudioSource.spatialBlend
-    ///   - AudioSource.minDistance / maxDistance
-    ///   - AudioSource.dopplerLevel
+    /// En VR con Meta XR, el Audio Spatializer plugin (si esta activo) toma este AudioSource
+    /// y lo espacializa con HRTF. No hace falta configuracion especial por instancia —
+    /// alcanza con spatialBlend = 1 (full 3D).
     ///
-    /// Las distancias min/max y curvas de atenuacion se configuran en FMOD Studio, no aca.
-    /// Los campos minDistance/maxDistance son solo informativos para el diseñador en Inspector.
-    ///
-    /// Parametros runtime: llamar SetParameter("Speed", value) desde NPCVehicleAI
-    /// para modular el sonido segun el estado del NPC.
+    /// Para modular el sonido en runtime (ej: pitch del motor NPC segun velocidad),
+    /// usar SetPitch(float) o SetVolume(float). Cualquier logica mas compleja (crossfades,
+    /// layering) se hace con multiples emitters o con AudioMixer snapshots.
     /// </summary>
+    [RequireComponent(typeof(AudioSource))]
     public class SpatialAudioEmitter : MonoBehaviour
     {
-#if FMOD_AVAILABLE
-        [Header("FMOD Event")]
-        [SerializeField] private EventReference loopEvent;
-#endif
+        [Header("Audio")]
+        [SerializeField] private AudioClip loopClip;
 
-        [Header("FMOD maneja el 3D — solo configurar en Studio")]
-        [Tooltip("Solo a modo informativo — la distancia real se setea en FMOD Studio.")]
+        [Tooltip("Mixer group para routing (SFX/Traffic/etc). Opcional.")]
+        [SerializeField] private AudioMixerGroup mixerGroup;
+
+        [Header("3D curve")]
         [SerializeField] private float minDistance = 1f;
         [SerializeField] private float maxDistance = 30f;
+        [SerializeField] private AudioRolloffMode rolloff = AudioRolloffMode.Logarithmic;
+
+        [Tooltip("0 = sin doppler, 1 = doppler fisico. Valores bajos son mas confortables en VR.")]
+        [Range(0f, 5f)] [SerializeField] private float dopplerLevel = 0.2f;
 
         [Header("Config")]
         [SerializeField] private bool playOnStart = true;
 
-        private bool isPlaying;
+        private AudioSource source;
 
-#if FMOD_AVAILABLE
-        private EventInstance instance;
-#endif
+        void Awake()
+        {
+            source = GetComponent<AudioSource>();
+            source.playOnAwake = false;
+            source.loop = true;
+            source.spatialBlend = 1f;
+            source.minDistance = minDistance;
+            source.maxDistance = maxDistance;
+            source.rolloffMode = rolloff;
+            source.dopplerLevel = dopplerLevel;
+            source.outputAudioMixerGroup = mixerGroup;
+            if (loopClip != null) source.clip = loopClip;
+        }
 
         void Start()
         {
             if (playOnStart) Play();
         }
 
-        /// <summary>Inicia la reproduccion del loop 3D, attached a este transform.</summary>
+        /// <summary>Inicia el loop 3D.</summary>
         public void Play()
         {
-            if (isPlaying) return;
-            isPlaying = true;
-
-#if FMOD_AVAILABLE
-            instance = RuntimeManager.CreateInstance(loopEvent);
-
-            // Attach al GameObject — FMOD actualiza posicion y velocidad automaticamente.
-            // Si no hay Rigidbody (objeto estatico), pasar null — FMOD lo maneja.
-            RuntimeManager.AttachInstanceToGameObject(
-                instance,
-                transform,
-                GetComponent<Rigidbody>()
-            );
-
-            instance.start();
-#else
-            Debug.Log("[SpatialAudio] Play (FMOD not installed) on " + gameObject.name);
-#endif
+            if (source == null || source.clip == null) return;
+            if (!source.isPlaying) source.Play();
         }
 
-        /// <summary>Detiene el loop con fade out.</summary>
+        /// <summary>Detiene el loop.</summary>
         public void Stop()
         {
-            if (!isPlaying) return;
-            isPlaying = false;
-
-#if FMOD_AVAILABLE
-            instance.stop(FMOD.Studio.STOP_MODE.ALLOWFADEOUT);
-            instance.release();
-#else
-            Debug.Log("[SpatialAudio] Stop (FMOD not installed) on " + gameObject.name);
-#endif
+            if (source != null && source.isPlaying) source.Stop();
         }
 
-        /// <summary>
-        /// Setea un parametro FMOD por nombre en runtime.
-        /// Llamar desde NPCVehicleAI para modular el sonido segun el estado del NPC.
-        /// Ejemplo: SetParameter("Speed", currentSpeedKmh) para variar el pitch del motor NPC.
-        /// </summary>
-        public void SetParameter(string paramName, float value)
-        {
-#if FMOD_AVAILABLE
-            if (isPlaying) instance.setParameterByName(paramName, value);
-#endif
-        }
+        /// <summary>Setea el pitch (ej: para modular el motor de un NPC segun velocidad).</summary>
+        public void SetPitch(float pitch) { if (source != null) source.pitch = pitch; }
 
-        void OnDestroy()
-        {
-#if FMOD_AVAILABLE
-            if (isPlaying)
-            {
-                instance.stop(FMOD.Studio.STOP_MODE.ALLOWFADEOUT);
-                instance.release();
-                isPlaying = false;
-            }
-#endif
-        }
+        /// <summary>Setea el volumen (0-1).</summary>
+        public void SetVolume(float volume) { if (source != null) source.volume = Mathf.Clamp01(volume); }
     }
 }
