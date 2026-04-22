@@ -30,9 +30,9 @@ namespace SafeDriver.Audio
         [SerializeField] private AudioClip cityAmbienceClip;
         [SerializeField] private AudioClip levelCompleteClip;
 
-        [Header("Mixer (opcional)")]
-        [SerializeField] private AudioMixerGroup sfxGroup;
-        [SerializeField] private AudioMixerGroup musicGroup;
+        [Header("Mixer")]
+        [Tooltip("Grupo Master del AudioMixer. Todo el audio del juego se rutea aca (lo que permite control global con MasterVolumeController).")]
+        [SerializeField] private AudioMixerGroup masterGroup;
 
         [Header("Engine config")]
         [Tooltip("Pitch minimo del loop del motor (idle, 0 km/h).")]
@@ -75,8 +75,8 @@ namespace SafeDriver.Audio
             cachedSuccess       = (_, __) => PlaySuccess();
             cachedLevelComplete = PlayLevelComplete;
 
-            cityAmbienceSource = CreateLocalSource("CityAmbience", spatial: false, loop: true, group: musicGroup);
-            sfxSource          = CreateLocalSource("SFX2D",        spatial: false, loop: false, group: sfxGroup);
+            cityAmbienceSource = CreateLocalSource("CityAmbience", spatial: false, loop: true, group: masterGroup);
+            sfxSource          = CreateLocalSource("SFX2D",        spatial: false, loop: false, group: masterGroup);
         }
 
         void OnDestroy()
@@ -102,7 +102,6 @@ namespace SafeDriver.Audio
 
         void Start()
         {
-            Debug.Log($"[AudioManager] Start. engineClip={(engineClip!=null?engineClip.name:"NULL")} vehicle={(VehicleController.Instance!=null?VehicleController.Instance.name:"NULL")} listeners={UnityEngine.Object.FindObjectsByType<UnityEngine.AudioListener>(UnityEngine.FindObjectsSortMode.None).Length}");
             StartEngineLoop();
             StartCityAmbience();
         }
@@ -113,8 +112,7 @@ namespace SafeDriver.Audio
 
         private void StartEngineLoop()
         {
-            if (engineClip == null) { Debug.LogWarning("[AudioManager] No engineClip assigned"); return; }
-            if (VehicleController.Instance == null) { Debug.LogWarning("[AudioManager] VehicleController.Instance is null"); return; }
+            if (engineClip == null || VehicleController.Instance == null) return;
 
             var host = new GameObject("EngineAudio");
             host.transform.SetParent(VehicleController.Instance.transform, worldPositionStays: false);
@@ -128,12 +126,10 @@ namespace SafeDriver.Audio
             engineSource.maxDistance = engineMaxDistance;
             engineSource.rolloffMode = AudioRolloffMode.Logarithmic;
             engineSource.dopplerLevel = 0.2f;
-            engineSource.outputAudioMixerGroup = sfxGroup;
+            engineSource.outputAudioMixerGroup = masterGroup;
             engineSource.volume = engineIdleVolume;
             engineSource.pitch = engineMinPitch;
             engineSource.Play();
-
-            Debug.Log($"[AudioManager] Engine loop started. clip={engineClip.name} len={engineClip.length:F2}s loadState={engineClip.loadState} volume={engineSource.volume} pitch={engineSource.pitch} 3D min={engineMinDistance} max={engineMaxDistance}");
         }
 
         private void UpdateEngineAudio(float speedKmh)
