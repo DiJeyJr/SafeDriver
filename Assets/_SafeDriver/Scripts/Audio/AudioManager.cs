@@ -102,6 +102,7 @@ namespace SafeDriver.Audio
 
         void Start()
         {
+            Debug.Log($"[AudioManager] Start. engineClip={(engineClip!=null?engineClip.name:"NULL")} vehicle={(VehicleController.Instance!=null?VehicleController.Instance.name:"NULL")} listeners={UnityEngine.Object.FindObjectsByType<UnityEngine.AudioListener>(UnityEngine.FindObjectsSortMode.None).Length}");
             StartEngineLoop();
             StartCityAmbience();
         }
@@ -112,7 +113,8 @@ namespace SafeDriver.Audio
 
         private void StartEngineLoop()
         {
-            if (engineClip == null || VehicleController.Instance == null) return;
+            if (engineClip == null) { Debug.LogWarning("[AudioManager] No engineClip assigned"); return; }
+            if (VehicleController.Instance == null) { Debug.LogWarning("[AudioManager] VehicleController.Instance is null"); return; }
 
             var host = new GameObject("EngineAudio");
             host.transform.SetParent(VehicleController.Instance.transform, worldPositionStays: false);
@@ -130,6 +132,8 @@ namespace SafeDriver.Audio
             engineSource.volume = engineIdleVolume;
             engineSource.pitch = engineMinPitch;
             engineSource.Play();
+
+            Debug.Log($"[AudioManager] Engine loop started. clip={engineClip.name} len={engineClip.length:F2}s loadState={engineClip.loadState} volume={engineSource.volume} pitch={engineSource.pitch} 3D min={engineMinDistance} max={engineMaxDistance}");
         }
 
         private void UpdateEngineAudio(float speedKmh)
