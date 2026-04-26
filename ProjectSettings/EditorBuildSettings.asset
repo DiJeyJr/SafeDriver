@@ -6,8 +6,9 @@ EditorBuildSettings:
   serializedVersion: 2
   m_Scenes:
   - enabled: 1
-    path: Assets/_SafeDriver/Scenes/Level_01_Basics.unity
-    guid: db7e51fb3197ebd4fafed34a63477005
+    path: Assets/SimplePoly City - Low Poly Assets/Demo/SimplePoly City - Low Poly
+      Assets_Demo Scene.unity
+    guid: 7e6d3f4e5d896154ab4438845532ac3e
   m_configObjects:
     Unity.XR.Oculus.Settings: {fileID: 11400000, guid: a92facc819e31a14e9951f4485e4622f, type: 2}
     com.unity.input.settings.actions: {fileID: -944628639613478452, guid: 052faaac586de48259a63d0c4782560b, type: 3}

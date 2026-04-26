@@ -5,7 +5,10 @@
   </component>
   <component name="ChangeListManager">
     <list default="true" id="3650586e-cea8-4210-95aa-289d5a369efd" name="Changes" comment="">
-      <change beforePath="$PROJECT_DIR$/Assets/_SafeDriver/Scenes/Level_01_Basics.unity" beforeDir="false" afterPath="$PROJECT_DIR$/Assets/_SafeDriver/Scenes/Level_01_Basics.unity" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/Assets/_SafeDriver/Materials/MirrorCenter.renderTexture" beforeDir="false" afterPath="$PROJECT_DIR$/Assets/_SafeDriver/Materials/MirrorCenter.renderTexture" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/Assets/_SafeDriver/Materials/MirrorLeft.renderTexture" beforeDir="false" afterPath="$PROJECT_DIR$/Assets/_SafeDriver/Materials/MirrorLeft.renderTexture" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/Assets/_SafeDriver/Materials/MirrorRight.renderTexture" beforeDir="false" afterPath="$PROJECT_DIR$/Assets/_SafeDriver/Materials/MirrorRight.renderTexture" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/ProjectSettings/ProjectSettings.asset" beforeDir="false" afterPath="$PROJECT_DIR$/ProjectSettings/ProjectSettings.asset" afterDir="false" />
     </list>
     <option name="SHOW_DIALOG" value="false" />
     <option name="HIGHLIGHT_CONFLICTS" value="true" />
@@ -28,19 +31,19 @@
     <option name="hideEmptyMiddlePackages" value="true" />
     <option name="showLibraryContents" value="true" />
   </component>
-  <component name="PropertiesComponent"><![CDATA[{
-  "keyToString": {
-    "RunOnceActivity.ShowReadmeOnStart": "true",
-    "RunOnceActivity.git.unshallow": "true",
-    "git-widget-placeholder": "CarParts",
-    "node.js.detected.package.eslint": "true",
-    "node.js.detected.package.tslint": "true",
-    "node.js.selected.package.eslint": "(autodetect)",
-    "node.js.selected.package.tslint": "(autodetect)",
-    "nodejs_package_manager_path": "npm",
-    "vue.rearranger.settings.migration": "true"
+  <component name="PropertiesComponent">{
+  &quot;keyToString&quot;: {
+    &quot;RunOnceActivity.ShowReadmeOnStart&quot;: &quot;true&quot;,
+    &quot;RunOnceActivity.git.unshallow&quot;: &quot;true&quot;,
+    &quot;git-widget-placeholder&quot;: &quot;CarParts&quot;,
+    &quot;node.js.detected.package.eslint&quot;: &quot;true&quot;,
+    &quot;node.js.detected.package.tslint&quot;: &quot;true&quot;,
+    &quot;node.js.selected.package.eslint&quot;: &quot;(autodetect)&quot;,
+    &quot;node.js.selected.package.tslint&quot;: &quot;(autodetect)&quot;,
+    &quot;nodejs_package_manager_path&quot;: &quot;npm&quot;,
+    &quot;vue.rearranger.settings.migration&quot;: &quot;true&quot;
   }
-}]]></component>
+}</component>
   <component name="RunManager" selected="Attach to Unity Editor.Attach to Unity Editor">
     <configuration name="Start Unity" type="RunUnityExe" factoryName="Unity Executable">
       <option name="EXE_PATH" value="C:\Program Files\Unity\Hub\Editor\6000.3.5f2\Editor\Unity.exe" />
@@ -95,6 +98,7 @@
       <updated>1776258605441</updated>
       <workItem from="1776258608181" duration="518000" />
       <workItem from="1776628608233" duration="597000" />
+      <workItem from="1776885406458" duration="594000" />
     </task>
     <servers />
   </component>
