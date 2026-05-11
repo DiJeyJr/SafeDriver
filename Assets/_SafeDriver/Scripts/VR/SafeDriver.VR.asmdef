@@ -5,7 +5,9 @@
         "SafeDriver.Core",
         "SafeDriver.Vehicle",
         "Oculus.Interaction",
-        "Unity.XR.CoreUtils"
+        "Oculus.VR",
+        "Unity.XR.CoreUtils",
+        "Unity.XR.Management"
     ],
     "includePlatforms": [],
     "excludePlatforms": [],

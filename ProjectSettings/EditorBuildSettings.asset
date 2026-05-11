@@ -6,11 +6,20 @@ EditorBuildSettings:
   serializedVersion: 2
   m_Scenes:
   - enabled: 1
-    path: Assets/SimplePoly City - Low Poly Assets/Demo/SimplePoly City - Low Poly
-      Assets_Demo Scene.unity
-    guid: 7e6d3f4e5d896154ab4438845532ac3e
+    path: Assets/_SafeDriver/Scenes/MainMenu.unity
+    guid: f10349bad2d01ba4c88544d8ab867679
+  - enabled: 1
+    path: Assets/_SafeDriver/Scenes/Level_01_City.unity
+    guid: c168dcb16b554cb1a4eb8d88544e120f
+  - enabled: 1
+    path: Assets/_SafeDriver/Scenes/Level_01_Demo.unity
+    guid: 0d3e5a7b9c2d4f6a8b1c3d5e7f9a1b3c
+  - enabled: 1
+    path: Assets/_SafeDriver/Scenes/Level_01_Basics.unity
+    guid: db7e51fb3197ebd4fafed34a63477005
   m_configObjects:
     Unity.XR.Oculus.Settings: {fileID: 11400000, guid: a92facc819e31a14e9951f4485e4622f, type: 2}
     com.unity.input.settings.actions: {fileID: -944628639613478452, guid: 052faaac586de48259a63d0c4782560b, type: 3}
     com.unity.xr.management.loader_settings: {fileID: 11400000, guid: ae44ff2a70e420048a8357e86cd2a63c, type: 2}
+    com.unity.xr.openxr.settings4: {fileID: 11400000, guid: dbceb224efd81cf45b2086ba289920d0, type: 2}
   m_UseUCBPForAssetBundles: 0

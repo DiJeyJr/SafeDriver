@@ -30,6 +30,10 @@ namespace SafeDriver.Vehicle
         [Tooltip("Input de freno por encima del cual se considera 'sostenido' para armar cambio de marcha.")]
         [SerializeField, Range(0.1f, 1f)] private float gearSwitchBrakeThreshold = 0.5f;
 
+        [Header("External shifter")]
+        [Tooltip("Si hay palanca externa (GearShifter), se desactiva la logica interna de 'freno 2s'.")]
+        [SerializeField] private bool useExternalShifter = false;
+
         [Header("Debug")]
         [SerializeField] private bool logPhysics = false;
         private float lastLogTime;
@@ -88,6 +92,10 @@ namespace SafeDriver.Vehicle
             if (Instance != null && Instance != this) { Destroy(gameObject); return; }
             Instance = this;
             rb = GetComponent<Rigidbody>();
+            // Si hay palanca externa, arrancar en Neutral. El shifter va a setear el gear
+            // correcto en su Start(), pero asi evitamos la ventana en que el HUD muestre 'D'
+            // mientras la palanca todavia no corrio.
+            if (useExternalShifter) currentGear = GearState.Neutral;
         }
 
         void Start()
@@ -212,8 +220,33 @@ namespace SafeDriver.Vehicle
         //
         // Simplificacion: el timer de 2s es simetrico. Mientras se arma, el gear activo para
         // motor sigue siendo el anterior (no se aplica torque reversa hasta que termine el timer).
+        /// <summary>
+        /// API publica para que una palanca externa (GearShifter) setee el gear directamente,
+        /// bypasseando el sistema de 'freno 2s'. Solo permite Drive / Neutral / Reverse.
+        /// Por seguridad, transiciones D<->R fuerzan pasar por Neutral si el auto se mueve.
+        /// </summary>
+        public void SetGearFromShifter(GearState gear)
+        {
+            if (gear != GearState.Drive && gear != GearState.Neutral && gear != GearState.Reverse) return;
+
+            // Safety: si esta moviendo y se intenta saltar de D a R o R a D sin pasar por N, forzar N.
+            bool moving = currentSpeed >= stoppedThresholdKmh;
+            bool jumpingDR = (currentGear == GearState.Drive && gear == GearState.Reverse) ||
+                             (currentGear == GearState.Reverse && gear == GearState.Drive);
+            if (moving && jumpingDR)
+            {
+                SetGear(GearState.Neutral);
+                return;
+            }
+
+            SetGear(gear);
+        }
+
         private void UpdateGear(float throttle, float brake)
         {
+            // Si hay palanca externa, la palanca es la unica autoridad sobre el gear.
+            if (useExternalShifter) return;
+
             bool stopped = currentSpeed < stoppedThresholdKmh;
             bool brakeHeld = brake >= gearSwitchBrakeThreshold;
             bool throttlePressed = throttle > 0.05f;
@@ -305,7 +338,7 @@ namespace SafeDriver.Vehicle
         private void ApplyMotor(float input)
         {
             // RWD: traccion trasera. En D empuja adelante, en R empuja atras con cap bajo.
-            // En Neutral/ReverseArming el motor queda libre (el freno, si lo hay, lo detiene).
+            // En Neutral / ReverseArming / DriveArming el motor queda libre (el freno, si lo hay, lo detiene).
             float torque = 0f;
             switch (currentGear)
             {
@@ -315,6 +348,7 @@ namespace SafeDriver.Vehicle
                 case GearState.Reverse:
                     if (currentSpeed < maxReverseSpeedKmh) torque = -input * acceleration * 100f;
                     break;
+                // Neutral / ReverseArming / DriveArming: torque = 0 (motor libre)
             }
             if (wheelRL != null) wheelRL.motorTorque = torque;
             if (wheelRR != null) wheelRR.motorTorque = torque;

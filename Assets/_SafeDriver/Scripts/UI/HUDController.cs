@@ -34,6 +34,9 @@ namespace SafeDriver.UI
         [Tooltip("TextMeshPro de la senal de limite de velocidad.")]
         public TextMeshPro speedLimitSign;
 
+        [Tooltip("TextMeshPro de velocidad ACTUAL del auto en km/h (numero grande en el tablero).")]
+        public TextMeshPro currentSpeedDisplay;
+
         [Header("UI No-Diegetica (world space, cerca del conductor)")]
         [Tooltip("Panel popup que aparece brevemente ante infraccion/acierto.")]
         public GameObject notificationPanel;
@@ -83,6 +86,8 @@ namespace SafeDriver.UI
         {
             if (speedometerNeedle != null)
                 speedometerNeedle.SetSpeed(speedKmh);
+            if (currentSpeedDisplay != null)
+                currentSpeedDisplay.text = Mathf.RoundToInt(speedKmh).ToString();
         }
 
         private void UpdateScoreDisplay(int score)

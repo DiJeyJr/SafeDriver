@@ -12,5 +12,7 @@ namespace SafeDriver.Core
         CheckedMirrorsBeforeTurn,  // +5:  chequear espejo(s) antes de girar
         MaintainedLegalSpeed,      // +2:  mantener velocidad dentro del limite por tramo
         StoppedAtPareSign,         // +8:  detenerse completamente en senal PARE
+        PassedGreenLight,          // +3:  cruzar el semaforo en verde correctamente
+        PedestrianNotPresent,      // +3:  cruzar paso peatonal sin peatones (sin infraccion)
     }
 }

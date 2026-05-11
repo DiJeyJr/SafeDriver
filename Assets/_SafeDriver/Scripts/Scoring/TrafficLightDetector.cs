@@ -60,6 +60,12 @@ namespace SafeDriver.Scoring
                 infractionFired = true;
                 TriggerInfraction();
             }
+            else if (trafficLight != null && trafficLight.IsGreen())
+            {
+                // Cruzo el semaforo en verde — premio chico por respetar la senal.
+                rewardGiven = true;
+                TriggerCorrectAction(ActionType.PassedGreenLight);
+            }
         }
 
         void OnTriggerStay(Collider other)

@@ -12,6 +12,8 @@ namespace SafeDriver.Core
         public const int CheckedMirrorsBeforeTurn = 5;
         public const int MaintainedLegalSpeed     = 2;
         public const int StoppedAtPareSign        = 8;
+        public const int PassedGreenLight         = 3;
+        public const int PedestrianNotPresent     = 3;
 
         /// <summary>Devuelve el bonus default para una ActionType.</summary>
         public static int GetBonus(ActionType action)
@@ -23,6 +25,8 @@ namespace SafeDriver.Core
                 ActionType.CheckedMirrorsBeforeTurn => CheckedMirrorsBeforeTurn,
                 ActionType.MaintainedLegalSpeed    => MaintainedLegalSpeed,
                 ActionType.StoppedAtPareSign        => StoppedAtPareSign,
+                ActionType.PassedGreenLight         => PassedGreenLight,
+                ActionType.PedestrianNotPresent     => PedestrianNotPresent,
                 _ => 0,
             };
         }

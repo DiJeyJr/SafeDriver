@@ -4,7 +4,8 @@
     "references": [
         "SafeDriver.Core",
         "SafeDriver.Vehicle",
-        "SafeDriver.Traffic"
+        "SafeDriver.Traffic",
+        "Unity.TextMeshPro"
     ],
     "includePlatforms": [],
     "excludePlatforms": [],

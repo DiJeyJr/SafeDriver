@@ -19,12 +19,13 @@ namespace SafeDriver.UI
         [Header("Colores")]
         [SerializeField] private Color driveColor = new Color(0.4f, 1f, 0.4f);
         [SerializeField] private Color reverseColor = new Color(1f, 0.5f, 0.3f);
+        [SerializeField] private Color neutralColor = new Color(1f, 0.9f, 0.3f);
 
         [Header("Blink")]
         [Tooltip("Hz del parpadeo durante ReverseArming.")]
         [SerializeField] private float blinkHz = 3f;
 
-        private GearState currentGear = GearState.Drive;
+        private GearState currentGear = GearState.Neutral;
 
         void Awake()
         {
@@ -76,6 +77,10 @@ namespace SafeDriver.UI
                 case GearState.Reverse:
                     label.text = "R";
                     label.color = reverseColor;
+                    break;
+                case GearState.Neutral:
+                    label.text = "N";
+                    label.color = neutralColor;
                     break;
                 case GearState.ReverseArming:
                     label.text = "R";

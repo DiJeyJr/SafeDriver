@@ -12,9 +12,15 @@ namespace SafeDriver.UI
     public class LevelEndPanel : MonoBehaviour
     {
         [SerializeField] private GameObject rootPanel;
-        [SerializeField] private TextMeshPro scoreText;
-        [SerializeField] private TextMeshPro statusText;
-        [SerializeField] private TextMeshPro infractionsListText;
+        [SerializeField] private TextMeshProUGUI scoreText;
+        [SerializeField] private TextMeshProUGUI statusText;
+        [SerializeField] private TextMeshProUGUI infractionsListText;
+
+        void OnEnable()
+        {
+            // Cuando UIManager activa este GameObject (al entrar a LevelEnd), refresca el resumen.
+            Show();
+        }
 
         public void Show()
         {

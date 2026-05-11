@@ -17,9 +17,9 @@ namespace SafeDriver.UI
     {
         [Header("UI")]
         public Canvas safeFailCanvas;
-        public TextMeshPro titleText;
-        public TextMeshPro descriptionText;
-        public TextMeshPro lawReferenceText;
+        public TextMeshProUGUI titleText;
+        public TextMeshProUGUI descriptionText;
+        public TextMeshProUGUI lawReferenceText;
         public Button retryButton;
         public Button mainMenuButton;
 

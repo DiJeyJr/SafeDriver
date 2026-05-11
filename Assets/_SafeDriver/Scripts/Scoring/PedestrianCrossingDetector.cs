@@ -68,6 +68,12 @@ namespace SafeDriver.Scoring
                 infractionFired = true;
                 TriggerInfraction();
             }
+            else if (!pedestriansPresent && !rewardGiven)
+            {
+                // No habia peatones cruzando — premio chico por pasar sin riesgo.
+                rewardGiven = true;
+                TriggerCorrectAction(ActionType.PedestrianNotPresent);
+            }
         }
 
         void OnTriggerStay(Collider other)
