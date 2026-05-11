@@ -23345,7 +23345,7 @@ GameObject:
   - component: {fileID: 565756088}
   - component: {fileID: 565756087}
   m_Layer: 0
-  m_Name: _Bootstrap
+  m_Name: Bootstrap
   m_TagString: Untagged
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
@@ -79298,7 +79298,7 @@ GameObject:
   m_Component:
   - component: {fileID: 1896749388}
   m_Layer: 0
-  m_Name: _DemoElements
+  m_Name: DemoElements
   m_TagString: Untagged
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
