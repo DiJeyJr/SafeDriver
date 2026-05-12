@@ -31655,8 +31655,6 @@ MonoBehaviour:
   snapOnRelease: 1
   snapLerpSeconds: 0.18
   lockWhenMoving: 1
-  lockHapticAmplitude: 0.9
-  lockHapticDuration: 0.08
   shiftHapticAmplitude: 0.6
   shiftHapticDuration: 0.07
 --- !u!114 &761714129
@@ -31832,19 +31830,19 @@ MonoBehaviour:
   grabbable: {fileID: 761714133}
   transformer: {fileID: 761714134}
   tiers:
-  - fromDeg: 0
-    toDeg: 10
+  - fromDeg: 1
+    toDeg: 15
     amplitude: 0.8
     duration: 0.08
     intervalSeconds: 0
     releaseOnEnter: 0
-  - fromDeg: 10
-    toDeg: 30
+  - fromDeg: 15
+    toDeg: 45
     amplitude: 0.5
     duration: 0.05
     intervalSeconds: 0.2
     releaseOnEnter: 0
-  - fromDeg: 30
+  - fromDeg: 45
     toDeg: Infinity
     amplitude: 1
     duration: 0.3
@@ -36542,31 +36540,31 @@ MonoBehaviour:
   grabbable: {fileID: 869236504}
   transformer: {fileID: 869236505}
   tiers:
-  - fromDeg: 0
-    toDeg: 10
+  - fromDeg: 1
+    toDeg: 20
     amplitude: 0.8
     duration: 0.08
     intervalSeconds: 0
     releaseOnEnter: 0
-  - fromDeg: 10
-    toDeg: 25
+  - fromDeg: 20
+    toDeg: 50
     amplitude: 0.3
     duration: 0.05
     intervalSeconds: 0.4
     releaseOnEnter: 0
-  - fromDeg: 25
-    toDeg: 40
+  - fromDeg: 50
+    toDeg: 80
     amplitude: 0.5
     duration: 0.05
     intervalSeconds: 0.25
     releaseOnEnter: 0
-  - fromDeg: 40
-    toDeg: 55
+  - fromDeg: 80
+    toDeg: 110
     amplitude: 0.8
     duration: 0.05
     intervalSeconds: 0.15
     releaseOnEnter: 0
-  - fromDeg: 55
+  - fromDeg: 110
     toDeg: Infinity
     amplitude: 1
     duration: 0.4
