@@ -41,6 +41,12 @@ namespace SafeDriver.Vehicle
         [Tooltip("Medio ancho de la zona Neutral. Fuera de ±este valor entra a D o R.")]
         [SerializeField] private float neutralHalfRange = 20f;
 
+        [Tooltip("Margen de histeresis para no alternar zonas cuando el angulo jiterea cerca del borde.")]
+        [SerializeField] private float zoneHysteresis = 2f;
+
+        [Tooltip("Margen entre el constraint del lock y la frontera de la zona — evita que la palanca clampada caiga justo en el borde y haga flicker D/N.")]
+        [SerializeField] private float lockMargin = 1.5f;
+
         [Tooltip("Angulo objetivo (grados) al snapear a D (positivo) o R (negativo).")]
         [SerializeField] private float snapAngle = 40f;
 
@@ -121,11 +127,36 @@ namespace SafeDriver.Vehicle
         //   Zonas y dispatch del gear
         // ============================================================
 
+        /// <summary>
+        /// Mapea un angulo a su zona D/N/R con histeresis: si ya estabamos en una zona,
+        /// solo salimos cuando el angulo cruza el threshold + hysteresis. Eso evita el
+        /// flicker D <-> N cuando el angulo jitterea cerca de la frontera (e.g. mientras
+        /// la palanca esta clampada por el lock-when-moving o cuando un HandGrabInteractor
+        /// le mete un poco de jitter de tracking).
+        /// </summary>
         private GearState ZoneFor(float angle)
         {
-            if (angle > neutralHalfRange)  return GearState.Drive;
-            if (angle < -neutralHalfRange) return GearState.Reverse;
-            return GearState.Neutral;
+            // Mientras estamos en Drive, no salimos hasta que angulo < neutralHalfRange - hysteresis.
+            // Mientras estamos en Reverse, no salimos hasta que angulo > -(neutralHalfRange - hysteresis).
+            // Entrando desde Neutral exige cruzar neutralHalfRange + hysteresis.
+            float upperEnter = neutralHalfRange + zoneHysteresis;
+            float upperExit  = neutralHalfRange - zoneHysteresis;
+            float lowerEnter = -upperEnter;
+            float lowerExit  = -upperExit;
+
+            switch (lastGear)
+            {
+                case GearState.Drive:
+                    if (angle < upperExit) return angle < lowerEnter ? GearState.Reverse : GearState.Neutral;
+                    return GearState.Drive;
+                case GearState.Reverse:
+                    if (angle > lowerExit) return angle > upperEnter ? GearState.Drive : GearState.Neutral;
+                    return GearState.Reverse;
+                default: // Neutral
+                    if (angle > upperEnter)  return GearState.Drive;
+                    if (angle < lowerEnter)  return GearState.Reverse;
+                    return GearState.Neutral;
+            }
         }
 
         private float SnapTargetFor(GearState zone)
@@ -163,8 +194,11 @@ namespace SafeDriver.Vehicle
             if (!grabbing && wasGrabbingLastFrame && snapOnRelease)
             {
                 float current = NormalizeAngle(pivot.localEulerAngles.x);
+                // Si el auto se mueve (lock activo), snapeamos al centro de la zona lockeada
+                // sin importar donde quedo la palanca — asi no se queda en N por jitter en el borde.
+                GearState targetZone = lockActive ? lockedZone : ZoneFor(current);
                 snapStartX = current;
-                snapTargetX = SnapTargetFor(ZoneFor(current));
+                snapTargetX = SnapTargetFor(targetZone);
                 snapStartTime = Time.unscaledTime;
                 snapping = true;
             }
@@ -209,20 +243,22 @@ namespace SafeDriver.Vehicle
         {
             if (_transformer == null || _transformer.Constraints == null) return;
 
+            // Aplicamos margen por DENTRO de la zona para que el clamp deje la palanca firmemente
+            // dentro de Drive/Reverse/Neutral y no oscile en el borde con el ZoneFor.
             float min, max;
             switch (zone)
             {
                 case GearState.Drive:
-                    min = neutralHalfRange;
+                    min = neutralHalfRange + lockMargin;
                     max = fullRangeMax;
                     break;
                 case GearState.Reverse:
                     min = fullRangeMin;
-                    max = -neutralHalfRange;
+                    max = -(neutralHalfRange + lockMargin);
                     break;
                 default:
-                    min = -neutralHalfRange;
-                    max =  neutralHalfRange;
+                    min = -(neutralHalfRange - lockMargin);
+                    max =  (neutralHalfRange - lockMargin);
                     break;
             }
             SetConstraints(min, max);
