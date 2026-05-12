@@ -1,3 +1,4 @@
+using System.Collections.Generic;
 using UnityEngine;
 using SafeDriver.Core;
 using SafeDriver.Vehicle;
@@ -21,7 +22,7 @@ namespace SafeDriver.Scoring
     ///   4. Auto sale → OnTriggerExit: reset flags
     /// </summary>
     [RequireComponent(typeof(Collider))]
-    public class PedestrianCrossingDetector : InfractionDetector, IPedestrianCrossingNotifier
+    public class PedestrianCrossingDetector : InfractionDetector, IPedestrianCrossingNotifier, IPedestrianCrossingMultiNotifier
     {
         [Header("Config")]
         [Tooltip("Segundos que el auto debe estar detenido para contar como 'cedió el paso'.")]
@@ -32,6 +33,11 @@ namespace SafeDriver.Scoring
         private bool infractionFired;
         private bool rewardGiven;
 
+        // Set de notifiers activos para soportar multiples peatones sin que se pisen el bool.
+        // El SetPedestriansPresent(bool) clasico usa la id sentinel 0 (un solo notifier global).
+        private readonly HashSet<int> activeNotifiers = new HashSet<int>();
+        private const int LegacyNotifierId = 0;
+
         void Awake()
         {
             infractionType = InfractionType.PedestrianNotYielded;
@@ -41,14 +47,27 @@ namespace SafeDriver.Scoring
         }
 
         /// <summary>
-        /// Llamado por NPCPedestrianAI cuando un peaton entra o sale de la senda.
+        /// Compat: llamado por notifiers de un solo agente (DemoPedestrianFaker, NPCPedestrianAI).
+        /// Delega al sistema multi-notifier usando una id sentinel unica.
         /// </summary>
         public void SetPedestriansPresent(bool present)
+            => NotifyByInstance(LegacyNotifierId, present);
+
+        /// <summary>
+        /// API multi-notifier: cada peaton se identifica con su instanceId. El estado
+        /// `pedestriansPresent` es true mientras haya al menos un notifier activo.
+        /// </summary>
+        public void NotifyByInstance(int notifierId, bool present)
         {
-            pedestriansPresent = present;
-            if (present)
+            if (present) activeNotifiers.Add(notifierId);
+            else activeNotifiers.Remove(notifierId);
+
+            bool wasPresent = pedestriansPresent;
+            pedestriansPresent = activeNotifiers.Count > 0;
+
+            // Reset al pasar de "sin peatones" a "con peatones"
+            if (pedestriansPresent && !wasPresent)
             {
-                // Resetear contadores al aparecer nuevos peatones
                 stoppedTime = 0f;
                 infractionFired = false;
                 rewardGiven = false;
