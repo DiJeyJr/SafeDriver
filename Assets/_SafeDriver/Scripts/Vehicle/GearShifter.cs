@@ -76,6 +76,13 @@ namespace SafeDriver.Vehicle
         private bool wasGrabbingLastFrame;
         private float lastLockHapticTime;
 
+        // Zona "lockeada" mientras el auto se mueve. Se captura la primera vez que el
+        // auto pasa de detenido a moviendose, y se mantiene hasta que vuelve a detenerse.
+        // Asi la palanca queda atrapada en la zona en la que estaba al arrancar.
+        private bool lockActive;
+        private GearState lockedZone = GearState.Neutral;
+        private bool wasStoppedLastFrame = true;
+
         void Awake()
         {
             originalLocalPosition = transform.localPosition;
@@ -94,12 +101,34 @@ namespace SafeDriver.Vehicle
         {
             bool grabbing = grabbable != null && grabbable.SelectingPointsCount > 0;
 
+            // Tomar snapshot de la zona actual cuando el auto pasa de parado a moviendose.
+            UpdateLockState();
+
             HandleSnapOnRelease(grabbing);
 
-            if (lockWhenMoving && grabbing && vehicle != null && !vehicle.IsStopped())
-                ClampToNeutralZone();
+            if (lockWhenMoving && grabbing && lockActive)
+                ClampToZone(lockedZone);
 
             EvaluateAndDispatch(force: false);
+        }
+
+        private void UpdateLockState()
+        {
+            if (vehicle == null) { lockActive = false; return; }
+            bool stoppedNow = vehicle.IsStopped();
+
+            if (!stoppedNow && wasStoppedLastFrame)
+            {
+                // Transicion: el auto arranco. Capturar la zona actual y lockear.
+                lockedZone = ZoneFor(NormalizeAngle(pivot.localEulerAngles.x));
+                lockActive = true;
+            }
+            else if (stoppedNow && !wasStoppedLastFrame)
+            {
+                // Transicion: el auto se detuvo. Liberar el lock — la palanca se puede mover libremente.
+                lockActive = false;
+            }
+            wasStoppedLastFrame = stoppedNow;
         }
 
         void LateUpdate()
@@ -175,13 +204,16 @@ namespace SafeDriver.Vehicle
         }
 
         // ============================================================
-        //   Lock when moving
+        //   Lock when moving — clampa al rango de la zona lockeada
         // ============================================================
 
-        private void ClampToNeutralZone()
+        private void ClampToZone(GearState zone)
         {
             float angle = NormalizeAngle(pivot.localEulerAngles.x);
-            float clamped = Mathf.Clamp(angle, -(neutralHalfRange - 1f), neutralHalfRange - 1f);
+            float min, max;
+            GetZoneRange(zone, out min, out max);
+
+            float clamped = Mathf.Clamp(angle, min, max);
             if (Mathf.Approximately(angle, clamped)) return;
 
             SetLocalRotationX(clamped);
@@ -191,6 +223,28 @@ namespace SafeDriver.Vehicle
             {
                 lastLockHapticTime = Time.unscaledTime;
                 PulseHaptic(lockHapticAmplitude, lockHapticDuration);
+            }
+        }
+
+        /// <summary>Devuelve los limites de angulo (en grados) de una zona D/N/R.</summary>
+        private void GetZoneRange(GearState zone, out float min, out float max)
+        {
+            // Pequenio margen para que el clamp no choque exactamente con la frontera.
+            const float margin = 1f;
+            switch (zone)
+            {
+                case GearState.Drive:
+                    min = neutralHalfRange + margin;
+                    max = 90f; // suficientemente grande, el constraint del transformer ya limita
+                    break;
+                case GearState.Reverse:
+                    min = -90f;
+                    max = -(neutralHalfRange + margin);
+                    break;
+                default: // Neutral
+                    min = -(neutralHalfRange - margin);
+                    max =  (neutralHalfRange - margin);
+                    break;
             }
         }
 

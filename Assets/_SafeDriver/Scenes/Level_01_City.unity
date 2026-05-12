@@ -7020,6 +7020,20 @@ PrefabInstance:
       insertIndex: -1
       addedObject: {fileID: 1741911560}
   m_SourcePrefab: {fileID: 100100000, guid: b82e76f4092b7d24aaeecddf36fe8d3b, type: 3}
+--- !u!134 &162961278
+PhysicsMaterial:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_Name: ' (Instance) (Instance) (Instance) (Instance) (Instance) (Instance) (Instance)
+    (Instance)'
+  serializedVersion: 2
+  m_DynamicFriction: 0.6
+  m_StaticFriction: 0.6
+  m_Bounciness: 0
+  m_FrictionCombine: 0
+  m_BounceCombine: 0
 --- !u!1001 &166626713
 PrefabInstance:
   m_ObjectHideFlags: 0
@@ -10657,10 +10671,26 @@ PrefabInstance:
       propertyPath: _playerOrigin
       value: 
       objectReference: {fileID: 1738792989}
+    - target: {fileID: 5983330939163497519, guid: 0a7d2469f24041c4284c66706f84c45e, type: 3}
+      propertyPath: m_IsActive
+      value: 1
+      objectReference: {fileID: 0}
     - target: {fileID: 6267690530596161800, guid: 0a7d2469f24041c4284c66706f84c45e, type: 3}
       propertyPath: _ovrCameraRig
       value: 
       objectReference: {fileID: 635664275}
+    - target: {fileID: 7330788141723197777, guid: 0a7d2469f24041c4284c66706f84c45e, type: 3}
+      propertyPath: m_IsActive
+      value: 1
+      objectReference: {fileID: 0}
+    - target: {fileID: 7330788142602987203, guid: 0a7d2469f24041c4284c66706f84c45e, type: 3}
+      propertyPath: m_IsActive
+      value: 1
+      objectReference: {fileID: 0}
+    - target: {fileID: 7529236852430256583, guid: 0a7d2469f24041c4284c66706f84c45e, type: 3}
+      propertyPath: m_IsActive
+      value: 1
+      objectReference: {fileID: 0}
     m_RemovedComponents: []
     m_RemovedGameObjects: []
     m_AddedGameObjects: []
@@ -18388,6 +18418,9 @@ PrefabInstance:
     - targetCorrespondingSourceObject: {fileID: -8325689553952117475, guid: d28690eabd62a9c4d8c6ccc45974f98d, type: 3}
       insertIndex: -1
       addedObject: {fileID: 869236517}
+    - targetCorrespondingSourceObject: {fileID: -8325689553952117475, guid: d28690eabd62a9c4d8c6ccc45974f98d, type: 3}
+      insertIndex: -1
+      addedObject: {fileID: 869236521}
   m_SourcePrefab: {fileID: 100100000, guid: d28690eabd62a9c4d8c6ccc45974f98d, type: 3}
 --- !u!4 &448988262 stripped
 Transform:
@@ -31551,6 +31584,7 @@ GameObject:
   - component: {fileID: 761714129}
   - component: {fileID: 761714128}
   - component: {fileID: 761714127}
+  - component: {fileID: 761714136}
   m_Layer: 0
   m_Name: GearShifter
   m_TagString: Untagged
@@ -31615,9 +31649,16 @@ MonoBehaviour:
   m_EditorClassIdentifier: SafeDriver.Vehicle::SafeDriver.Vehicle.GearShifter
   vehicle: {fileID: 1738792990}
   pivot: {fileID: 761714126}
-  neutralDeadzone: 12
-  snapOnRelease: 0
-  snapAngle: 22
+  grabbable: {fileID: 761714133}
+  neutralHalfRange: 20
+  snapAngle: 40
+  snapOnRelease: 1
+  snapLerpSeconds: 0.18
+  lockWhenMoving: 1
+  lockHapticAmplitude: 0.9
+  lockHapticDuration: 0.08
+  shiftHapticAmplitude: 0.6
+  shiftHapticDuration: 0.07
 --- !u!114 &761714129
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -31751,10 +31792,10 @@ MonoBehaviour:
   _constraints:
     MinAngle:
       Constrain: 1
-      Value: -30
+      Value: -60
     MaxAngle:
       Constrain: 1
-      Value: 30
+      Value: 60
 --- !u!135 &761714135
 SphereCollider:
   m_ObjectHideFlags: 0
@@ -31762,7 +31803,7 @@ SphereCollider:
   m_PrefabInstance: {fileID: 0}
   m_PrefabAsset: {fileID: 0}
   m_GameObject: {fileID: 761714125}
-  m_Material: {fileID: 2074644059}
+  m_Material: {fileID: 1950332210}
   m_IncludeLayers:
     serializedVersion: 2
     m_Bits: 0
@@ -31776,6 +31817,42 @@ SphereCollider:
   serializedVersion: 3
   m_Radius: 0.1
   m_Center: {x: 0, y: 0.14, z: 0}
+--- !u!114 &761714136
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 761714125}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 48b023b5cba77034fae7c58ea4faadab, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: SafeDriver.VR::SafeDriver.VR.GrabLimitFeedback
+  grabbable: {fileID: 761714133}
+  transformer: {fileID: 761714134}
+  tiers:
+  - fromDeg: 0
+    toDeg: 10
+    amplitude: 0.8
+    duration: 0.08
+    intervalSeconds: 0
+    releaseOnEnter: 0
+  - fromDeg: 10
+    toDeg: 30
+    amplitude: 0.5
+    duration: 0.05
+    intervalSeconds: 0.2
+    releaseOnEnter: 0
+  - fromDeg: 30
+    toDeg: Infinity
+    amplitude: 1
+    duration: 0.3
+    intervalSeconds: 0
+    releaseOnEnter: 1
+  releaseShakeMagnitude: 0.03
+  releaseShakeDuration: 0.3
+  logDebug: 0
 --- !u!1 &764433984 stripped
 GameObject:
   m_CorrespondingSourceObject: {fileID: 100000, guid: 0ee6d569ec3227e40888e8151b331e0f, type: 3}
@@ -35453,6 +35530,7 @@ GameObject:
   - component: {fileID: 851397171}
   - component: {fileID: 851397173}
   - component: {fileID: 851397172}
+  - component: {fileID: 851397174}
   m_Layer: 0
   m_Name: CenterEyeAnchor
   m_TagString: MainCamera
@@ -35611,6 +35689,19 @@ MonoBehaviour:
   rightMirrorAngle: 45
   rearMirrorAngle: 15
   checkBonusOverride: 0
+--- !u!114 &851397174
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 851397167}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: c69604c4b9637ce4a92a45cc55295372, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: SafeDriver.VR::SafeDriver.VR.CameraShake
+  target: {fileID: 0}
 --- !u!1 &852108181 stripped
 GameObject:
   m_CorrespondingSourceObject: {fileID: 100000, guid: 2d5fb229ae2945742b900a405a5e7a0b, type: 3}
@@ -36315,7 +36406,7 @@ SphereCollider:
   m_PrefabInstance: {fileID: 0}
   m_PrefabAsset: {fileID: 0}
   m_GameObject: {fileID: 869236497}
-  m_Material: {fileID: 1211361308}
+  m_Material: {fileID: 162961278}
   m_IncludeLayers:
     serializedVersion: 2
     m_Bits: 0
@@ -36436,6 +36527,54 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 10641f4b2b0329f4db1fda547ab3bd19, type: 3}
   m_Name: 
   m_EditorClassIdentifier: SafeDriver.VR::SafeDriver.VR.HandGrabRigidbodyTracker
+--- !u!114 &869236521
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 869236497}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 48b023b5cba77034fae7c58ea4faadab, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: SafeDriver.VR::SafeDriver.VR.GrabLimitFeedback
+  grabbable: {fileID: 869236504}
+  transformer: {fileID: 869236505}
+  tiers:
+  - fromDeg: 0
+    toDeg: 10
+    amplitude: 0.8
+    duration: 0.08
+    intervalSeconds: 0
+    releaseOnEnter: 0
+  - fromDeg: 10
+    toDeg: 25
+    amplitude: 0.3
+    duration: 0.05
+    intervalSeconds: 0.4
+    releaseOnEnter: 0
+  - fromDeg: 25
+    toDeg: 40
+    amplitude: 0.5
+    duration: 0.05
+    intervalSeconds: 0.25
+    releaseOnEnter: 0
+  - fromDeg: 40
+    toDeg: 55
+    amplitude: 0.8
+    duration: 0.05
+    intervalSeconds: 0.15
+    releaseOnEnter: 0
+  - fromDeg: 55
+    toDeg: Infinity
+    amplitude: 1
+    duration: 0.4
+    intervalSeconds: 0
+    releaseOnEnter: 1
+  releaseShakeMagnitude: 0.04
+  releaseShakeDuration: 0.3
+  logDebug: 0
 --- !u!1001 &870745845
 PrefabInstance:
   m_ObjectHideFlags: 0
@@ -49534,19 +49673,6 @@ Transform:
   m_Children: []
   m_Father: {fileID: 514216678}
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
---- !u!134 &1211361308
-PhysicsMaterial:
-  m_ObjectHideFlags: 0
-  m_CorrespondingSourceObject: {fileID: 0}
-  m_PrefabInstance: {fileID: 0}
-  m_PrefabAsset: {fileID: 0}
-  m_Name: ' (Instance) (Instance) (Instance) (Instance) (Instance) (Instance) (Instance)'
-  serializedVersion: 2
-  m_DynamicFriction: 0.6
-  m_StaticFriction: 0.6
-  m_Bounciness: 0
-  m_FrictionCombine: 0
-  m_BounceCombine: 0
 --- !u!1001 &1211618243
 PrefabInstance:
   m_ObjectHideFlags: 0
@@ -81550,6 +81676,20 @@ MeshCollider:
   m_Convex: 0
   m_CookingOptions: 30
   m_Mesh: {fileID: 4300000, guid: 773c211b627e8c648b96743ec461a88f, type: 3}
+--- !u!134 &1950332210
+PhysicsMaterial:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_Name: ' (Instance) (Instance) (Instance) (Instance) (Instance) (Instance) (Instance)
+    (Instance) (Instance)'
+  serializedVersion: 2
+  m_DynamicFriction: 0.6
+  m_StaticFriction: 0.6
+  m_Bounciness: 0
+  m_FrictionCombine: 0
+  m_BounceCombine: 0
 --- !u!1 &1953091764
 GameObject:
   m_ObjectHideFlags: 0
@@ -87549,20 +87689,6 @@ PrefabInstance:
       insertIndex: -1
       addedObject: {fileID: 198156347}
   m_SourcePrefab: {fileID: 100100000, guid: 62125825e49febf4a89f76daf85d9ca7, type: 3}
---- !u!134 &2074644059
-PhysicsMaterial:
-  m_ObjectHideFlags: 0
-  m_CorrespondingSourceObject: {fileID: 0}
-  m_PrefabInstance: {fileID: 0}
-  m_PrefabAsset: {fileID: 0}
-  m_Name: ' (Instance) (Instance) (Instance) (Instance) (Instance) (Instance) (Instance)
-    (Instance)'
-  serializedVersion: 2
-  m_DynamicFriction: 0.6
-  m_StaticFriction: 0.6
-  m_Bounciness: 0
-  m_FrictionCombine: 0
-  m_BounceCombine: 0
 --- !u!1001 &2075768646
 PrefabInstance:
   m_ObjectHideFlags: 0
