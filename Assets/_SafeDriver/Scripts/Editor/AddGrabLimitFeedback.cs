@@ -29,13 +29,16 @@ namespace SafeDriver.EditorTools
                     var feedback = wheel.GetComponent<GrabLimitFeedback>();
                     if (feedback == null) feedback = Undo.AddComponent<GrabLimitFeedback>(wheel);
 
+                    // Tiers x2 sobre la version original — rangos mas largos y release mas tarde.
+                    // El primer tier empieza en 1° (no 0°) para que el pulso unico se dispare
+                    // recien al CRUZAR el tope, no al simplemente agarrar el volante.
                     var tiers = new[]
                     {
-                        new GrabLimitFeedback.Tier { fromDeg = 0f,  toDeg = 10f, amplitude = 0.8f, duration = 0.08f, intervalSeconds = 0f,    releaseOnEnter = false },
-                        new GrabLimitFeedback.Tier { fromDeg = 10f, toDeg = 25f, amplitude = 0.3f, duration = 0.05f, intervalSeconds = 0.40f, releaseOnEnter = false },
-                        new GrabLimitFeedback.Tier { fromDeg = 25f, toDeg = 40f, amplitude = 0.5f, duration = 0.05f, intervalSeconds = 0.25f, releaseOnEnter = false },
-                        new GrabLimitFeedback.Tier { fromDeg = 40f, toDeg = 55f, amplitude = 0.8f, duration = 0.05f, intervalSeconds = 0.15f, releaseOnEnter = false },
-                        new GrabLimitFeedback.Tier { fromDeg = 55f, toDeg = Mathf.Infinity, amplitude = 1.0f, duration = 0.4f, intervalSeconds = 0f, releaseOnEnter = true },
+                        new GrabLimitFeedback.Tier { fromDeg = 1f,   toDeg = 20f,  amplitude = 0.8f, duration = 0.08f, intervalSeconds = 0f,    releaseOnEnter = false },
+                        new GrabLimitFeedback.Tier { fromDeg = 20f,  toDeg = 50f,  amplitude = 0.3f, duration = 0.05f, intervalSeconds = 0.40f, releaseOnEnter = false },
+                        new GrabLimitFeedback.Tier { fromDeg = 50f,  toDeg = 80f,  amplitude = 0.5f, duration = 0.05f, intervalSeconds = 0.25f, releaseOnEnter = false },
+                        new GrabLimitFeedback.Tier { fromDeg = 80f,  toDeg = 110f, amplitude = 0.8f, duration = 0.05f, intervalSeconds = 0.15f, releaseOnEnter = false },
+                        new GrabLimitFeedback.Tier { fromDeg = 110f, toDeg = Mathf.Infinity, amplitude = 1.0f, duration = 0.4f, intervalSeconds = 0f, releaseOnEnter = true },
                     };
                     AssignTiersAndRefs(feedback, grabbable, transformer, tiers, shakeMagnitude: 0.04f, shakeDuration: 0.3f);
                     EditorUtility.SetDirty(wheel);
@@ -63,11 +66,13 @@ namespace SafeDriver.EditorTools
                     var feedback = shifter.GetComponent<GrabLimitFeedback>();
                     if (feedback == null) feedback = Undo.AddComponent<GrabLimitFeedback>(shifter);
 
+                    // Tiers x1.5 sobre la version original; primer tier desde 1° para que el
+                    // pulso unico aparezca al cruzar el tope, no al agarrar la palanca.
                     var tiers = new[]
                     {
-                        new GrabLimitFeedback.Tier { fromDeg = 0f,  toDeg = 10f, amplitude = 0.8f, duration = 0.08f, intervalSeconds = 0f,    releaseOnEnter = false },
-                        new GrabLimitFeedback.Tier { fromDeg = 10f, toDeg = 30f, amplitude = 0.5f, duration = 0.05f, intervalSeconds = 0.20f, releaseOnEnter = false },
-                        new GrabLimitFeedback.Tier { fromDeg = 30f, toDeg = Mathf.Infinity, amplitude = 1.0f, duration = 0.3f, intervalSeconds = 0f, releaseOnEnter = true },
+                        new GrabLimitFeedback.Tier { fromDeg = 1f,  toDeg = 15f, amplitude = 0.8f, duration = 0.08f, intervalSeconds = 0f,    releaseOnEnter = false },
+                        new GrabLimitFeedback.Tier { fromDeg = 15f, toDeg = 45f, amplitude = 0.5f, duration = 0.05f, intervalSeconds = 0.20f, releaseOnEnter = false },
+                        new GrabLimitFeedback.Tier { fromDeg = 45f, toDeg = Mathf.Infinity, amplitude = 1.0f, duration = 0.3f, intervalSeconds = 0f, releaseOnEnter = true },
                     };
                     AssignTiersAndRefs(feedback, grabbable, transformer, tiers, shakeMagnitude: 0.03f, shakeDuration: 0.3f);
 

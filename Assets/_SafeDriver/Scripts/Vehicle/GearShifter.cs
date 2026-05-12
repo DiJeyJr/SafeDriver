@@ -12,18 +12,18 @@ namespace SafeDriver.Vehicle
     /// notificando a `VehicleController.SetGearFromShifter`.
     ///
     /// Zonas:
-    ///   Reverse: < -neutralHalfRange   (centro al snap = -snapAngle)
-    ///   Neutral: ±neutralHalfRange     (centro = 0)
-    ///   Drive:   > +neutralHalfRange   (centro al snap = +snapAngle)
+    ///   Reverse: angulo < -neutralHalfRange   (centro al snap = -snapAngle)
+    ///   Neutral: |angulo| <= neutralHalfRange (centro = 0)
+    ///   Drive:   angulo > +neutralHalfRange   (centro al snap = +snapAngle)
     ///
     /// Comportamiento:
-    ///   - Snap on release: al soltar se recentra al medio de la zona actual (lerp).
-    ///   - Lock-when-moving: si el auto NO esta detenido, clampa la rotacion al rango Neutral.
-    ///     Cada vez que se intenta forzar el clamp dispara un pulso haptic de aviso.
-    ///   - Pulso al cambiar de zona D <-> N <-> R.
-    ///
-    /// Nota: la logica de haptic esta inline aca (no usa SafeDriver.VR.GrabHaptics) porque el
-    /// asmdef SafeDriver.Vehicle no puede referenciar SafeDriver.VR sin crear un ciclo.
+    ///   - Snap on release: al soltar la palanca se recentra al medio de la zona actual (lerp).
+    ///   - Lock-when-moving: si el auto NO esta detenido, modificamos los CONSTRAINTS del
+    ///     OneGrabRotateTransformer dinamicamente al rango de la zona en la que arranco el auto.
+    ///     El transformer respeta el limite naturalmente; cuando el usuario empuja contra el
+    ///     limite, el `GrabLimitFeedback` adjunto detecta el overshoot (relative - constrained)
+    ///     y dispara los tiers de vibracion y, eventualmente, el release del grab.
+    ///   - Pulso breve al cambiar de zona D <-> N <-> R.
     /// </summary>
     public class GearShifter : MonoBehaviour
     {
@@ -34,7 +34,7 @@ namespace SafeDriver.Vehicle
         [Tooltip("Transform cuya rotacion X local define el gear. Tipicamente el pivot de la palanca.")]
         [SerializeField] private Transform pivot;
 
-        [Tooltip("Grabbable de la palanca. Si queda vacio se busca en este GameObject. Necesario para snap-on-release y haptics.")]
+        [Tooltip("Grabbable de la palanca. Si queda vacio se busca en este GameObject.")]
         [SerializeField] private Grabbable grabbable;
 
         [Header("Config de zonas (grados sobre eje X local)")]
@@ -52,17 +52,10 @@ namespace SafeDriver.Vehicle
         [SerializeField] private float snapLerpSeconds = 0.18f;
 
         [Header("Lock when moving")]
-        [Tooltip("Si el auto se mueve, fuerza la palanca a quedarse dentro de Neutral.")]
+        [Tooltip("Si el auto se mueve, fuerza la palanca a quedarse dentro de la zona donde arranco.")]
         [SerializeField] private bool lockWhenMoving = true;
 
-        [Tooltip("Amplitud del pulso haptic al chocar el clamp por velocidad (0-1).")]
-        [Range(0f, 1f)] [SerializeField] private float lockHapticAmplitude = 0.9f;
-
-        [Tooltip("Duracion del pulso haptic al chocar el clamp (segundos).")]
-        [SerializeField] private float lockHapticDuration = 0.08f;
-
         [Header("Haptic de cambio de marcha")]
-        [Tooltip("Amplitud del pulso al pasar de zona (0-1).")]
         [Range(0f, 1f)] [SerializeField] private float shiftHapticAmplitude = 0.6f;
         [SerializeField] private float shiftHapticDuration = 0.07f;
 
@@ -74,25 +67,35 @@ namespace SafeDriver.Vehicle
         private float snapTargetX;
         private float snapStartTime;
         private bool wasGrabbingLastFrame;
-        private float lastLockHapticTime;
 
-        // Zona "lockeada" mientras el auto se mueve. Se captura la primera vez que el
-        // auto pasa de detenido a moviendose, y se mantiene hasta que vuelve a detenerse.
-        // Asi la palanca queda atrapada en la zona en la que estaba al arrancar.
+        // Lock state
         private bool lockActive;
         private GearState lockedZone = GearState.Neutral;
         private bool wasStoppedLastFrame = true;
+
+        // Rango "completo" del transformer (cuando no hay lock). Se captura en Start.
+        private float fullRangeMin = -60f;
+        private float fullRangeMax =  60f;
+
+        private OneGrabRotateTransformer _transformer;
 
         void Awake()
         {
             originalLocalPosition = transform.localPosition;
             if (grabbable == null) grabbable = GetComponent<Grabbable>();
+            _transformer = GetComponent<OneGrabRotateTransformer>();
         }
 
         void Start()
         {
             if (vehicle == null) vehicle = FindFirstObjectByType<VehicleController>();
             if (pivot == null) pivot = transform;
+
+            if (_transformer != null && _transformer.Constraints != null)
+            {
+                fullRangeMin = _transformer.Constraints.MinAngle.Value;
+                fullRangeMax = _transformer.Constraints.MaxAngle.Value;
+            }
 
             EvaluateAndDispatch(force: true);
         }
@@ -101,45 +104,21 @@ namespace SafeDriver.Vehicle
         {
             bool grabbing = grabbable != null && grabbable.SelectingPointsCount > 0;
 
-            // Tomar snapshot de la zona actual cuando el auto pasa de parado a moviendose.
             UpdateLockState();
-
             HandleSnapOnRelease(grabbing);
-
-            if (lockWhenMoving && grabbing && lockActive)
-                ClampToZone(lockedZone);
 
             EvaluateAndDispatch(force: false);
         }
 
-        private void UpdateLockState()
-        {
-            if (vehicle == null) { lockActive = false; return; }
-            bool stoppedNow = vehicle.IsStopped();
-
-            if (!stoppedNow && wasStoppedLastFrame)
-            {
-                // Transicion: el auto arranco. Capturar la zona actual y lockear.
-                lockedZone = ZoneFor(NormalizeAngle(pivot.localEulerAngles.x));
-                lockActive = true;
-            }
-            else if (stoppedNow && !wasStoppedLastFrame)
-            {
-                // Transicion: el auto se detuvo. Liberar el lock — la palanca se puede mover libremente.
-                lockActive = false;
-            }
-            wasStoppedLastFrame = stoppedNow;
-        }
-
         void LateUpdate()
         {
-            // Lock posicional: solo rotamos sobre X, jamas trasladamos.
+            // Solo trasladar lock: NUNCA tocamos la rotacion (la maneja el transformer).
             if (transform.localPosition != originalLocalPosition)
                 transform.localPosition = originalLocalPosition;
         }
 
         // ============================================================
-        //   Zonas
+        //   Zonas y dispatch del gear
         // ============================================================
 
         private GearState ZoneFor(float angle)
@@ -181,7 +160,6 @@ namespace SafeDriver.Vehicle
 
         private void HandleSnapOnRelease(bool grabbing)
         {
-            // Disparar snap al pasar de grabbing a no-grabbing
             if (!grabbing && wasGrabbingLastFrame && snapOnRelease)
             {
                 float current = NormalizeAngle(pivot.localEulerAngles.x);
@@ -192,7 +170,6 @@ namespace SafeDriver.Vehicle
             }
             wasGrabbingLastFrame = grabbing;
 
-            // Cancelar snap si vuelve a agarrar
             if (grabbing) { snapping = false; return; }
             if (!snapping) return;
 
@@ -204,52 +181,66 @@ namespace SafeDriver.Vehicle
         }
 
         // ============================================================
-        //   Lock when moving — clampa al rango de la zona lockeada
+        //   Lock when moving: cambia los CONSTRAINTS del transformer
         // ============================================================
 
-        private void ClampToZone(GearState zone)
+        private void UpdateLockState()
         {
-            float angle = NormalizeAngle(pivot.localEulerAngles.x);
-            float min, max;
-            GetZoneRange(zone, out min, out max);
+            if (vehicle == null) return;
+            bool stoppedNow = vehicle.IsStopped();
 
-            float clamped = Mathf.Clamp(angle, min, max);
-            if (Mathf.Approximately(angle, clamped)) return;
-
-            SetLocalRotationX(clamped);
-
-            // Haptic de aviso anti-spam (max ~4 Hz)
-            if (Time.unscaledTime - lastLockHapticTime > 0.25f)
+            if (!stoppedNow && wasStoppedLastFrame)
             {
-                lastLockHapticTime = Time.unscaledTime;
-                PulseHaptic(lockHapticAmplitude, lockHapticDuration);
+                // Transicion stopped -> moving: capturar zona y aplicar constraints estrechos
+                lockedZone = ZoneFor(NormalizeAngle(pivot.localEulerAngles.x));
+                lockActive = true;
+                if (lockWhenMoving) ApplyConstraintsForZone(lockedZone);
             }
+            else if (stoppedNow && !wasStoppedLastFrame)
+            {
+                // Transicion moving -> stopped: liberar lock, restaurar rango completo
+                lockActive = false;
+                RestoreFullConstraints();
+            }
+            wasStoppedLastFrame = stoppedNow;
         }
 
-        /// <summary>Devuelve los limites de angulo (en grados) de una zona D/N/R.</summary>
-        private void GetZoneRange(GearState zone, out float min, out float max)
+        private void ApplyConstraintsForZone(GearState zone)
         {
-            // Pequenio margen para que el clamp no choque exactamente con la frontera.
-            const float margin = 1f;
+            if (_transformer == null || _transformer.Constraints == null) return;
+
+            float min, max;
             switch (zone)
             {
                 case GearState.Drive:
-                    min = neutralHalfRange + margin;
-                    max = 90f; // suficientemente grande, el constraint del transformer ya limita
+                    min = neutralHalfRange;
+                    max = fullRangeMax;
                     break;
                 case GearState.Reverse:
-                    min = -90f;
-                    max = -(neutralHalfRange + margin);
+                    min = fullRangeMin;
+                    max = -neutralHalfRange;
                     break;
-                default: // Neutral
-                    min = -(neutralHalfRange - margin);
-                    max =  (neutralHalfRange - margin);
+                default:
+                    min = -neutralHalfRange;
+                    max =  neutralHalfRange;
                     break;
             }
+            SetConstraints(min, max);
+        }
+
+        private void RestoreFullConstraints() => SetConstraints(fullRangeMin, fullRangeMax);
+
+        private void SetConstraints(float min, float max)
+        {
+            if (_transformer == null || _transformer.Constraints == null) return;
+            _transformer.Constraints.MinAngle.Constrain = true;
+            _transformer.Constraints.MinAngle.Value = min;
+            _transformer.Constraints.MaxAngle.Constrain = true;
+            _transformer.Constraints.MaxAngle.Value = max;
         }
 
         // ============================================================
-        //   Helpers de rotacion
+        //   Helpers de rotacion (solo usado por el snap-on-release)
         // ============================================================
 
         private void SetLocalRotationX(float xDeg)
@@ -266,8 +257,7 @@ namespace SafeDriver.Vehicle
 
         private void SyncTransformerAngle(float xDeg)
         {
-            var t = GetComponent<OneGrabRotateTransformer>();
-            if (t == null) return;
+            if (_transformer == null) return;
             const System.Reflection.BindingFlags F =
                 System.Reflection.BindingFlags.NonPublic | System.Reflection.BindingFlags.Instance;
             if (s_relAngleField == null)
@@ -275,8 +265,8 @@ namespace SafeDriver.Vehicle
                 s_relAngleField = typeof(OneGrabRotateTransformer).GetField("_relativeAngle", F);
                 s_constrAngleField = typeof(OneGrabRotateTransformer).GetField("_constrainedRelativeAngle", F);
             }
-            if (s_relAngleField != null) s_relAngleField.SetValue(t, xDeg);
-            if (s_constrAngleField != null) s_constrAngleField.SetValue(t, xDeg);
+            if (s_relAngleField != null) s_relAngleField.SetValue(_transformer, xDeg);
+            if (s_constrAngleField != null) s_constrAngleField.SetValue(_transformer, xDeg);
         }
 
         private static float NormalizeAngle(float a)
