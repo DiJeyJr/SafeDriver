@@ -4,14 +4,18 @@ using SafeDriver.Core;
 namespace SafeDriver.Traffic
 {
     /// <summary>
-    /// Peaton ambiental que recorre un path en loop (por las veredas tipicamente).
-    /// Si el path pasa por una zona de paso peatonal y el NPC entra/sale de ella, notifica
-    /// al detector via IPedestrianCrossingNotifier — asi el scoring sabe que hay peatones
-    /// presentes en la senda y puede premiar al jugador que ceda o sancionar al que no.
+    /// Peaton ambiental que recorre un path en loop o rebote. Movimiento simple (lerp +
+    /// rotacion), sin NavMesh ni fisica.
     ///
-    /// Versionado liviano: sin NavMesh, sin Rigidbody, sin colisiones fisicas. Solo lerp
-    /// entre waypoints y rotacion para mirar adelante. Si el jugador lo embiste, dispara
-    /// infraccion grave igual que TrafficVehicle.
+    /// Si el path pasa por una zona de cebra, los waypoints contenidos en el rango
+    /// [crosswalkMinIndex, crosswalkMaxIndex] cuentan como "dentro de la senda". Mientras
+    /// el peaton este en ese rango, notifica al `PedestrianCrossingDetector` para que el
+    /// scoring sepa que hay peatones (en cualquiera de los dos sentidos de marcha — esto
+    /// funciona con paths abiertos en modo rebote).
+    ///
+    /// Usa la API `NotifyByInstance(id, present)` del detector cuando esta disponible,
+    /// asi multiples peatones pueden coexistir sin pisarse el bool. Cae al
+    /// `SetPedestriansPresent(bool)` clasico si el detector no lo expone.
     /// </summary>
     public class TrafficPedestrian : MonoBehaviour
     {
@@ -25,13 +29,13 @@ namespace SafeDriver.Traffic
         [SerializeField] private float turnSpeed = 360f;
 
         [Header("Senda peatonal (opcional)")]
-        [Tooltip("Indice del waypoint donde el peaton ENTRA a la senda (notifica present=true).")]
-        [SerializeField] private int crosswalkEnterIndex = -1;
+        [Tooltip("Indice minimo del rango de waypoints contenidos en la cebra. -1 = no notificar.")]
+        [SerializeField] private int crosswalkMinIndex = -1;
 
-        [Tooltip("Indice del waypoint donde el peaton SALE de la senda (notifica present=false).")]
-        [SerializeField] private int crosswalkExitIndex = -1;
+        [Tooltip("Indice maximo del rango de waypoints contenidos en la cebra. Inclusivo.")]
+        [SerializeField] private int crosswalkMaxIndex = -1;
 
-        [Tooltip("Componente que implementa IPedestrianCrossingNotifier (tipicamente el PedestrianCrossingDetector).")]
+        [Tooltip("PedestrianCrossingDetector (u otro componente que implemente IPedestrianCrossingNotifier).")]
         [SerializeField] private MonoBehaviour crossingNotifierRef;
 
         [Header("Player")]
@@ -40,13 +44,28 @@ namespace SafeDriver.Traffic
         private int currentIndex;
         private int direction = 1;
         private IPedestrianCrossingNotifier notifier;
+        private IPedestrianCrossingMultiNotifier multiNotifier;
         private bool inCrosswalk;
+        private int notifierId;
 
         void Start()
         {
             if (path == null) { enabled = false; return; }
             currentIndex = Mathf.Clamp(startIndex, 0, Mathf.Max(0, path.Count - 1));
+
             notifier = crossingNotifierRef as IPedestrianCrossingNotifier;
+            multiNotifier = crossingNotifierRef as IPedestrianCrossingMultiNotifier;
+            notifierId = GetInstanceID();
+
+            // Asegurar el estado inicial coherente con el currentIndex
+            UpdateCrosswalkStateFor(currentIndex);
+        }
+
+        void OnDisable()
+        {
+            // Si nos apagamos estando en la cebra, sacar el flag asi no queda residuo
+            if (inCrosswalk) NotifyPresence(false);
+            inCrosswalk = false;
         }
 
         void Update()
@@ -60,8 +79,8 @@ namespace SafeDriver.Traffic
 
             if (dist < arriveThreshold)
             {
-                UpdateCrosswalkState(currentIndex);
                 path.Advance(ref currentIndex, ref direction);
+                UpdateCrosswalkStateFor(currentIndex);
                 target = path.GetPosition(currentIndex);
                 toTarget = target - transform.position;
                 toTarget.y = 0f;
@@ -69,27 +88,31 @@ namespace SafeDriver.Traffic
                 if (dist < 0.001f) return;
             }
 
-            if (toTarget.sqrMagnitude > 0.001f)
-            {
-                Quaternion lookRot = Quaternion.LookRotation(toTarget.normalized);
-                transform.rotation = Quaternion.RotateTowards(transform.rotation, lookRot, turnSpeed * Time.deltaTime);
-                transform.position += transform.forward * speed * Time.deltaTime;
-            }
+            Quaternion lookRot = Quaternion.LookRotation(toTarget.normalized);
+            transform.rotation = Quaternion.RotateTowards(transform.rotation, lookRot, turnSpeed * Time.deltaTime);
+            transform.position += transform.forward * speed * Time.deltaTime;
         }
 
-        private void UpdateCrosswalkState(int reachedIndex)
+        /// <summary>
+        /// Actualiza el estado de presencia en la cebra segun el waypoint actual. Si el indice
+        /// cae dentro de [crosswalkMinIndex, crosswalkMaxIndex] se notifica present=true; fuera,
+        /// present=false. Funciona bidireccional (al rebotar el path).
+        /// </summary>
+        private void UpdateCrosswalkStateFor(int index)
         {
-            if (notifier == null) return;
-            if (reachedIndex == crosswalkEnterIndex && !inCrosswalk)
-            {
-                inCrosswalk = true;
-                notifier.SetPedestriansPresent(true);
-            }
-            else if (reachedIndex == crosswalkExitIndex && inCrosswalk)
-            {
-                inCrosswalk = false;
-                notifier.SetPedestriansPresent(false);
-            }
+            if (crosswalkMinIndex < 0 || crosswalkMaxIndex < crosswalkMinIndex) return;
+
+            bool nowInside = index >= crosswalkMinIndex && index <= crosswalkMaxIndex;
+            if (nowInside == inCrosswalk) return;
+
+            inCrosswalk = nowInside;
+            NotifyPresence(nowInside);
+        }
+
+        private void NotifyPresence(bool present)
+        {
+            if (multiNotifier != null) multiNotifier.NotifyByInstance(notifierId, present);
+            else notifier?.SetPedestriansPresent(present);
         }
 
         void OnTriggerEnter(Collider other)
