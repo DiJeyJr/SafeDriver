@@ -48,6 +48,19 @@ namespace SafeDriver.Traffic
         private int currentIndex;
         private int direction = 1;
         private float currentSpeed;
+        private TrafficLightStopZone activeStopZone;
+
+        void Awake()
+        {
+            // Rigidbody kinematic: necesario para que el OnTriggerEnter del NPC dispare al
+            // entrar a otros triggers (StopZones, etc). Sin rb los triggers solo dispararian
+            // cuando otros rigidbodies entren a ESTE collider — no al reves.
+            var rb = GetComponent<Rigidbody>();
+            if (rb == null) rb = gameObject.AddComponent<Rigidbody>();
+            rb.isKinematic = true;
+            rb.useGravity = false;
+            rb.interpolation = RigidbodyInterpolation.Interpolate;
+        }
 
         void Start()
         {
@@ -66,8 +79,11 @@ namespace SafeDriver.Traffic
         {
             if (path == null || path.Count == 0) return;
 
-            // Frenar si hay jugador adelante (raycast)
-            float targetSpeed = IsPlayerAhead() ? 0f : cruiseSpeed;
+            // Frenar si hay jugador adelante (raycast) o si estamos en una zona de stop
+            // de un semaforo en rojo/amarillo.
+            bool stopForLight = activeStopZone != null && activeStopZone.ShouldStop;
+            bool stopForPlayer = IsPlayerAhead();
+            float targetSpeed = (stopForLight || stopForPlayer) ? 0f : cruiseSpeed;
             currentSpeed = Mathf.MoveTowards(currentSpeed, targetSpeed, accel * Time.deltaTime);
 
             // Direccion hacia el waypoint actual
@@ -107,12 +123,25 @@ namespace SafeDriver.Traffic
 
         void OnTriggerEnter(Collider other)
         {
-            if (!other.CompareTag(playerTag)) return;
-            // El jugador embistio al auto NPC — infraccion grave
-            EventBus.Dispatch_InfractionDetected(
-                InfractionType.DangerousManeuver,
-                "Choque con vehiculo. Mantener distancia y respetar el carril.");
-            if (horn != null) horn.Play();
+            // Colision con jugador → infraccion grave
+            if (other.CompareTag(playerTag))
+            {
+                EventBus.Dispatch_InfractionDetected(
+                    InfractionType.DangerousManeuver,
+                    "Choque con vehiculo. Mantener distancia y respetar el carril.");
+                if (horn != null) horn.Play();
+                return;
+            }
+
+            // Entro a una zona de stop por semaforo
+            var zone = other.GetComponent<TrafficLightStopZone>();
+            if (zone != null) activeStopZone = zone;
+        }
+
+        void OnTriggerExit(Collider other)
+        {
+            var zone = other.GetComponent<TrafficLightStopZone>();
+            if (zone != null && zone == activeStopZone) activeStopZone = null;
         }
     }
 }
