@@ -126,7 +126,7 @@ namespace SafeDriver.Traffic
             // Colision con jugador → infraccion grave
             if (other.CompareTag(playerTag))
             {
-                EventBus.Dispatch_InfractionDetected(
+                EventBus.Dispatch_Infraction(
                     InfractionType.DangerousManeuver,
                     "Choque con vehiculo. Mantener distancia y respetar el carril.");
                 if (horn != null) horn.Play();

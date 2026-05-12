@@ -3,7 +3,8 @@
     "rootNamespace": "SafeDriver.Vehicle",
     "references": [
         "SafeDriver.Core",
-        "Unity.InputSystem"
+        "Unity.InputSystem",
+        "Oculus.Interaction"
     ],
     "includePlatforms": [],
     "excludePlatforms": [],

@@ -118,9 +118,9 @@ namespace SafeDriver.Traffic
         void OnTriggerEnter(Collider other)
         {
             if (!other.CompareTag(playerTag)) return;
-            EventBus.Dispatch_InfractionDetected(
+            EventBus.Dispatch_Infraction(
                 InfractionType.PedestrianNotYielded,
-                "Atropelló a un peaton. Disminuir velocidad cerca de cebras y veredas.");
+                "Atropello a un peaton. Disminuir velocidad cerca de cebras y veredas.");
         }
     }
 }
