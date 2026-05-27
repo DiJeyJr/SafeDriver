@@ -1,12 +1,8 @@
 {
-    "name": "SafeDriver.UI",
-    "rootNamespace": "SafeDriver.UI",
+    "name": "SafeDriver.Missions",
+    "rootNamespace": "SafeDriver.Missions",
     "references": [
-        "SafeDriver.Core",
-        "SafeDriver.Scoring",
-        "SafeDriver.Missions",
-        "UnityEngine.UI",
-        "Unity.TextMeshPro"
+        "SafeDriver.Core"
     ],
     "includePlatforms": [],
     "excludePlatforms": [],

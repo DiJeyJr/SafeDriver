@@ -1,63 +1,28 @@
-using System;
 using System.Collections.Generic;
 using TMPro;
 using UnityEngine;
 using UnityEngine.UI;
-using SafeDriver.Core;
+using SafeDriver.Missions;
 
 namespace SafeDriver.UI
 {
     /// <summary>
-    /// Lista diegetica de objetivos del nivel. Se monta sobre un Canvas WorldSpace en el tablero
-    /// del auto y se actualiza escuchando EventBus.OnCorrectActionPerformed.
+    /// Lista diegetica de objetivos del nivel, montada sobre un Canvas WorldSpace en el
+    /// tablero del auto. Lee las misiones del MissionManager y se actualiza con sus eventos.
     ///
-    /// La UI se construye una sola vez via Inspector (right-click → "Rebuild UI") o via menu
-    /// SafeDriver/Rebuild Objectives UI. Los children resultantes se serializan con la escena.
-    /// En play mode no se reconstruye — solo se re-bindean las filas existentes a la lista.
-    ///
-    /// Cada fila es un TextMeshProUGUI con un check ASCII al inicio (□/✔) que se pinta de verde
-    /// con tachado al completarse. Si requiredCount &gt; 1 el texto incluye contador "label (1/3)".
-    ///
-    /// Los objetivos del mismo ActionType se completan en orden — un solo evento incrementa solo
-    /// el primer objetivo no terminado de ese tipo.
+    /// A diferencia de la version anterior (objetivos fijos en Inspector), ahora las filas
+    /// se generan en runtime: una por mision activa, cuando MissionManager dispara
+    /// MissionsLoaded. Cada fila es un TextMeshProUGUI con check al inicio (caja / tilde /
+    /// cruz) que se pinta segun el estado de la mision.
     /// </summary>
     public class ObjectivesController : MonoBehaviour
     {
-        [Serializable]
-        public struct ObjectiveSpec
-        {
-            [Tooltip("Texto que se muestra al jugador.")]
-            public string label;
-
-            [Tooltip("Accion del EventBus que cuenta para completar este objetivo.")]
-            public ActionType triggerAction;
-
-            [Tooltip("Cuantas veces hay que hacer la accion para completar.")]
-            [Min(1)] public int requiredCount;
-        }
-
-        [Header("Lista de objetivos")]
-        [SerializeField]
-        private ObjectiveSpec[] objectives = new ObjectiveSpec[]
-        {
-            new ObjectiveSpec { label = "Detenerse en la senal PARE",   triggerAction = ActionType.StoppedAtPareSign,        requiredCount = 1 },
-            new ObjectiveSpec { label = "Respetar el semaforo en rojo", triggerAction = ActionType.StoppedAtRedLight,        requiredCount = 1 },
-            new ObjectiveSpec { label = "Ceder paso a peatones",        triggerAction = ActionType.YieldedToPedestrian,      requiredCount = 1 },
-            new ObjectiveSpec { label = "Chequear espejos al girar",    triggerAction = ActionType.CheckedMirrorsBeforeTurn, requiredCount = 2 },
-        };
-
         [Header("Estilo")]
-        [Tooltip("Tamanio de fuente del titulo del panel.")]
         [SerializeField] private float titleFontSize = 22f;
-
-        [Tooltip("Tamanio de fuente de cada item.")]
         [SerializeField] private float itemFontSize = 18f;
-
-        [Tooltip("Color de objetivo pendiente.")]
         [SerializeField] private Color pendingColor = Color.white;
-
-        [Tooltip("Color de objetivo completado.")]
         [SerializeField] private Color completedColor = new Color(0.55f, 0.85f, 0.55f);
+        [SerializeField] private Color failedColor = new Color(0.90f, 0.45f, 0.45f);
 
         [Tooltip("Texto del titulo. Vacio = sin titulo.")]
         [SerializeField] private string titleText = "OBJETIVOS";
@@ -71,66 +36,44 @@ namespace SafeDriver.UI
         [Tooltip("Espaciado entre items.")]
         [SerializeField] private float itemSpacing = 8f;
 
-        // Naming convention para encontrar los children al runtime.
         private const string TitleName = "Title";
         private const string ItemPrefix = "Item_";
 
-        private struct Row { public ObjectiveSpec spec; public TextMeshProUGUI text; public int progress; }
-        private readonly List<Row> rows = new List<Row>();
+        private readonly Dictionary<MissionRuntime, TextMeshProUGUI> rows = new();
 
         void OnEnable()
         {
             if (!Application.isPlaying) return;
 
-            LinkRowsFromChildren();
-            EventBus.OnCorrectActionPerformed += HandleAction;
+            var mm = MissionManager.Instance;
+            if (mm != null)
+            {
+                mm.MissionsLoaded += Rebuild;
+                mm.MissionChanged += UpdateRow;
+                if (mm.ActiveMissions.Count > 0) Rebuild();
+            }
         }
 
         void OnDisable()
         {
             if (!Application.isPlaying) return;
-            EventBus.OnCorrectActionPerformed -= HandleAction;
-        }
 
-        private void HandleAction(ActionType type, int bonus)
-        {
-            for (int i = 0; i < rows.Count; i++)
+            var mm = MissionManager.Instance;
+            if (mm != null)
             {
-                var r = rows[i];
-                if (r.spec.triggerAction != type || r.progress >= r.spec.requiredCount) continue;
-
-                r.progress++;
-                rows[i] = r;
-                UpdateRow(i);
-
-                if (AllCompleted())
-                {
-                    Debug.Log("[Objectives] Todos los objetivos completados.", this);
-                }
-                return;
+                mm.MissionsLoaded -= Rebuild;
+                mm.MissionChanged -= UpdateRow;
             }
         }
 
-        /// <summary>Devuelve true si todos los objetivos llegaron a su requiredCount.</summary>
-        public bool AllCompleted()
-        {
-            foreach (var r in rows)
-                if (r.progress < r.spec.requiredCount) return false;
-            return rows.Count > 0;
-        }
-
         // ============================================================
-        //   Construccion de la UI (editor-time, llamado a mano)
+        //   Construccion / actualizacion de filas
         // ============================================================
 
-        /// <summary>
-        /// (Editor-time) Borra los children y reconstruye titulo + items desde el array de objetivos.
-        /// Llamar via right-click en Inspector o desde una utility de editor.
-        /// </summary>
-        [ContextMenu("Rebuild UI")]
-        public void BuildUI()
+        private void Rebuild()
         {
             ClearChildren();
+            rows.Clear();
             EnsureLayoutComponents();
 
             if (!string.IsNullOrEmpty(titleText))
@@ -139,13 +82,54 @@ namespace SafeDriver.UI
                 title.color = pendingColor;
             }
 
-            for (int i = 0; i < objectives.Length; i++)
+            var mm = MissionManager.Instance;
+            if (mm == null) return;
+
+            int i = 0;
+            foreach (var mission in mm.ActiveMissions)
             {
-                var spec = objectives[i];
-                var text = CreateText(ItemPrefix + i, FormatLabel(spec, 0), itemFontSize, FontStyles.Normal);
-                text.color = pendingColor;
+                var tmp = CreateText(ItemPrefix + i, string.Empty, itemFontSize, FontStyles.Normal);
+                rows[mission] = tmp;
+                Paint(mission, tmp);
+                i++;
             }
         }
+
+        private void UpdateRow(MissionRuntime mission)
+        {
+            if (rows.TryGetValue(mission, out var tmp))
+                Paint(mission, tmp);
+        }
+
+        private void Paint(MissionRuntime mission, TextMeshProUGUI tmp)
+        {
+            string check = mission.Status switch
+            {
+                MissionStatus.Completed => "<b>✔</b>",  // ✔
+                MissionStatus.Failed    => "<b>✘</b>",  // ✘
+                _                       => "□",          // □
+            };
+
+            string progress = mission.ProgressLabel;
+            string body = string.IsNullOrEmpty(progress)
+                ? mission.Definition.title
+                : $"{mission.Definition.title}  ({progress})";
+
+            tmp.text = check + "  " + body;
+            tmp.color = mission.Status switch
+            {
+                MissionStatus.Completed => completedColor,
+                MissionStatus.Failed    => failedColor,
+                _                       => pendingColor,
+            };
+            tmp.fontStyle = mission.Status == MissionStatus.Completed
+                ? FontStyles.Strikethrough
+                : FontStyles.Normal;
+        }
+
+        // ============================================================
+        //   Helpers de layout / creacion de texto
+        // ============================================================
 
         private void ClearChildren()
         {
@@ -155,7 +139,6 @@ namespace SafeDriver.UI
                 if (Application.isPlaying) Destroy(c);
                 else DestroyImmediate(c);
             }
-            rows.Clear();
         }
 
         private void EnsureLayoutComponents()
@@ -174,9 +157,9 @@ namespace SafeDriver.UI
             fitter.verticalFit = ContentSizeFitter.FitMode.PreferredSize;
         }
 
-        private TextMeshProUGUI CreateText(string name, string content, float size, FontStyles style)
+        private TextMeshProUGUI CreateText(string objectName, string content, float size, FontStyles style)
         {
-            var go = new GameObject(name, typeof(RectTransform), typeof(CanvasRenderer));
+            var go = new GameObject(objectName, typeof(RectTransform), typeof(CanvasRenderer));
             go.transform.SetParent(transform, false);
 
             var tmp = go.AddComponent<TextMeshProUGUI>();
@@ -186,47 +169,6 @@ namespace SafeDriver.UI
             tmp.textWrappingMode = TextWrappingModes.Normal;
             tmp.richText = true;
             return tmp;
-        }
-
-        // ============================================================
-        //   Runtime: relink a children ya serializados en escena
-        // ============================================================
-
-        private void LinkRowsFromChildren()
-        {
-            rows.Clear();
-            for (int i = 0; i < objectives.Length; i++)
-            {
-                var child = transform.Find(ItemPrefix + i);
-                if (child == null)
-                {
-                    Debug.LogWarning("[Objectives] No se encontro child '" + ItemPrefix + i + "'. Reconstruir UI desde Inspector.", this);
-                    continue;
-                }
-                var tmp = child.GetComponent<TextMeshProUGUI>();
-                if (tmp == null) continue;
-
-                rows.Add(new Row { spec = objectives[i], text = tmp, progress = 0 });
-                UpdateRow(rows.Count - 1);
-            }
-        }
-
-        private void UpdateRow(int i)
-        {
-            var r = rows[i];
-            bool done = r.progress >= r.spec.requiredCount;
-            r.text.text = FormatLabel(r.spec, r.progress);
-            r.text.color = done ? completedColor : pendingColor;
-            r.text.fontStyle = done ? FontStyles.Strikethrough : FontStyles.Normal;
-        }
-
-        private static string FormatLabel(ObjectiveSpec spec, int progress)
-        {
-            string check = progress >= spec.requiredCount ? "<b>✔</b>" : "□";
-            string body = spec.requiredCount > 1
-                ? string.Format("{0}  ({1}/{2})", spec.label, progress, spec.requiredCount)
-                : spec.label;
-            return check + "  " + body;
         }
     }
 }

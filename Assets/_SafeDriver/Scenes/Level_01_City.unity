@@ -12344,19 +12344,6 @@ MeshCollider:
   m_Convex: 0
   m_CookingOptions: 30
   m_Mesh: {fileID: 4300000, guid: ab761d05302615348a9aed34ccd58dd7, type: 3}
---- !u!134 &283951916
-PhysicsMaterial:
-  m_ObjectHideFlags: 0
-  m_CorrespondingSourceObject: {fileID: 0}
-  m_PrefabInstance: {fileID: 0}
-  m_PrefabAsset: {fileID: 0}
-  m_Name: 
-  serializedVersion: 2
-  m_DynamicFriction: 0.6
-  m_StaticFriction: 0.6
-  m_Bounciness: 0
-  m_FrictionCombine: 0
-  m_BounceCombine: 0
 --- !u!1 &284846905 stripped
 GameObject:
   m_CorrespondingSourceObject: {fileID: 100000, guid: b82e76f4092b7d24aaeecddf36fe8d3b, type: 3}
@@ -12984,19 +12971,6 @@ Transform:
   m_Children: []
   m_Father: {fileID: 1896749388}
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
---- !u!134 &308301142
-PhysicsMaterial:
-  m_ObjectHideFlags: 0
-  m_CorrespondingSourceObject: {fileID: 0}
-  m_PrefabInstance: {fileID: 0}
-  m_PrefabAsset: {fileID: 0}
-  m_Name: 
-  serializedVersion: 2
-  m_DynamicFriction: 0.6
-  m_StaticFriction: 0.6
-  m_Bounciness: 0
-  m_FrictionCombine: 0
-  m_BounceCombine: 0
 --- !u!1 &309211521 stripped
 GameObject:
   m_CorrespondingSourceObject: {fileID: 100000, guid: 2509cc5763ca17f4598bf61fd585a93e, type: 3}
@@ -23999,6 +23973,66 @@ PrefabInstance:
       insertIndex: -1
       addedObject: {fileID: 728861936}
   m_SourcePrefab: {fileID: 100100000, guid: 2509cc5763ca17f4598bf61fd585a93e, type: 3}
+--- !u!1 &575045127
+GameObject:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  serializedVersion: 6
+  m_Component:
+  - component: {fileID: 575045130}
+  - component: {fileID: 575045129}
+  - component: {fileID: 575045128}
+  m_Layer: 0
+  m_Name: MissionSystem
+  m_TagString: Untagged
+  m_Icon: {fileID: 0}
+  m_NavMeshLayer: 0
+  m_StaticEditorFlags: 0
+  m_IsActive: 1
+--- !u!114 &575045128
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 575045127}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 977f61f8f4e917b4cb11d9084a260d6e, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: SafeDriver.Missions::SafeDriver.Missions.LevelManager
+  level: {fileID: 11400000, guid: cf88413be085e25419745d1cfb5a2729, type: 2}
+--- !u!114 &575045129
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 575045127}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 5dda3c2ff2ace5449981c3bac6867a57, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: SafeDriver.Missions::SafeDriver.Missions.MissionManager
+  autoLoadInspectorMissions: 0
+  inspectorMissions: []
+--- !u!4 &575045130
+Transform:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 575045127}
+  serializedVersion: 2
+  m_LocalRotation: {x: 0, y: 0, z: 0, w: 1}
+  m_LocalPosition: {x: 0, y: 0, z: 0}
+  m_LocalScale: {x: 1, y: 1, z: 1}
+  m_ConstrainProportionsScale: 0
+  m_Children: []
+  m_Father: {fileID: 0}
+  m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
 --- !u!1 &578105796
 GameObject:
   m_ObjectHideFlags: 0
@@ -36862,6 +36896,7 @@ MonoBehaviour:
   m_EditorClassIdentifier: SafeDriver.VR::SafeDriver.VR.SteeringWheelController
   maxSteeringAngle: 180
   returnSpeed: 180
+  referenceSpeedKmh: 30
   rotationAxis: 1
   grabbable: {fileID: 869236504}
   rotateTransformer: {fileID: 0}
@@ -44460,29 +44495,11 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: b929cd39d0af62b45938a553e2741f33, type: 3}
   m_Name: 
   m_EditorClassIdentifier: SafeDriver.UI::SafeDriver.UI.ObjectivesController
-  objectives:
-  - label: Detenerse en la senal PARE
-    triggerAction: 4
-    requiredCount: 1
-  - label: Pasar el semaforo en verde
-    triggerAction: 5
-    requiredCount: 1
-  - label: Detenerse en semaforo rojo
-    triggerAction: 0
-    requiredCount: 1
-  - label: Ceder paso a peatones
-    triggerAction: 1
-    requiredCount: 1
-  - label: Cruzar senda sin peatones
-    triggerAction: 6
-    requiredCount: 1
-  - label: Chequear espejos al girar
-    triggerAction: 2
-    requiredCount: 2
   titleFontSize: 22
   itemFontSize: 18
   pendingColor: {r: 1, g: 1, b: 1, a: 1}
   completedColor: {r: 0.55, g: 0.85, b: 0.55, a: 1}
+  failedColor: {r: 0.9, g: 0.45, b: 0.45, a: 1}
   titleText: OBJETIVOS
   paddingLeft: 20
   paddingRight: 20
@@ -44632,7 +44649,7 @@ BoxCollider:
   m_PrefabInstance: {fileID: 0}
   m_PrefabAsset: {fileID: 0}
   m_GameObject: {fileID: 1074770895}
-  m_Material: {fileID: 283951916}
+  m_Material: {fileID: 1970409738}
   m_IncludeLayers:
     serializedVersion: 2
     m_Bits: 0
@@ -46010,6 +46027,19 @@ MeshCollider:
   m_Convex: 0
   m_CookingOptions: 30
   m_Mesh: {fileID: 4300000, guid: 2605c818ea0c2df4092b898402e71aae, type: 3}
+--- !u!134 &1110233498
+PhysicsMaterial:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_Name: ' (Instance)'
+  serializedVersion: 2
+  m_DynamicFriction: 0.6
+  m_StaticFriction: 0.6
+  m_Bounciness: 0
+  m_FrictionCombine: 0
+  m_BounceCombine: 0
 --- !u!1 &1111163201
 GameObject:
   m_ObjectHideFlags: 0
@@ -56323,7 +56353,7 @@ BoxCollider:
   m_PrefabInstance: {fileID: 0}
   m_PrefabAsset: {fileID: 0}
   m_GameObject: {fileID: 1330277699}
-  m_Material: {fileID: 308301142}
+  m_Material: {fileID: 1110233498}
   m_IncludeLayers:
     serializedVersion: 2
     m_Bits: 0
@@ -84063,6 +84093,19 @@ MeshCollider:
   m_Convex: 0
   m_CookingOptions: 30
   m_Mesh: {fileID: 4300000, guid: 773c211b627e8c648b96743ec461a88f, type: 3}
+--- !u!134 &1970409738
+PhysicsMaterial:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_Name: ' (Instance)'
+  serializedVersion: 2
+  m_DynamicFriction: 0.6
+  m_StaticFriction: 0.6
+  m_Bounciness: 0
+  m_FrictionCombine: 0
+  m_BounceCombine: 0
 --- !u!1 &1971707893 stripped
 GameObject:
   m_CorrespondingSourceObject: {fileID: 100000, guid: 9ccda285cd5f1ce4fa00133b50ba5cbc, type: 3}
@@ -92907,3 +92950,4 @@ SceneRoots:
   - {fileID: 565756092}
   - {fileID: 1896749388}
   - {fileID: 1790299927}
+  - {fileID: 575045130}
