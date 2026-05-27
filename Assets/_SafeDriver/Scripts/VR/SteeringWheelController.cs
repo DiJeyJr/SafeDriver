@@ -28,7 +28,10 @@ namespace SafeDriver.VR
     {
         [Header("Config")]
         [SerializeField] private float maxSteeringAngle = 180f;
+        [Tooltip("Velocidad de retorno maxima del volante (deg/s), alcanzada cuando el auto va a referenceSpeedKmh o mas.")]
         [SerializeField] private float returnSpeed = 180f;
+        [Tooltip("Velocidad del auto (km/h) a la que el recentrado del volante es maximo. A 0 km/h no hay recentrado (queda donde se dejo).")]
+        [SerializeField] private float referenceSpeedKmh = 30f;
 
         [Header("Eje visual (0=X, 1=Y, 2=Z). Debe coincidir con OneGrabRotateTransformer.")]
         [SerializeField] private int rotationAxis = 1;
@@ -118,12 +121,24 @@ namespace SafeDriver.VR
             return -a;
         }
 
+        /// <summary>
+        /// Recentrado proporcional a la velocidad del auto: simula el self-aligning torque
+        /// del caster + ackermann reales. A 0 km/h el volante se queda donde se dejo; a
+        /// referenceSpeedKmh o mas, recentra a returnSpeed; entre medio, lineal.
+        /// </summary>
         private void ReturnToCenter()
         {
             float currentAngle = ReadAngle();
             if (Mathf.Abs(currentAngle) < 0.5f) return;
 
-            float targetAngle = Mathf.MoveTowards(currentAngle, 0f, returnSpeed * Time.deltaTime);
+            float speedKmh = VehicleController.Instance != null
+                ? VehicleController.Instance.CurrentSpeedKmh
+                : 0f;
+            float speedFactor = Mathf.Clamp01(speedKmh / Mathf.Max(0.01f, referenceSpeedKmh));
+            if (speedFactor <= 0.001f) return;
+
+            float effectiveReturnSpeed = returnSpeed * speedFactor;
+            float targetAngle = Mathf.MoveTowards(currentAngle, 0f, effectiveReturnSpeed * Time.deltaTime);
             Vector3 euler = Vector3.zero;
             euler[rotationAxis] = -targetAngle;
             transform.localRotation = originalLocalRotation * Quaternion.Euler(euler);
