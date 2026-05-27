@@ -52,15 +52,19 @@ namespace SafeDriver.Scoring
             vehicleIsInZone = true;
             entryTime = Time.time;
 
-            if (trafficLight != null && trafficLight.IsRed())
+            bool moving = VehicleController.Instance != null
+                && !VehicleController.Instance.IsStopped();
+
+            if (trafficLight != null && trafficLight.IsRed() && moving)
             {
-                // El auto ENTRO a la zona con luz roja — infraccion inmediata.
-                // (Si hubiera entrado en verde/amarillo y cambio a rojo mientras espera,
-                //  eso no es infraccion — por eso el check es en Enter, no en Stay.)
+                // Invadio la zona con luz roja Y moviendose: infraccion. Si entra
+                // por inercia ya practicamente parado (IsStopped == true), tratar como
+                // aproximacion normal — OnTriggerStay le va a dar el premio cuando complete
+                // el minStopTimeForReward. Simetrico con PedestrianCrossingDetector.
                 infractionFired = true;
                 TriggerInfraction();
             }
-            else if (trafficLight != null && trafficLight.IsGreen())
+            else if (trafficLight != null && trafficLight.IsGreen() && moving)
             {
                 // Cruzo el semaforo en verde — premio chico por respetar la senal.
                 rewardGiven = true;
