@@ -1,0 +1,25 @@
+{
+    "name": "SafeDriver.Missions.Tests",
+    "rootNamespace": "SafeDriver.Missions.Tests",
+    "references": [
+        "SafeDriver.Missions",
+        "SafeDriver.Core",
+        "UnityEngine.TestRunner",
+        "UnityEditor.TestRunner"
+    ],
+    "includePlatforms": [
+        "Editor"
+    ],
+    "excludePlatforms": [],
+    "allowUnsafeCode": false,
+    "overrideReferences": true,
+    "precompiledReferences": [
+        "nunit.framework.dll"
+    ],
+    "autoReferenced": false,
+    "defineConstraints": [
+        "UNITY_INCLUDE_TESTS"
+    ],
+    "versionDefines": [],
+    "noEngineReferences": false
+}
