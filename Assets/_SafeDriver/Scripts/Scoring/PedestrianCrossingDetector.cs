@@ -57,6 +57,13 @@ namespace SafeDriver.Scoring
         /// API multi-notifier: cada peaton se identifica con su instanceId. El estado
         /// `pedestriansPresent` es true mientras haya al menos un notifier activo.
         /// </summary>
+        /// <summary>
+        /// True si hay al menos un peaton cruzando ahora. Se consulta en el instante
+        /// del cruce/entrada en vez de depender de un flanco temporal, asi el premio
+        /// es robusto ante el timing de aparicion del peaton.
+        /// </summary>
+        public bool AnyPedestrianInCrossing() => activeNotifiers.Count > 0;
+
         public void NotifyByInstance(int notifierId, bool present)
         {
             if (present) activeNotifiers.Add(notifierId);

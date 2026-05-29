@@ -102,6 +102,8 @@ namespace SafeDriver.Scoring
                 InfractionType.Speeding             => 10,
                 InfractionType.NoMirrorCheck        => 5,
                 InfractionType.DangerousManeuver    => 8,
+                InfractionType.WrongWay             => 18,
+                InfractionType.HitPedestrian        => 30,
                 _ => 5,
             };
         }
@@ -113,7 +115,8 @@ namespace SafeDriver.Scoring
         private bool IsGraveInfraction(InfractionType t)
         {
             return t == InfractionType.RanRedLight
-                || t == InfractionType.PedestrianNotYielded;
+                || t == InfractionType.PedestrianNotYielded
+                || t == InfractionType.HitPedestrian;
         }
 
         // ============================================================

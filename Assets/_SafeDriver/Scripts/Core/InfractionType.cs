@@ -12,5 +12,7 @@ namespace SafeDriver.Core
         Speeding,             // Excedio velocidad
         NoMirrorCheck,        // No chequeo espejos antes de girar
         DangerousManeuver,    // Maniobra peligrosa generica
+        WrongWay,             // Circular en contramano
+        HitPedestrian,        // Atropello a un peaton (grave)
     }
 }

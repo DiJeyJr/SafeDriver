@@ -23,6 +23,7 @@ namespace SafeDriver.Scoring
     ///      → Reset para la proxima pasada
     /// </summary>
     [RequireComponent(typeof(Collider))]
+    [System.Obsolete("Reemplazado por TrafficLightStopZone (premio frenar) + TrafficLightCrossLine (infraccion/premio al cruzar). Se mantiene para escenas demo viejas.")]
     public class TrafficLightDetector : InfractionDetector
     {
         [Header("Referencia")]
