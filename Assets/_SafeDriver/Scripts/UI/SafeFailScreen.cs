@@ -94,6 +94,7 @@ namespace SafeDriver.UI
             if (descriptionText != null)  descriptionText.text  = desc;
             if (lawReferenceText != null) lawReferenceText.text = law;
 
+            SetContentActive(true);                        // activa card + poke recien al aparecer
             if (safeFailCanvas != null)   safeFailCanvas.enabled = true;
 
             StartCoroutine(FadeIn());
@@ -103,6 +104,17 @@ namespace SafeDriver.UI
         {
             if (canvasGroup != null) canvasGroup.alpha = 0f;
             if (safeFailCanvas != null) safeFailCanvas.enabled = false;
+            SetContentActive(false);                       // apaga card + el hitbox de poke mientras esta oculto
+        }
+
+        // Activa/desactiva los hijos del canvas (la card y el ISDK de poke). Mientras el
+        // SafeFail esta oculto, su superficie de poke NO debe existir: si no, la mano choca
+        // con una "pared invisible" al estirarse hacia el volante. El propio SafeFailScreen
+        // vive en el canvas (no en los hijos), asi que sigue activo para recibir Show().
+        private void SetContentActive(bool active)
+        {
+            for (int i = 0; i < transform.childCount; i++)
+                transform.GetChild(i).gameObject.SetActive(active);
         }
 
         // ============================================================
