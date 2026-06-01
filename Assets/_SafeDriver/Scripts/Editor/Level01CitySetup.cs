@@ -52,17 +52,9 @@ namespace SafeDriver.EditorTools
                     new Vector3(-0.30f, 0.92f, 0.40f), new Vector3(15, 0, 0),
                     new Vector2(0.25f, 0.10f), "0", 0.7f, new Color(0.8f, 1f, 0.8f), FontStyles.Bold);
 
-                var notifPanel = GetOrCreate("NotificationPanel", interior.transform);
-                var notifTmp = CreateOrUpdateTMP3D(notifPanel.transform, "Text",
-                    new Vector3(0, 0, 0), Vector3.zero,
-                    new Vector2(0.6f, 0.15f), "", 0.6f, Color.white, FontStyles.Bold);
-                notifPanel.transform.localPosition = new Vector3(0, 1.4f, 1.0f);
-
                 hud.scoreDisplay = scoreTmp;
                 hud.speedLimitSign = limitTmp;
                 hud.currentSpeedDisplay = speedTmp;
-                hud.notificationPanel = notifPanel;
-                hud.notificationText = notifTmp;
                 LevelTimer timer = bootstrap.GetComponent<LevelTimer>();
                 var so = new SerializedObject(timer);
                 var dispProp = so.FindProperty("display");

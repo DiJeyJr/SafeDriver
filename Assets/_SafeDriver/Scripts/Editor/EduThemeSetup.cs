@@ -48,19 +48,45 @@ namespace SafeDriver.EditorTools
             return theme;
         }
 
+        // Nombres de las pantallas de menu a restilizar en la escena activa. NO incluye el
+        // HUD diegetico ni el panel de objetivos (tienen su propio look de auto).
+        private static readonly string[] MenuScreenNames = { "_PauseMenu", "MainMenuCanvas", "MenuCanvas", "Canvas" };
+
         [MenuItem("SafeDriver/UI/2. Aplicar EduTheme a la seleccion")]
         public static void ApplyToSelection()
         {
-            var theme = AssetDatabase.LoadAssetAtPath<UITheme>(ThemePath);
-            if (theme == null) theme = CreateTheme();
-
             var roots = Selection.gameObjects;
             if (roots == null || roots.Length == 0)
             {
                 Debug.LogWarning("[EduTheme] Selecciona el GameObject raiz de una pantalla de menu " +
-                                 "(ej. _PauseMenu, LevelEndPanel) y volve a aplicar. Asi no se toca el HUD diegetico.");
+                                 "(ej. _PauseMenu) y volve a aplicar, o usa 'Aplicar a pantallas de menu'.");
                 return;
             }
+            ApplyToRoots(roots);
+        }
+
+        [MenuItem("SafeDriver/UI/3. Aplicar EduTheme a pantallas de menu (por nombre)")]
+        public static void ApplyToNamedScreens()
+        {
+            var found = new System.Collections.Generic.List<GameObject>();
+            foreach (var name in MenuScreenNames)
+            {
+                var go = GameObject.Find(name);
+                if (go != null) found.Add(go);
+            }
+            if (found.Count == 0)
+            {
+                Debug.LogWarning("[EduTheme] No se encontraron pantallas de menu por nombre en esta escena " +
+                                 "(" + string.Join(", ", MenuScreenNames) + "). Usa la opcion por seleccion.");
+                return;
+            }
+            ApplyToRoots(found.ToArray());
+        }
+
+        private static void ApplyToRoots(GameObject[] roots)
+        {
+            var theme = AssetDatabase.LoadAssetAtPath<UITheme>(ThemePath);
+            if (theme == null) theme = CreateTheme();
 
             int texts = 0, panels = 0, buttons = 0;
             foreach (var root in roots)

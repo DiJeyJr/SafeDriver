@@ -1,4 +1,6 @@
 using UnityEngine;
+using UnityEngine.SceneManagement;
+using UnityEngine.UI;
 using TMPro;
 using SafeDriver.Core;
 using SafeDriver.Scoring;
@@ -8,13 +10,26 @@ namespace SafeDriver.UI
     /// <summary>
     /// Panel de fin de nivel: muestra resumen (score, infracciones, tiempo, aprobado/reprobado).
     /// Lee el LevelResult de ScoreManager.Instance.GetLevelResult().
+    /// Botones: Reintentar (recarga la escena) / Menu principal (carga MainMenu).
     /// </summary>
     public class LevelEndPanel : MonoBehaviour
     {
         [SerializeField] private GameObject rootPanel;
+        [SerializeField] private TextMeshProUGUI titleText;
         [SerializeField] private TextMeshProUGUI scoreText;
         [SerializeField] private TextMeshProUGUI statusText;
         [SerializeField] private TextMeshProUGUI infractionsListText;
+
+        [Header("Botones")]
+        [SerializeField] private Button retryButton;
+        [SerializeField] private Button mainMenuButton;
+        [SerializeField] private string mainMenuSceneName = "MainMenu";
+
+        void Awake()
+        {
+            if (retryButton != null) retryButton.onClick.AddListener(OnRetryPressed);
+            if (mainMenuButton != null) mainMenuButton.onClick.AddListener(OnMainMenuPressed);
+        }
 
         void OnEnable()
         {
@@ -22,9 +37,27 @@ namespace SafeDriver.UI
             Show();
         }
 
+        // ============================================================
+        //   Botones
+        // ============================================================
+
+        private void OnRetryPressed()
+        {
+            Time.timeScale = 1f;
+            SceneManager.LoadScene(SceneManager.GetActiveScene().name);
+        }
+
+        private void OnMainMenuPressed()
+        {
+            Time.timeScale = 1f;
+            if (!string.IsNullOrEmpty(mainMenuSceneName))
+                SceneManager.LoadScene(mainMenuSceneName);
+        }
+
         public void Show()
         {
             if (rootPanel != null) rootPanel.SetActive(true);
+            if (titleText != null) titleText.text = "FIN DEL NIVEL";
 
             if (ScoreManager.Instance == null) return;
             LevelResult result = ScoreManager.Instance.GetLevelResult();

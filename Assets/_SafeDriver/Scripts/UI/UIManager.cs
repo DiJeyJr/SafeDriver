@@ -73,8 +73,20 @@ namespace SafeDriver.UI
             if (safeFailScreen != null) safeFailScreen.Show(type);
         }
 
-        private void HandleLevelComplete() { /* TODO: mostrar LevelEndPanel con exito */ }
-        private void HandleLevelFailed()   { /* TODO: mostrar LevelEndPanel con fallo */ }
+        // Al completar/fallar el nivel, pasar a LevelEnd: el GameManager pausa el tiempo
+        // (OnEnterLevelEnd) y el case GameState.LevelEnd activa el panel de resumen, que en
+        // OnEnable lee el LevelResult de ScoreManager y muestra aprobado/reprobado + score.
+        private void HandleLevelComplete()
+        {
+            if (GameManager.Instance != null) GameManager.Instance.TransitionTo(GameState.LevelEnd);
+            else if (levelEndPanel != null) levelEndPanel.gameObject.SetActive(true);
+        }
+
+        private void HandleLevelFailed()
+        {
+            if (GameManager.Instance != null) GameManager.Instance.TransitionTo(GameState.LevelEnd);
+            else if (levelEndPanel != null) levelEndPanel.gameObject.SetActive(true);
+        }
 
         private void HideAll()
         {

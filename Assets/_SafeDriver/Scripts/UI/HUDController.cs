@@ -1,26 +1,17 @@
-using System.Collections;
 using UnityEngine;
-using UnityEngine.UI;
 using TMPro;
 using SafeDriver.Core;
 
 namespace SafeDriver.UI
 {
     /// <summary>
-    /// Gestiona todos los elementos de UI en VR.
+    /// Gestiona la UI DIEGETICA del tablero del auto: velocimetro (aguja + numero),
+    /// display de score y senal de limite de velocidad. Siempre visible, nunca bloquea
+    /// la vista del conductor.
     ///
-    /// UI DIEGETICA (en el tablero del auto):
-    ///   - Velocimetro con aguja rotante (SpeedometerNeedle)
-    ///   - Display de score (TextMeshPro en tablero)
-    ///   - Senal de limite de velocidad (TextMeshPro)
-    ///
-    /// UI NO-DIEGETICA (world space, near driver):
-    ///   - Panel de notificacion temporal (infraccion/acierto)
-    ///   - Aparece 3 seg y se desvanece, sin bloquear conduccion
-    ///
-    /// REGLA VR: la UI diegetica esta SIEMPRE visible en el tablero.
-    /// Las notificaciones flotan brevemente y desaparecen.
-    /// NUNCA bloquear la vista del conductor.
+    /// El feedback de infracciones/aciertos NO se muestra aca: las infracciones graves
+    /// usan la pantalla SafeFail (pedagogica) y los aciertos se reflejan en el panel de
+    /// objetivos del tablero + haptica. El viejo popup de notificaciones se elimino.
     /// </summary>
     public class HUDController : MonoBehaviour
     {
@@ -37,50 +28,19 @@ namespace SafeDriver.UI
         [Tooltip("TextMeshPro de velocidad ACTUAL del auto en km/h (numero grande en el tablero).")]
         public TextMeshPro currentSpeedDisplay;
 
-        [Header("UI No-Diegetica (world space, cerca del conductor)")]
-        [Tooltip("Panel popup que aparece brevemente ante infraccion/acierto.")]
-        public GameObject notificationPanel;
-
-        [Tooltip("Texto de la notificacion.")]
-        public TextMeshPro notificationText;
-
-        [Tooltip("Icono de la notificacion (Image UI o SpriteRenderer segun tu setup).")]
-        public Image notificationIcon;
-
-        [Header("Sprites de notificacion")]
-        public Sprite infractionSprite;
-        public Sprite successSprite;
-
-        [Header("Config")]
-        [Tooltip("Segundos que se muestra la notificacion de infraccion.")]
-        [SerializeField] private float infractionDuration = 3f;
-
-        [Tooltip("Segundos que se muestra la notificacion de acierto.")]
-        [SerializeField] private float successDuration = 2f;
-
-        private Coroutine activeNotification;
-
         void OnEnable()
         {
-            EventBus.OnSpeedChanged            += UpdateSpeedometer;
-            EventBus.OnScoreChanged            += UpdateScoreDisplay;
-            EventBus.OnSpeedLimitChanged       += UpdateSpeedLimit;
-            EventBus.OnInfractionDetected      += ShowInfractionNotification;
-            EventBus.OnCorrectActionPerformed  += ShowSuccessNotification;
+            EventBus.OnSpeedChanged      += UpdateSpeedometer;
+            EventBus.OnScoreChanged      += UpdateScoreDisplay;
+            EventBus.OnSpeedLimitChanged += UpdateSpeedLimit;
         }
 
         void OnDisable()
         {
-            EventBus.OnSpeedChanged            -= UpdateSpeedometer;
-            EventBus.OnScoreChanged            -= UpdateScoreDisplay;
-            EventBus.OnSpeedLimitChanged       -= UpdateSpeedLimit;
-            EventBus.OnInfractionDetected      -= ShowInfractionNotification;
-            EventBus.OnCorrectActionPerformed  -= ShowSuccessNotification;
+            EventBus.OnSpeedChanged      -= UpdateSpeedometer;
+            EventBus.OnScoreChanged      -= UpdateScoreDisplay;
+            EventBus.OnSpeedLimitChanged -= UpdateSpeedLimit;
         }
-
-        // ============================================================
-        //   Diegetica: tablero del auto
-        // ============================================================
 
         private void UpdateSpeedometer(float speedKmh)
         {
@@ -100,50 +60,6 @@ namespace SafeDriver.UI
         {
             if (speedLimitSign != null)
                 speedLimitSign.text = limitKmh.ToString("0");
-        }
-
-        // ============================================================
-        //   No-diegetica: notificaciones temporales
-        // ============================================================
-
-        private void ShowInfractionNotification(InfractionType type, string message)
-        {
-            ShowNotification(message, infractionSprite, new Color(0.9f, 0.2f, 0.2f), infractionDuration);
-        }
-
-        private void ShowSuccessNotification(ActionType type, int bonus)
-        {
-            string msg = "+" + bonus + " " + type.ToString();
-            ShowNotification(msg, successSprite, new Color(0.2f, 0.8f, 0.3f), successDuration);
-        }
-
-        private void ShowNotification(string message, Sprite icon, Color tint, float duration)
-        {
-            if (activeNotification != null)
-                StopCoroutine(activeNotification);
-            activeNotification = StartCoroutine(NotificationRoutine(message, icon, tint, duration));
-        }
-
-        private IEnumerator NotificationRoutine(string message, Sprite icon, Color tint, float duration)
-        {
-            // Mostrar
-            if (notificationPanel != null) notificationPanel.SetActive(true);
-            if (notificationText != null)
-            {
-                notificationText.text = message;
-                notificationText.color = tint;
-            }
-            if (notificationIcon != null && icon != null)
-            {
-                notificationIcon.sprite = icon;
-                notificationIcon.color = tint;
-            }
-
-            yield return new WaitForSeconds(duration);
-
-            // Ocultar
-            if (notificationPanel != null) notificationPanel.SetActive(false);
-            activeNotification = null;
         }
     }
 }

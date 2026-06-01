@@ -110,9 +110,10 @@ namespace SafeDriver.Scoring
 
         /// <summary>
         /// Infracciones graves disparan SafeFail inmediato (el auto se detiene, pantalla pedagogica).
-        /// Las no-graves solo restan puntos.
+        /// Las no-graves solo restan puntos. Publico para que el HUD no muestre el popup de aviso
+        /// cuando ya va a aparecer la pantalla SafeFail (evita ver dos UIs encimadas).
         /// </summary>
-        private bool IsGraveInfraction(InfractionType t)
+        public static bool IsGraveInfraction(InfractionType t)
         {
             return t == InfractionType.RanRedLight
                 || t == InfractionType.PedestrianNotYielded

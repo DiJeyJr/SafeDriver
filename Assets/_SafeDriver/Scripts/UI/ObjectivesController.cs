@@ -36,6 +36,9 @@ namespace SafeDriver.UI
         [Tooltip("Espaciado entre items.")]
         [SerializeField] private float itemSpacing = 8f;
 
+        [Tooltip("Fuente para titulo e items. Si queda vacia usa la default de TMP.")]
+        [SerializeField] private TMP_FontAsset font;
+
         private const string TitleName = "Title";
         private const string ItemPrefix = "Item_";
 
@@ -163,6 +166,7 @@ namespace SafeDriver.UI
             go.transform.SetParent(transform, false);
 
             var tmp = go.AddComponent<TextMeshProUGUI>();
+            if (font != null) tmp.font = font;
             tmp.text = content;
             tmp.fontSize = size;
             tmp.fontStyle = style;
