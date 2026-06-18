@@ -3,7 +3,9 @@ using UnityEditor.SceneManagement;
 using UnityEngine;
 using UnityEngine.UI;
 using Oculus.Interaction;
+using TMPro;
 using SafeDriver.UI;
+using SafeDriver.Scoring;
 
 namespace SafeDriver.EditorTools
 {
@@ -154,6 +156,143 @@ namespace SafeDriver.EditorTools
 
             EditorSceneManager.MarkSceneDirty(EditorSceneManager.GetActiveScene());
             Debug.Log("[Dashboard] Objetivos con scroll: header fijo 'OBJETIVOS' + viewport recortado + ScrollRect. Guardar (Ctrl+S).");
+        }
+
+        // ============================================================
+        //   Panel de fondo detras del cluster de displays (limite/timer/score)
+        // ============================================================
+
+        [MenuItem("SafeDriver/UI/12. Cluster de displays en un canvas alineado")]
+        public static void ClusterPanel()
+        {
+            var theme = UIComposer.LoadTheme();
+            if (theme == null) { Debug.LogError("[Dashboard] No se encontro EduTheme."); return; }
+
+            var oldLimit = GameObject.Find("SpeedLimitSign");
+            var oldTimer = GameObject.Find("TimerDisplay");
+            var oldScore = GameObject.Find("ScoreDisplay");
+            var prevCluster = GameObject.Find("DashboardCluster");
+            // El parent correcto es el interior del auto (asi el cluster viaja con el vehiculo).
+            // Lo derivamos de los displays viejos o del cluster previo; si ya no existen (re-ejecucion),
+            // caemos al interior por nombre. OJO: los displays viejos se borran mas abajo, asi que hay
+            // que capturar el parent ANTES de destruirlos.
+            Transform parent = oldScore != null ? oldScore.transform.parent
+                             : (oldLimit != null ? oldLimit.transform.parent
+                             : (oldTimer != null ? oldTimer.transform.parent
+                             : (prevCluster != null ? prevCluster.transform.parent : null)));
+            if (parent == null)
+            {
+                var interior = GameObject.Find("SafeDriver_Exterior_v1/SafeDriver_Interior_v1");
+                if (interior != null) parent = interior.transform;
+                else Debug.LogWarning("[Dashboard] No se encontro el interior del auto; el cluster quedara en root y no seguira al vehiculo.");
+            }
+
+            // Limpiar versiones previas.
+            var prevPanel = GameObject.Find("ClusterPanel"); if (prevPanel != null) Object.DestroyImmediate(prevPanel);
+            if (prevCluster != null) Object.DestroyImmediate(prevCluster);
+
+            // Canvas worldspace que agrupa los 3 displays, coplanar (un solo plano inclinado).
+            var go = new GameObject("DashboardCluster", typeof(RectTransform));
+            if (parent != null) go.transform.SetParent(parent, false);
+            var canvas = go.AddComponent<Canvas>();
+            canvas.renderMode = RenderMode.WorldSpace;
+            var centerEye = GameObject.Find("CenterEyeAnchor");
+            if (centerEye != null)
+            {
+                var cso = new SerializedObject(canvas);
+                cso.FindProperty("m_Camera").objectReferenceValue = centerEye.GetComponent<Camera>();
+                cso.ApplyModifiedProperties();
+            }
+            go.AddComponent<CanvasScaler>();
+            go.AddComponent<GraphicRaycaster>();
+
+            var rt = go.GetComponent<RectTransform>();
+            rt.sizeDelta = new Vector2(240f, 320f);
+            rt.localScale = Vector3.one * 0.001f;
+            rt.position = new Vector3(0.162f, 1.17f, 0.40f);
+            rt.rotation = Quaternion.Euler(15f, 0f, 0f);
+
+            var bg = go.AddComponent<Image>();
+            if (theme.roundedSprite != null) { bg.sprite = theme.roundedSprite; bg.type = Image.Type.Sliced; }
+            bg.color = new Color(theme.surface.r, theme.surface.g, theme.surface.b, 0.94f);
+            var sh = go.AddComponent<Shadow>();
+            sh.effectColor = new Color(0f, 0f, 0f, 0.25f);
+            sh.effectDistance = new Vector2(0f, -4f);
+
+            var vlg = go.AddComponent<VerticalLayoutGroup>();
+            vlg.padding = new RectOffset(16, 16, 14, 14);
+            vlg.spacing = 6f;
+            vlg.childAlignment = TextAnchor.MiddleCenter;
+            vlg.childControlWidth = true; vlg.childControlHeight = true;
+            vlg.childForceExpandWidth = true; vlg.childForceExpandHeight = false;
+
+            // 3 filas alineadas (etiqueta + numero), coplanares.
+            var limitTmp = MakeClusterRow(go.transform, theme, "Limite", "LIMITE", "40", theme.danger);
+            var timerTmp = MakeClusterRow(go.transform, theme, "Timer",  "TIEMPO", "02:00", theme.textPrimary);
+            var scoreTmp = MakeClusterRow(go.transform, theme, "Score",  "PUNTOS", "1000", theme.brand);
+
+            // Re-apuntar las referencias del HUD y del Timer a los nuevos textos UGUI.
+            var hud = Object.FindFirstObjectByType<HUDController>(FindObjectsInactive.Include);
+            if (hud != null)
+            {
+                var hso = new SerializedObject(hud);
+                hso.FindProperty("speedLimitSign").objectReferenceValue = limitTmp;
+                hso.FindProperty("scoreDisplay").objectReferenceValue = scoreTmp;
+                hso.ApplyModifiedProperties();
+                EditorUtility.SetDirty(hud);
+            }
+            var timer = Object.FindFirstObjectByType<LevelTimer>(FindObjectsInactive.Include);
+            if (timer != null)
+            {
+                var tso = new SerializedObject(timer);
+                var dp = tso.FindProperty("display");
+                if (dp != null) dp.objectReferenceValue = timerTmp;
+                // El timer pinta el numero con normalColor en runtime; el default es blanco y se
+                // pierde sobre el panel crema. Lo bajamos a textPrimary para que contraste.
+                var nc = tso.FindProperty("normalColor");
+                if (nc != null) nc.colorValue = theme.textPrimary;
+                tso.ApplyModifiedProperties();
+                EditorUtility.SetDirty(timer);
+            }
+
+            // Borrar los TMP 3D viejos (ya reemplazados).
+            if (oldLimit != null) Object.DestroyImmediate(oldLimit);
+            if (oldTimer != null) Object.DestroyImmediate(oldTimer);
+            if (oldScore != null) Object.DestroyImmediate(oldScore);
+
+            EditorSceneManager.MarkSceneDirty(EditorSceneManager.GetActiveScene());
+            Debug.Log("[Dashboard] Cluster en canvas alineado: LIMITE/TIEMPO/PUNTOS en un solo panel coplanar. Guardar (Ctrl+S).");
+        }
+
+        // Una fila del cluster: etiqueta chica arriba + numero grande, en un contenedor vertical.
+        // Devuelve el TMP del numero (lo que actualizan HUD/Timer en runtime).
+        private static TMP_Text MakeClusterRow(Transform parent, SafeDriver.UI.UITheme theme, string name, string label, string value, Color valueColor)
+        {
+            var row = new GameObject(name, typeof(RectTransform));
+            row.transform.SetParent(parent, false);
+            var le = row.AddComponent<LayoutElement>();
+            le.preferredHeight = 74f; le.flexibleHeight = 0f;
+            var vlg = row.AddComponent<VerticalLayoutGroup>();
+            vlg.spacing = 0f; vlg.childAlignment = TextAnchor.MiddleCenter;
+            vlg.childControlWidth = true; vlg.childControlHeight = true;
+            vlg.childForceExpandWidth = true; vlg.childForceExpandHeight = false;
+
+            var lblGo = new GameObject("Label", typeof(RectTransform), typeof(CanvasRenderer));
+            lblGo.transform.SetParent(row.transform, false);
+            var lbl = lblGo.AddComponent<TextMeshProUGUI>();
+            lbl.text = label;
+            lbl.alignment = TextAlignmentOptions.Center;
+            if (theme.bodyFont != null) lbl.font = theme.bodyFont;
+            lbl.fontSize = 14f; lbl.color = theme.textSecondary; lbl.fontStyle = FontStyles.Bold;
+
+            var valGo = new GameObject("Value", typeof(RectTransform), typeof(CanvasRenderer));
+            valGo.transform.SetParent(row.transform, false);
+            var val = valGo.AddComponent<TextMeshProUGUI>();
+            val.text = value;
+            val.alignment = TextAlignmentOptions.Center;
+            if (theme.titleFont != null) val.font = theme.titleFont;
+            val.fontSize = 30f; val.color = valueColor;
+            return val;
         }
 
         // El fondo es el Canvas/Image que contiene al List del ObjectivesController.

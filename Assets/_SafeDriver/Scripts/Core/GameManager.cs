@@ -77,6 +77,19 @@ namespace SafeDriver.Core
             LastInfractionMessage = message;
         }
 
+        /// <summary>
+        /// Setea la infraccion actual Y transiciona a SafeFail, en ese orden, de forma SINCRONICA.
+        /// Esto evita el race con el cacheo por evento: garantiza que cuando UIManager lea
+        /// LastInfractionType (al entrar a SafeFail) ya tenga el tipo correcto, no el de la
+        /// infraccion anterior. ScoreManager llama a esto en vez de TransitionTo(SafeFail) directo.
+        /// </summary>
+        public void TriggerSafeFail(InfractionType type, string message)
+        {
+            LastInfractionType = type;
+            LastInfractionMessage = message;
+            TransitionTo(GameState.SafeFail);
+        }
+
         // ---------- Hooks locales ----------
 
         private void OnEnterDriving(GameState previous)

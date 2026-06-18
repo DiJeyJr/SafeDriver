@@ -1,17 +1,16 @@
 using UnityEngine;
-using SafeDriver.Core;
 
 namespace SafeDriver.Traffic
 {
     /// <summary>
-    /// Auto NPC que sigue un TrafficWaypointPath. Avanza con velocidad constante, frena
-    /// suavemente al detectar al jugador adelante (raycast), rota para mirar al proximo
-    /// waypoint, y dispara una infraccion grave si el jugador lo embiste (collision con
-    /// el BoxCollider trigger del NPC).
+    /// Auto NPC que sigue un TrafficWaypointPath. Avanza a velocidad de crucero y frena suave ante:
+    ///   - un obstaculo adelante (el player, otro NPC o un peaton cruzando) — SphereCast,
+    ///   - una linea de detencion (TrafficStopLine) de un semaforo en rojo — por distancia.
+    /// Frena para parar JUSTO antes de la linea; si ya la paso, termina de cruzar (no se queda en el medio).
     ///
-    /// Sin Rigidbody — controlado solo por scripts. El BoxCollider esta en isTrigger=true
-    /// para que el auto del jugador no rebote contra el (sin fisica) pero igual dispare
-    /// el OnTriggerEnter para detectar la colision logica.
+    /// MOVIMIENTO: Rigidbody kinematic movido con MovePosition/MoveRotation en FixedUpdate +
+    /// interpolation=Interpolate. Esto da velocidad CONSISTENTE (timestep fijo, no depende del framerate
+    /// de render, importante en VR) y a la vez se ve suave (la interpolacion rellena entre pasos de physics).
     /// </summary>
     public class TrafficVehicle : MonoBehaviour
     {
@@ -36,30 +35,34 @@ namespace SafeDriver.Traffic
         [SerializeField] private float arriveThreshold = 0.6f;
 
         [Header("Safety")]
-        [Tooltip("Distancia (m) hacia adelante para chequear si el jugador esta atravesado.")]
+        [Tooltip("Distancia (m) hacia adelante para chequear obstaculos (player/NPC/peaton).")]
         [SerializeField] private float forwardCheckDistance = 5f;
 
-        [Tooltip("Tag del jugador (para la colision logica).")]
+        [Tooltip("Distancia (m) a la que empieza a considerar una linea de stop en rojo.")]
+        [SerializeField] private float stopLineRange = 12f;
+
+        [Tooltip("Cuanto antes de la linea para (m). Mas alto = frena con mas margen antes de la senda.")]
+        [SerializeField] private float stopLineOffset = 2.5f;
+
+        [Tooltip("Tag del jugador.")]
         [SerializeField] private string playerTag = "PlayerVehicle";
 
-        [Header("Audio (opcional)")]
-        [SerializeField] private AudioSource horn;
+        [Tooltip("Tag del peaton (para frenar si esta cruzando adelante).")]
+        [SerializeField] private string pedestrianTag = "Pedestrian";
 
         private int currentIndex;
         private int direction = 1;
         private float currentSpeed;
-        private TrafficLightStopZone activeStopZone;
+        private TrafficStopLine[] stopLines;
+        private Rigidbody rb;
 
         void Awake()
         {
-            // Rigidbody kinematic: necesario para que el OnTriggerEnter del NPC dispare al
-            // entrar a otros triggers (StopZones, etc). Sin rb los triggers solo dispararian
-            // cuando otros rigidbodies entren a ESTE collider — no al reves.
-            var rb = GetComponent<Rigidbody>();
+            rb = GetComponent<Rigidbody>();
             if (rb == null) rb = gameObject.AddComponent<Rigidbody>();
             rb.isKinematic = true;
             rb.useGravity = false;
-            rb.interpolation = RigidbodyInterpolation.Interpolate;
+            rb.interpolation = RigidbodyInterpolation.Interpolate; // suave entre pasos de physics
         }
 
         void Start()
@@ -67,28 +70,36 @@ namespace SafeDriver.Traffic
             if (path == null) { enabled = false; return; }
             currentIndex = Mathf.Clamp(startIndex, 0, Mathf.Max(0, path.Count - 1));
             currentSpeed = cruiseSpeed;
+            stopLines = Object.FindObjectsByType<TrafficStopLine>(FindObjectsSortMode.None);
 
-            // Orientar al primer waypoint
             var first = path.GetPosition(currentIndex);
             var dir = (first - transform.position);
             if (dir.sqrMagnitude > 0.001f)
                 transform.rotation = Quaternion.LookRotation(new Vector3(dir.x, 0f, dir.z));
         }
 
-        void Update()
+        // En FixedUpdate (timestep fijo) para velocidad consistente, frame-rate independiente.
+        void FixedUpdate()
         {
             if (path == null || path.Count == 0) return;
+            float dt = Time.fixedDeltaTime;
 
-            // Frenar si hay jugador adelante (raycast) o si estamos en una zona de stop
-            // de un semaforo en rojo/amarillo.
-            bool stopForLight = activeStopZone != null && activeStopZone.ShouldStop;
-            bool stopForPlayer = IsPlayerAhead();
-            float targetSpeed = (stopForLight || stopForPlayer) ? 0f : cruiseSpeed;
-            currentSpeed = Mathf.MoveTowards(currentSpeed, targetSpeed, accel * Time.deltaTime);
+            // Velocidad objetivo: crucero, salvo obstaculo adelante (para) o linea de stop roja (desacelera).
+            float targetSpeed = IsObstacleAhead() ? 0f : cruiseSpeed;
 
-            // Direccion hacia el waypoint actual
+            float stopAhead = NearestRedStopLineAhead();
+            if (stopAhead < stopLineRange)
+            {
+                // Velocidad maxima para frenar a 'accel' y parar 'stopLineOffset' antes de la linea.
+                float d = Mathf.Max(0f, stopAhead - stopLineOffset);
+                float vMax = Mathf.Sqrt(2f * accel * d);
+                if (vMax < targetSpeed) targetSpeed = vMax;
+            }
+
+            currentSpeed = Mathf.MoveTowards(currentSpeed, targetSpeed, accel * dt);
+
             Vector3 target = path.GetPosition(currentIndex);
-            Vector3 toTarget = target - transform.position;
+            Vector3 toTarget = target - rb.position;
             toTarget.y = 0f;
             float dist = toTarget.magnitude;
 
@@ -96,52 +107,62 @@ namespace SafeDriver.Traffic
             {
                 path.Advance(ref currentIndex, ref direction);
                 target = path.GetPosition(currentIndex);
-                toTarget = target - transform.position;
+                toTarget = target - rb.position;
                 toTarget.y = 0f;
                 dist = toTarget.magnitude;
                 if (dist < 0.001f) return;
             }
 
-            // Rotar hacia el waypoint
             Quaternion lookRot = Quaternion.LookRotation(toTarget.normalized);
-            transform.rotation = Quaternion.RotateTowards(transform.rotation, lookRot, turnSpeed * Time.deltaTime);
-
-            // Avanzar adelante (eje Z local)
-            transform.position += transform.forward * currentSpeed * Time.deltaTime;
+            Quaternion newRot = Quaternion.RotateTowards(rb.rotation, lookRot, turnSpeed * dt);
+            rb.MoveRotation(newRot);
+            Vector3 forward = newRot * Vector3.forward;
+            rb.MovePosition(rb.position + forward * currentSpeed * dt);
         }
 
-        private bool IsPlayerAhead()
+        // Distancia (m) a la linea de stop ROJA mas cercana que tengo ADELANTE y en mi carril.
+        // float.MaxValue si no hay ninguna. Si ya pase la linea (ahead<=0.5) la ignoro → termino de cruzar.
+        private float NearestRedStopLineAhead()
+        {
+            float best = float.MaxValue;
+            if (stopLines == null) return best;
+            Vector3 pos = rb != null ? rb.position : transform.position;
+            Vector3 fwd = transform.forward;
+            Vector3 right = transform.right;
+            foreach (var line in stopLines)
+            {
+                if (line == null || !line.IsStop) continue;
+                Vector3 to = line.Position - pos;
+                to.y = 0f;
+                float ahead = Vector3.Dot(to, fwd);
+                if (ahead <= 0.5f) continue;                          // ya la pase (o estoy encima)
+                if (Mathf.Abs(Vector3.Dot(to, right)) > 2.5f) continue; // no esta en mi carril
+                if (ahead < best) best = ahead;
+            }
+            return best;
+        }
+
+        // Obstaculo adelante (player/NPC/peaton) dentro de forwardCheckDistance → frenar. SphereCast (no
+        // un rayo fino) para no fallar cosas descentradas; reconoce al player por el tag de su rigidbody.
+        private bool IsObstacleAhead()
         {
             Vector3 origin = transform.position + Vector3.up * 0.5f;
-            // Raycast al frente
-            if (Physics.Raycast(origin, transform.forward, out RaycastHit hit, forwardCheckDistance))
+            var hits = Physics.SphereCastAll(origin, 0.9f, transform.forward, forwardCheckDistance,
+                                             ~0, QueryTriggerInteraction.Collide);
+            foreach (var hit in hits)
             {
-                if (hit.collider != null && hit.collider.CompareTag(playerTag)) return true;
+                var col = hit.collider;
+                if (col == null || col.transform.IsChildOf(transform)) continue;
+
+                bool isPlayer = col.CompareTag(playerTag)
+                             || (col.attachedRigidbody != null && col.attachedRigidbody.CompareTag(playerTag));
+                var otherNpc = col.GetComponentInParent<TrafficVehicle>();
+                bool isNpc = otherNpc != null && otherNpc != this;
+                bool isPed = !string.IsNullOrEmpty(pedestrianTag) && col.CompareTag(pedestrianTag);
+
+                if (isPlayer || isNpc || isPed) return true;
             }
             return false;
-        }
-
-        void OnTriggerEnter(Collider other)
-        {
-            // Colision con jugador → infraccion grave
-            if (other.CompareTag(playerTag))
-            {
-                EventBus.Dispatch_Infraction(
-                    InfractionType.DangerousManeuver,
-                    "Choque con vehiculo. Mantener distancia y respetar el carril.");
-                if (horn != null) horn.Play();
-                return;
-            }
-
-            // Entro a una zona de stop por semaforo
-            var zone = other.GetComponent<TrafficLightStopZone>();
-            if (zone != null) activeStopZone = zone;
-        }
-
-        void OnTriggerExit(Collider other)
-        {
-            var zone = other.GetComponent<TrafficLightStopZone>();
-            if (zone != null && zone == activeStopZone) activeStopZone = null;
         }
     }
 }

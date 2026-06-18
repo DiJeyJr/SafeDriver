@@ -2,6 +2,7 @@ using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
 using UnityEngine.UI;
+using UnityEngine.SceneManagement;
 using TMPro;
 using SafeDriver.Core;
 
@@ -22,6 +23,7 @@ namespace SafeDriver.UI
         public TextMeshProUGUI lawReferenceText;
         public Button retryButton;
         public Button mainMenuButton;
+        [SerializeField] private string mainMenuSceneName = "MainMenu";
 
         [Header("Fade")]
         [SerializeField] private CanvasGroup canvasGroup;
@@ -66,6 +68,24 @@ namespace SafeDriver.UI
                 "Realizaste una maniobra que pone en riesgo a otros participantes del transito. "
                 + "Conduce de forma previsible y segura.",
                 "Ley 24.449 — Art. 48: Prohibiciones al conductor"
+            ),
+            [InfractionType.HitPedestrian] = (
+                "Atropellaste a un Peaton",
+                "Pasaste por encima de un peaton. La prioridad peatonal es absoluta: debes frenar y "
+                + "esperar a que termine de cruzar. Un atropello es la falta mas grave al volante.",
+                "Ley 24.449 — Art. 41: Prioridad del peaton"
+            ),
+            [InfractionType.WrongWay] = (
+                "Circulaste en Contramano",
+                "Fuiste en sentido contrario al permitido. Respeta siempre el sentido de circulacion "
+                + "de cada carril: el contramano provoca choques frontales.",
+                "Ley 24.449 — Art. 42: Sentido de circulacion"
+            ),
+            [InfractionType.SevereCollision] = (
+                "Choque Grave",
+                "Chocaste el vehiculo con fuerza o acumulaste demasiado daño. "
+                + "Mantene distancia, anticipate y conduci a una velocidad que te permita frenar a tiempo.",
+                "Ley 24.449 — Art. 50: Velocidad precautoria"
             ),
         };
 
@@ -123,16 +143,17 @@ namespace SafeDriver.UI
 
         private void OnRetryPressed()
         {
-            Hide();
-            if (GameManager.Instance != null)
-                GameManager.Instance.TransitionTo(GameState.Driving);
+            // Recarga la escena actual = reinicio limpio del nivel (auto, score, misiones, timer).
+            // Mismo patron que LevelEndPanel (que ya funcionaba); TransitionTo(Driving) no reseteaba nada.
+            Time.timeScale = 1f;
+            SceneManager.LoadScene(SceneManager.GetActiveScene().name);
         }
 
         private void OnMainMenuPressed()
         {
-            Hide();
-            if (GameManager.Instance != null)
-                GameManager.Instance.TransitionTo(GameState.MainMenu);
+            Time.timeScale = 1f;
+            if (!string.IsNullOrEmpty(mainMenuSceneName))
+                SceneManager.LoadScene(mainMenuSceneName);
         }
 
         // ============================================================

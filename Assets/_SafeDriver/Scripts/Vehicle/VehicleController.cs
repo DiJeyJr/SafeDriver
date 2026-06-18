@@ -61,6 +61,14 @@ namespace SafeDriver.Vehicle
         private Rigidbody rb;
         private float currentSpeed; // km/h
         private bool isSmoothStopping;
+        private bool handbrakeEngaged;
+
+        /// <summary>True si el freno de mano esta puesto (la palanca lo controla via SetHandbrake).</summary>
+        public bool HandbrakeEngaged => handbrakeEngaged;
+
+        /// <summary>Pone/saca el freno de mano. Con el freno puesto: freno full en las 4 ruedas + motor
+        /// cortado (el auto no acelera y queda retenido). Lo llama el HandbrakeController de la palanca.</summary>
+        public void SetHandbrake(bool engaged) => handbrakeEngaged = engaged;
 
         private GearState currentGear = GearState.Drive;
         private float gearSwitchTimer;
@@ -136,9 +144,10 @@ namespace SafeDriver.Vehicle
             if (input != null)
             {
                 UpdateGear(input.ThrottleInput, input.BrakeInput);
-                ApplyMotor(input.ThrottleInput);
+                // Freno de mano: corta el motor y aplica freno full (combinado con el freno de pie).
+                ApplyMotor(handbrakeEngaged ? 0f : input.ThrottleInput);
                 ApplySteering(input.SteerInput);
-                ApplyBrakes(input.BrakeInput);
+                ApplyBrakes(Mathf.Max(input.BrakeInput, handbrakeEngaged ? 1f : 0f));
             }
             else
             {

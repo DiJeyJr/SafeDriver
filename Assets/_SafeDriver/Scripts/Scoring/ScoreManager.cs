@@ -67,11 +67,13 @@ namespace SafeDriver.Scoring
             EventBus.Dispatch_ScoreDelta(-penalty);
             EventBus.Dispatch_ScoreChanged(CurrentScore);
 
-            // Infraccion grave: SafeFail inmediato (el auto frena, se muestra pantalla pedagogica)
+            // Infraccion grave: SafeFail inmediato (el auto frena, se muestra pantalla pedagogica).
+            // TriggerSafeFail setea el tipo ANTES de transicionar (evita el race con el cacheo por
+            // evento que hacia que la pantalla mostrara la infraccion anterior).
             if (IsGraveInfraction(type))
             {
                 if (GameManager.Instance != null)
-                    GameManager.Instance.TransitionTo(GameState.SafeFail);
+                    GameManager.Instance.TriggerSafeFail(type, message);
             }
 
             // Score llego a 0: nivel reprobado
@@ -104,6 +106,7 @@ namespace SafeDriver.Scoring
                 InfractionType.DangerousManeuver    => 8,
                 InfractionType.WrongWay             => 18,
                 InfractionType.HitPedestrian        => 30,
+                InfractionType.SevereCollision      => 25,
                 _ => 5,
             };
         }
@@ -117,7 +120,8 @@ namespace SafeDriver.Scoring
         {
             return t == InfractionType.RanRedLight
                 || t == InfractionType.PedestrianNotYielded
-                || t == InfractionType.HitPedestrian;
+                || t == InfractionType.HitPedestrian
+                || t == InfractionType.SevereCollision;
         }
 
         // ============================================================

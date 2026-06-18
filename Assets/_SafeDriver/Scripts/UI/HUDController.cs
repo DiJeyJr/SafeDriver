@@ -19,14 +19,14 @@ namespace SafeDriver.UI
         [Tooltip("Componente SpeedometerNeedle en la aguja del velocimetro del tablero.")]
         public SpeedometerNeedle speedometerNeedle;
 
-        [Tooltip("TextMeshPro del display de score en el tablero.")]
-        public TextMeshPro scoreDisplay;
+        [Tooltip("Display de score (TMP 3D o UGUI).")]
+        public TMP_Text scoreDisplay;
 
-        [Tooltip("TextMeshPro de la senal de limite de velocidad.")]
-        public TextMeshPro speedLimitSign;
+        [Tooltip("Senal de limite de velocidad (TMP 3D o UGUI).")]
+        public TMP_Text speedLimitSign;
 
-        [Tooltip("TextMeshPro de velocidad ACTUAL del auto en km/h (numero grande en el tablero).")]
-        public TextMeshPro currentSpeedDisplay;
+        [Tooltip("Velocidad ACTUAL del auto en km/h (TMP 3D o UGUI).")]
+        public TMP_Text currentSpeedDisplay;
 
         void OnEnable()
         {

@@ -1,0 +1,592 @@
+<!DOCTYPE html>
+<html xmlns="http://www.w3.org/1999/xhtml">
+<head>
+  <meta charset="utf-8" />
+  <meta name="generator" content="pandoc 3.10" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=yes" />
+  <title>Guia del Level Designer - SafeDriver</title>
+  <style>
+    /* Default styles provided by pandoc.
+    ** See https://pandoc.org/MANUAL.html#variables-for-html for config info.
+    */
+    html {
+      color: #1a1a1a;
+      background-color: #fdfdfd;
+    }
+    body {
+      margin: 0 auto;
+      max-width: 36em;
+      padding-left: 50px;
+      padding-right: 50px;
+      padding-top: 50px;
+      padding-bottom: 50px;
+      hyphens: auto;
+      overflow-wrap: break-word;
+      text-rendering: optimizeLegibility;
+      font-kerning: normal;
+    }
+    @media (max-width: 600px) {
+      body {
+        font-size: 0.9em;
+        padding: 12px;
+      }
+      h1 {
+        font-size: 1.8em;
+      }
+    }
+    @media print {
+      html {
+        background-color: white;
+      }
+      body {
+        background-color: transparent;
+        color: black;
+        font-size: 12pt;
+      }
+      p, h2, h3 {
+        orphans: 3;
+        widows: 3;
+      }
+      h2, h3, h4 {
+        page-break-after: avoid;
+      }
+    }
+    p {
+      margin: 1em 0;
+    }
+    a {
+      color: #1a1a1a;
+    }
+    a:visited {
+      color: #1a1a1a;
+    }
+    img {
+      max-width: 100%;
+    }
+    svg {
+      height: auto;
+      max-width: 100%;
+    }
+    h1, h2, h3, h4, h5, h6 {
+      margin-top: 1.4em;
+    }
+    h5, h6 {
+      font-size: 1em;
+      font-style: italic;
+    }
+    h6 {
+      font-weight: normal;
+    }
+    ol, ul {
+      padding-left: 1.7em;
+      margin-top: 1em;
+    }
+    li > ol, li > ul {
+      margin-top: 0;
+    }
+    blockquote {
+      margin: 1em 0 1em 1.7em;
+      padding-left: 1em;
+      border-left: 2px solid #e6e6e6;
+      color: #606060;
+    }
+    code {
+      white-space: pre-wrap;
+      font-family: Menlo, Monaco, Consolas, 'Lucida Console', monospace;
+      font-size: 85%;
+      margin: 0;
+      hyphens: manual;
+    }
+    pre {
+      margin: 1em 0;
+      overflow: auto;
+    }
+    pre code {
+      padding: 0;
+      overflow: visible;
+      overflow-wrap: normal;
+    }
+    .sourceCode {
+     background-color: transparent;
+     overflow: visible;
+    }
+    hr {
+      border: none;
+      border-top: 1px solid #1a1a1a;
+      height: 1px;
+      margin: 1em 0;
+    }
+    table {
+      margin: 1em 0;
+      border-collapse: collapse;
+      width: 100%;
+      overflow-x: auto;
+      display: block;
+      font-variant-numeric: lining-nums tabular-nums;
+    }
+    table caption {
+      margin-bottom: 0.75em;
+    }
+    tbody {
+      margin-top: 0.5em;
+      border-top: 1px solid #1a1a1a;
+      border-bottom: 1px solid #1a1a1a;
+    }
+    th {
+      border-top: 1px solid #1a1a1a;
+      padding: 0.25em 0.5em 0.25em 0.5em;
+    }
+    td {
+      padding: 0.125em 0.5em 0.25em 0.5em;
+    }
+    header {
+      margin-bottom: 4em;
+      text-align: center;
+    }
+    #TOC li {
+      list-style: none;
+    }
+    #TOC ul {
+      padding-left: 1.3em;
+    }
+    #TOC > ul {
+      padding-left: 0;
+    }
+    #TOC a:not(:hover) {
+      text-decoration: none;
+    }
+    span.smallcaps{font-variant: small-caps;}
+    div.columns{display: flex; gap: 1.5em;}
+    div.column{flex: auto;}
+    @media screen {
+    div.columns{gap: min(4vw, 1.5em);}
+    div.column{overflow-x: auto;}
+    }
+    div.hanging-indent{margin-left: 1.5em; text-indent: -1.5em;}
+    /* The extra [class] is a hack that increases specificity enough to
+       override a similar rule in reveal.js */
+    ul.task-list[class]{list-style: none;}
+    ul.task-list li input[type="checkbox"] {
+      font-size: inherit;
+      width: 0.8em;
+      margin: 0 0.8em 0.2em -1.6em;
+      vertical-align: middle;
+    }
+    .display.math{display: block; text-align: center; margin: 0.5rem auto;}
+  </style>
+</head>
+<body>
+<header id="title-block-header">
+<h1 class="title">Guia del Level Designer - SafeDriver</h1>
+</header>
+<h1 id="guía-del-level-designer-armar-un-nivel-de-cero">Guía del Level
+Designer — armar un nivel de cero</h1>
+<p>Esta es <strong>la guía principal</strong> para diseñar niveles en
+SafeDriver <strong>sin tocar código</strong>. Todo se hace arrastrando
+<strong>prefabs</strong> y configurando <strong>assets</strong> desde el
+Inspector.</p>
+<blockquote>
+<p>Si querés el detalle fino de los tipos de misión, ver <a
+href="CrearMisiones.md">CrearMisiones.md</a>. Para la teoría de
+progresión/escenas, <a href="CrearNiveles.md">CrearNiveles.md</a>.
+<strong>Esta guía las resume y las conecta.</strong></p>
+</blockquote>
+<hr />
+<h2 id="el-flujo-en-6-pasos-tldr">🎯 El flujo en 6 pasos (TL;DR)</h2>
+<ol type="1">
+<li><strong>Creá las misiones</strong> del nivel (assets) → <em>Create →
+SafeDriver → Misiones</em>.</li>
+<li><strong>Duplicá</strong> una escena que ya funcione
+(<code>Level_01_City</code>) y renombrala.</li>
+<li><strong>Arrastrá los prefabs de zona</strong> (semáforo, PARE,
+senda, etc.) donde van. Ya vienen armados.</li>
+<li><strong>Creá el LevelDefinition</strong> + montá el
+<strong>MissionSystem</strong> (2 componentes).</li>
+<li><strong>Agregá la escena a Build Settings</strong> y encadenala con
+el siguiente nivel.</li>
+<li><strong>Probá</strong> en VR.</li>
+</ol>
+<p>Cada paso está detallado abajo. La idea central: <strong>arrastrás un
+prefab y se conecta solo con la misión</strong> que tenga el
+<code>ActionType</code> correspondiente. No hay que wirear nada entre el
+prefab y la misión.</p>
+<hr />
+<h2 id="concepto-clave-cómo-se-conecta-todo">🧩 Concepto clave: cómo se
+conecta todo</h2>
+<pre><code>   Prefab de zona en la escena          Misión (asset)
+   (ej. MissionZone_TrafficLight)       (ej. &quot;Frenar en rojo&quot;, Contable)
+            │                                   ▲
+            │ el auto frena en rojo             │ cuenta StoppedAtRedLight
+            ▼                                   │
+        dispara ActionType.StoppedAtRedLight ───┘   (acoplamiento por EventBus)
+            │
+            └─► el panel de objetivos del tablero se tilda</code></pre>
+<p><strong>No hay referencia directa</strong> entre el prefab y la
+misión. Se enganchan por el <strong><code>ActionType</code></strong>: si
+un prefab dispara <code>StoppedAtRedLight</code> y existe una misión que
+cuenta <code>StoppedAtRedLight</code>, esa misión avanza. Por eso podés
+poner 3 semáforos y una sola misión “frenar en rojo 1 vez”: el primero
+que frenes la completa.</p>
+<hr />
+<h2 id="los-prefabs-de-zona-lo-que-arrastrás">🚦 Los prefabs de zona (lo
+que arrastrás)</h2>
+<p>Están en <code>Assets/_SafeDriver/Prefabs/MissionZones/</code>.
+<strong>Todos son autocontenidos</strong>: los arrastrás a la escena,
+los rotás hacia la calle y listo.</p>
+<blockquote>
+<p><strong>Convención de orientación:</strong> el <strong>+Z
+local</strong> de cada prefab = <strong>sentido de avance
+legal</strong>. Rotá el prefab (eje Y) para que su “adelante” apunte
+hacia donde vienen los autos. La flecha azul del Move Tool es el +Z.</p>
+</blockquote>
+<blockquote>
+<p><em>(captura: los 6 prefabs en fila — ver
+<code>img/mission-zones-overview.png</code>)</em></p>
+</blockquote>
+<table>
+<colgroup>
+<col style="width: 11%" />
+<col style="width: 14%" />
+<col style="width: 50%" />
+<col style="width: 23%" />
+</colgroup>
+<thead>
+<tr>
+<th>Prefab</th>
+<th>Qué hace</th>
+<th>Dispara (ActionType / Infracción)</th>
+<th>Hay que wirear</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><strong>MissionZone_TrafficLight</strong></td>
+<td>Semáforo completo: trae su propio
+<code>TrafficLightController</code> + las zonas de premio (frenar en
+rojo) y de cruce (rojo=infracción / verde=premio)</td>
+<td><code>StoppedAtRedLight</code>, <code>PassedGreenLight</code> /
+<code>RanRedLight</code></td>
+<td><strong>Nada.</strong> Ya viene wireado</td>
+</tr>
+<tr>
+<td><strong>MissionZone_StopSign</strong></td>
+<td>Señal de PARE con su línea de detención</td>
+<td><code>StoppedAtPareSign</code> /
+<code>FailedToStopAtSign</code></td>
+<td>Nada</td>
+</tr>
+<tr>
+<td><strong>MissionZone_SpeedLimit</strong></td>
+<td>Zona con límite de velocidad (40 por defecto)</td>
+<td><code>MaintainedLegalSpeed</code> / <code>Speeding</code></td>
+<td>Cambiar el límite en el componente <code>SpeedLimitZone</code> si
+querés otro número</td>
+</tr>
+<tr>
+<td><strong>MissionZone_Direction</strong></td>
+<td>Zona de contramano (sentido obligatorio)</td>
+<td>— / <code>WrongWay</code></td>
+<td>Nada. Rotá el prefab al sentido legal</td>
+</tr>
+<tr>
+<td><strong>MissionZone_Crosswalk</strong></td>
+<td>Senda peatonal con su detector</td>
+<td><code>YieldedToPedestrian</code>, <code>PedestrianNotPresent</code>
+/ <code>PedestrianNotYielded</code></td>
+<td>Para que premie “ceder paso”, wirearle un peatón (ver abajo)</td>
+</tr>
+<tr>
+<td><strong>Pedestrian_Crossing</strong></td>
+<td>Un peatón (con hitbox de atropello)</td>
+<td>— / <code>HitPedestrian</code></td>
+<td>Para que camine, agregarle un path (ver abajo)</td>
+</tr>
+</tbody>
+</table>
+<h3 id="cómo-colocar-un-semáforo-el-más-usado">Cómo colocar un semáforo
+(el más usado)</h3>
+<ol type="1">
+<li>Arrastrá <code>MissionZone_TrafficLight</code> a la escena.</li>
+<li>Movelo sobre la línea de detención del carril.</li>
+<li>Rotalo en Y para que el <strong>+Z mire hacia donde avanzan los
+autos</strong>.</li>
+<li>Listo: los focos ciclan solos (verde→amarillo→rojo) y las zonas ya
+están wireadas a su controller interno. Frenar en rojo premia; cruzar en
+rojo es infracción grave.</li>
+</ol>
+<h3 id="cómo-colocar-una-senda-con-peatón-que-cede-el-paso">Cómo colocar
+una senda con peatón que cede el paso</h3>
+<ol type="1">
+<li>Arrastrá <code>MissionZone_Crosswalk</code> sobre la senda.</li>
+<li>Arrastrá <code>Pedestrian_Crossing</code> a un costado (la
+vereda).</li>
+<li>En el <strong><code>PedestrianCrossingDetector</code></strong> de la
+senda, asigná el peatón al campo notificador (o usá
+<code>DemoPedestrianFaker</code> con dos waypoints, ver
+<code>Level_01_City</code> como ejemplo: <code>CrosswalkDetector</code>
++ <code>PedestrianFaker</code> + <code>WaypointA/B</code>).</li>
+<li><strong>Bonus (recomendado):</strong> poné un
+<code>CrosswalkTrafficGate</code> sobre el asfalto y asignáselo al
+peatón → así el peatón <strong>espera</strong> si viene un auto y no se
+manda a cruzar (evita el “no cediste el paso” injusto). Ver
+<code>Level_01_City</code>.</li>
+</ol>
+<hr />
+<h2 id="paso-1-crear-las-misiones-del-nivel">🚗 Paso 1 — Crear las
+misiones del nivel</h2>
+<ol type="1">
+<li><p>En <strong>Project</strong>, andá a la carpeta del nivel (ej.
+<code>Assets/_SafeDriver/Missions/MiNivel/</code>).</p></li>
+<li><p>Click derecho → <strong>Create → SafeDriver → Misiones →
+Contable</strong> (el tipo más común).</p></li>
+<li><p>Nombrá el asset (ej. <code>m_rojo</code>) y completá el
+Inspector:</p>
+<table>
+<thead>
+<tr>
+<th>Campo</th>
+<th>Qué poner</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>Mission Id</td>
+<td>id único sin espacios (<code>m_rojo</code>)</td>
+</tr>
+<tr>
+<td>Title</td>
+<td>lo que ve el jugador (<code>Detenerse en semáforo rojo</code>)</td>
+</tr>
+<tr>
+<td>Points</td>
+<td>puntos al completar (<code>10</code>)</td>
+</tr>
+<tr>
+<td>Is Optional</td>
+<td>desmarcado = obligatoria para pasar el nivel</td>
+</tr>
+<tr>
+<td><strong>Action</strong></td>
+<td>la acción que cuenta (<code>Stopped At Red Light</code>)</td>
+</tr>
+<tr>
+<td>Required Count</td>
+<td>cuántas veces (<code>1</code>)</td>
+</tr>
+</tbody>
+</table></li>
+</ol>
+<blockquote>
+<p>Tipos de misión (Contable / Secuencia / Con tiempo / Compuesta) y la
+lista completa de <code>ActionType</code>: ver <a
+href="CrearMisiones.md">CrearMisiones.md</a>. <em>(captura:
+<code>img/mision-contable-inspector.png</code>)</em></p>
+</blockquote>
+<p><strong>Regla de oro:</strong> el <code>Action</code> de la misión
+tiene que coincidir con lo que dispara el prefab. Si ponés un
+<code>MissionZone_StopSign</code> querés una misión con
+<code>Action = Stopped At Pare Sign</code>.</p>
+<hr />
+<h2 id="paso-2-armar-la-escena">🏙️ Paso 2 — Armar la escena</h2>
+<p>La forma <strong>más segura</strong>: duplicar
+<code>Level_01_City</code> (ya trae el rig VR con Building Blocks, el
+auto con tag <code>PlayerVehicle</code>, el tablero, etc.).</p>
+<ol type="1">
+<li>En Project, seleccioná
+<code>Assets/_SafeDriver/Scenes/Level_01_City.unity</code> →
+<strong>Ctrl+D</strong>.</li>
+<li>Renombrala (ej. <code>Level_02_Avenida.unity</code>).</li>
+<li>Abrila. Borrá/movés los prefabs de zona viejos y armás tu
+mundo.</li>
+</ol>
+<blockquote>
+<p>⚠️ El auto del jugador <strong>debe</strong> tener el tag
+<code>PlayerVehicle</code> (los prefabs lo detectan por ese tag). Si
+duplicaste de <code>Level_01_City</code> ya lo tiene.</p>
+</blockquote>
+<hr />
+<h2 id="paso-3-arrastrar-los-prefabs-de-zona">🧱 Paso 3 — Arrastrar los
+prefabs de zona</h2>
+<p>Arrastrá desde <code>Assets/_SafeDriver/Prefabs/MissionZones/</code>
+los que necesite el nivel, posicionalos sobre la calle y <strong>rotalos
+al sentido de avance</strong> (+Z local).</p>
+<ul>
+<li>Semáforo → sobre la línea de detención.</li>
+<li>PARE → en la esquina, con la línea sobre el cruce.</li>
+<li>Límite de velocidad → al inicio del tramo (la zona cubre el tramo
+siguiente).</li>
+<li>Senda + peatón → sobre la cebra.</li>
+<li>Contramano → en el carril de sentido único.</li>
+</ul>
+<blockquote>
+<p><em>(captura: <code>img/escena-prefabs-colocados.png</code>)</em></p>
+</blockquote>
+<p>No hace falta tocar nada más en los prefabs (salvo el límite de
+velocidad si querés otro número, o wirear el peatón a la senda).</p>
+<hr />
+<h2 id="paso-4-crear-el-leveldefinition-y-montar-el-missionsystem">🎛️
+Paso 4 — Crear el LevelDefinition y montar el MissionSystem</h2>
+<h3 id="a.-el-leveldefinition-el-índice-del-nivel">4a. El
+LevelDefinition (el “índice” del nivel)</h3>
+<ol type="1">
+<li><p><strong>Create → SafeDriver → Nivel</strong>. Guardalo en
+<code>Assets/_SafeDriver/Missions/Levels/</code>.</p></li>
+<li><p>Completá:</p>
+<table>
+<colgroup>
+<col style="width: 38%" />
+<col style="width: 61%" />
+</colgroup>
+<thead>
+<tr>
+<th>Campo</th>
+<th>Qué poner</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>Level Id</td>
+<td>id único (<code>level_02_avenida</code>)</td>
+</tr>
+<tr>
+<td>Display Name</td>
+<td>nombre en el menú (<code>Avenida - Intermedio</code>)</td>
+</tr>
+<tr>
+<td>Scene Name</td>
+<td>nombre EXACTO de la escena, sin <code>.unity</code>
+(<code>Level_02_Avenida</code>)</td>
+</tr>
+<tr>
+<td><strong>Missions</strong></td>
+<td>arrastrá los assets de misión que creaste en el paso 1</td>
+</tr>
+<tr>
+<td>Next Level</td>
+<td>el <code>LevelDefinition</code> del siguiente nivel (o vacío si es
+el último)</td>
+</tr>
+<tr>
+<td>Is Free Roam</td>
+<td>desmarcado (salvo el nivel de modo libre)</td>
+</tr>
+</tbody>
+</table></li>
+</ol>
+<blockquote>
+<p><em>(captura:
+<code>img/leveldefinition-inspector.png</code>)</em></p>
+</blockquote>
+<h3 id="b.-el-missionsystem-los-managers-en-la-escena">4b. El
+MissionSystem (los managers en la escena)</h3>
+<ol type="1">
+<li>Creá un GameObject vacío llamado
+<strong><code>MissionSystem</code></strong>.</li>
+<li>Agregale <strong>MissionManager</strong> y
+<strong>LevelManager</strong>.</li>
+<li>En <strong>MissionManager</strong>: desmarcá
+<code>Auto Load Inspector Missions</code> (el LevelManager inyecta las
+misiones; si lo dejás, se cargan dos veces).</li>
+<li>En <strong>LevelManager</strong>: asigná tu
+<code>LevelDefinition</code> al campo <strong>Level</strong>.</li>
+</ol>
+<pre><code>MissionSystem
+├─ MissionManager   (Auto Load Inspector Missions = OFF)
+└─ LevelManager     (Level = Level_02_Avenida.asset)</code></pre>
+<blockquote>
+<p><em>(captura:
+<code>img/missionsystem-componentes.png</code>)</em></p>
+</blockquote>
+<blockquote>
+<p>💡 Si duplicaste <code>Level_01_City</code>, el
+<code>MissionSystem</code> ya está: solo cambiá el <code>Level</code>
+del <code>LevelManager</code> por tu nuevo
+<code>LevelDefinition</code>.</p>
+</blockquote>
+<hr />
+<h2 id="paso-5-build-settings-y-encadenar">📦 Paso 5 — Build Settings y
+encadenar</h2>
+<ol type="1">
+<li><strong>File → Build Settings</strong> (o <strong>Build
+Profiles</strong> en Unity 6) → con la escena abierta, <strong>Add Open
+Scenes</strong>.</li>
+<li>Verificá que <code>MainMenu</code> quede en índice
+<strong>0</strong>.</li>
+<li><strong>Encadenar:</strong> en cada <code>LevelDefinition</code>, el
+campo <strong>Next Level</strong> apunta al siguiente. Al completar las
+misiones obligatorias, el <code>LevelManager</code> desbloquea ese Next
+Level y muestra el panel de fin de nivel. Si Next Level está vacío, es
+el último (se marca la campaña como completa → habilita el modo
+libre).</li>
+</ol>
+<blockquote>
+<p>⚠️ Si la escena no está en Build Settings, el cambio de nivel
+<strong>falla</strong> (<code>SceneManager.LoadScene</code> no la
+encuentra).</p>
+</blockquote>
+<hr />
+<h2 id="tráfico-npc-opcional-pero-recomendado">🚙 Tráfico NPC (opcional
+pero recomendado)</h2>
+<p>Para llenar el nivel de autos que circulan, respetan el semáforo,
+frenan ante el peatón y no te embisten:</p>
+<ul>
+<li>En <code>Level_01_City</code> está el menú
+<strong><code>SafeDriver/Setup City Traffic</code></strong> que monta un
+loop de autos sobre la avenida. Para tu nivel, ajustá las coordenadas
+del path en
+<code>Assets/_SafeDriver/Scripts/Editor/SetupCityTraffic.cs</code> (o
+copialo y adaptalo).</li>
+<li>La <strong>velocidad / tamaño / cantidad</strong> se configuran en
+el asset
+<code>Assets/_SafeDriver/Config/DefaultTrafficProfile.asset</code> (un
+<code>TrafficProfile</code>). <strong>Subí la velocidad por nivel para
+escalar la dificultad.</strong></li>
+</ul>
+<hr />
+<h2 id="checklist-de-un-nivel-nuevo">✅ Checklist de un nivel nuevo</h2>
+<ul class="task-list">
+<li><label><input type="checkbox" />Misiones creadas (assets) con el
+<code>Action</code> correcto</label></li>
+<li><label><input type="checkbox" />Escena duplicada de una que funcione
+(auto con tag <code>PlayerVehicle</code>)</label></li>
+<li><label><input type="checkbox" />Prefabs de zona arrastrados,
+posicionados y <strong>rotados al sentido de
+avance</strong></label></li>
+<li><label><input type="checkbox" />Peatón wireado a la senda (si hay
+misión de “ceder paso”)</label></li>
+<li><label><input type="checkbox" /><code>LevelDefinition</code> con
+Scene Name correcto + misiones asignadas</label></li>
+<li><label><input type="checkbox" /><code>MissionSystem</code>:
+MissionManager (auto-load OFF) + LevelManager (Level
+asignado)</label></li>
+<li><label><input type="checkbox" />Escena en Build
+Settings</label></li>
+<li><label><input type="checkbox" /><code>Next Level</code> encadenado
+(o vacío si es el último)</label></li>
+<li><label><input type="checkbox" />(Opcional) Tráfico NPC montado y
+<code>TrafficProfile</code> ajustado</label></li>
+<li><label><input type="checkbox" />Probado en VR: las misiones se
+tildan y el nivel termina al completarlas</label></li>
+</ul>
+<hr />
+<h2 id="probar-rápido-sin-armar-todo">🧪 Probar rápido sin armar
+todo</h2>
+<ol type="1">
+<li>Abrí <code>Level_01_City</code> (ya tiene todo montado).</li>
+<li>Seleccioná <code>MissionSystem</code> → <code>LevelManager</code> →
+su <code>Level</code> (el LevelDefinition).</li>
+<li>Abrí ese asset y agregá/quitá misiones del array
+<strong>Missions</strong>.</li>
+<li><strong>Play</strong> → el panel de objetivos del tablero refleja
+las misiones cargadas.</li>
+</ol>
+<hr />
+<h2 id="sobre-las-capturas">📸 Sobre las capturas</h2>
+<p>Los marcadores <code>_(captura: img/...)_</code> señalan dónde va una
+imagen del editor (Inspector, jerarquía). Para completarlas: sacá el
+screenshot desde Unity, guardalo en <code>Docs/img/</code> con ese
+nombre, y reemplazá la línea del marcador por
+<code>![desc](img/nombre.png)</code>. La guía es completa sin las
+imágenes; son un complemento.</p>
+</body>
+</html>

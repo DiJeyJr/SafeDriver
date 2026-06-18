@@ -23,8 +23,8 @@ namespace SafeDriver.Scoring
         [Tooltip("Arranca automaticamente al entrar al estado Driving.")]
         [SerializeField] private bool startOnDriving = true;
 
-        [Header("Display (TMP 3D, opcional)")]
-        [SerializeField] private TextMeshPro display;
+        [Header("Display (TMP 3D o UGUI, opcional)")]
+        [SerializeField] private TMP_Text display;
 
         [Tooltip("Color normal del timer.")]
         [SerializeField] private Color normalColor = Color.white;

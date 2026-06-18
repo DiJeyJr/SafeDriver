@@ -14,5 +14,6 @@ namespace SafeDriver.Core
         DangerousManeuver,    // Maniobra peligrosa generica
         WrongWay,             // Circular en contramano
         HitPedestrian,        // Atropello a un peaton (grave)
+        SevereCollision,      // Choque grave / auto muy daniado (grave) — sistema de integridad
     }
 }

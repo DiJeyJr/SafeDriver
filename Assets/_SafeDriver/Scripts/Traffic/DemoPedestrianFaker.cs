@@ -24,6 +24,10 @@ namespace SafeDriver.Traffic
         [SerializeField] private float idleSeconds = 4f;
         [SerializeField] private float crossingSeconds = 5f;
 
+        [Header("Percepcion")]
+        [Tooltip("Compuerta de la senda: el peaton espera a que NO haya vehiculos antes de bajar del cordon.")]
+        [SerializeField] private CrosswalkTrafficGate trafficGate;
+
         private IPedestrianCrossingNotifier notifier;
 
         void Start()
@@ -40,6 +44,11 @@ namespace SafeDriver.Traffic
             while (true)
             {
                 yield return new WaitForSeconds(idleSeconds);
+
+                // Mira antes de cruzar: espera en el cordon mientras haya un vehiculo en la senda.
+                // Asi no se manda a cruzar cuando el player (o un NPC) esta pasando justo.
+                while (trafficGate != null && !trafficGate.IsClear)
+                    yield return null;
 
                 notifier?.SetPedestriansPresent(true);
                 yield return Animate(toB);

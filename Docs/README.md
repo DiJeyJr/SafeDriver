@@ -4,10 +4,14 @@ Guías para extender el juego sin tocar el código core.
 
 ## Índice
 
-- **[Cómo crear misiones](CrearMisiones.md)** — armar objetivos (contables, en
-  secuencia, con tiempo, compuestos) como assets, sin programar.
-- **[Cómo crear niveles](CrearNiveles.md)** — armar una escena nueva, conectar
-  sus misiones y encadenarla en la progresión.
+- **🎯 [Guía del Level Designer](GuiaLevelDesigner.md)** — **EMPEZÁ POR ACÁ.** Armar
+  un nivel completo de cero en 6 pasos, usando los **prefabs de zona drag-and-drop**
+  (semáforo, PARE, senda, etc.). Es la guía principal y autocontenida.
+- **[Cómo crear misiones](CrearMisiones.md)** — detalle fino de los tipos de misión
+  (contables, secuencia, con tiempo, compuestas).
+- **[Cómo crear niveles](CrearNiveles.md)** — teoría de escenas/progresión y modo
+  libre (complemento de la guía principal). *Nota: la parte de "colocar detectores a
+  mano" quedó vieja — usá los prefabs de la Guía del Level Designer.*
 
 ## Sobre las imágenes
 
