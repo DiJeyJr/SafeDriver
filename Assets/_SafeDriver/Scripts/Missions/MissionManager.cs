@@ -89,6 +89,20 @@ namespace SafeDriver.Missions
             MissionsLoaded?.Invoke();
         }
 
+        /// <summary>
+        /// Registra una mision adicional sin descartar las ya cargadas. La usan los
+        /// MissionKits al arrancar la escena (corren despues de LevelManager/Start).
+        /// </summary>
+        public void RegisterMission(MissionDefinition def)
+        {
+            if (def == null) return;
+            var runtime = def.CreateRuntime();
+            runtime.Changed += HandleMissionChanged;
+            active.Add(runtime);
+            runtime.Activate();
+            MissionsLoaded?.Invoke();
+        }
+
         /// <summary>Desactiva y limpia todas las misiones activas.</summary>
         public void ClearMissions()
         {
