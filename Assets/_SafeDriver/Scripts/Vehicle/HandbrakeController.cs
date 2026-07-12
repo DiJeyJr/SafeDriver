@@ -7,10 +7,11 @@ using Oculus.Interaction.Input;
 namespace SafeDriver.Vehicle
 {
     /// <summary>
-    /// Palanca de freno de mano (2 posiciones). Lee el angulo local X del pivot: si la palanca esta
-    /// tirada ARRIBA (angulo > engageThreshold) pone el freno de mano (VehicleController.SetHandbrake(true));
-    /// abajo, lo saca. Snap-on-release: al soltar, la palanca queda arriba (puesto) o abajo (sacado)
-    /// segun de que lado del threshold quedo. Pulso haptico al enganchar/desenganchar.
+    /// Palanca de freno de mano (2 posiciones). Lee el angulo local X del pivot: en reposo ARRIBA
+    /// (angulo ~0) el freno esta PUESTO (VehicleController.SetHandbrake(true)); al bajarla
+    /// (angulo > releaseThreshold) se suelta, como un freno de mano real. Snap-on-release: al soltar,
+    /// la palanca queda arriba (puesto) o abajo (suelto) segun de que lado del threshold quedo.
+    /// Pulso haptico al enganchar/desenganchar.
     ///
     /// Se monta clonando el SteeringWheel (mismo stack de grab + OneGrabRotateTransformer), igual que el
     /// GearShifter — ver Editor/CloneWheelAsHandbrake.cs.
@@ -23,10 +24,10 @@ namespace SafeDriver.Vehicle
         [SerializeField] private Grabbable grabbable;
 
         [Header("Angulos (grados, eje X local)")]
-        [Tooltip("Angulo de la palanca ARRIBA (freno puesto).")]
-        [SerializeField] private float engagedAngle = 40f;
-        [Tooltip("Por encima de este angulo se considera el freno PUESTO.")]
-        [SerializeField] private float engageThreshold = 20f;
+        [Tooltip("Angulo de la palanca ABAJO (freno suelto). El reposo (0) es arriba, con el freno puesto.")]
+        [SerializeField] private float releasedAngle = 40f;
+        [Tooltip("Por encima de este angulo (palanca bajada) se considera el freno SUELTO.")]
+        [SerializeField] private float releaseThreshold = 20f;
 
         [Header("Snap on release")]
         [SerializeField] private bool snapOnRelease = true;
@@ -74,7 +75,8 @@ namespace SafeDriver.Vehicle
         private void Evaluate(bool force)
         {
             float angle = NormalizeAngle(pivot.localEulerAngles.x);
-            bool nowEngaged = angle > engageThreshold;
+            // Invertido respecto al diseño original: arriba (reposo, ~0) = puesto, abajo = suelto.
+            bool nowEngaged = angle < releaseThreshold;
             if (!force && nowEngaged == engaged) return;
 
             bool changed = nowEngaged != engaged;
@@ -89,7 +91,7 @@ namespace SafeDriver.Vehicle
             {
                 float current = NormalizeAngle(pivot.localEulerAngles.x);
                 snapStartX = current;
-                snapTargetX = current > engageThreshold ? engagedAngle : 0f;
+                snapTargetX = current > releaseThreshold ? releasedAngle : 0f;
                 snapStartTime = Time.unscaledTime;
                 snapping = true;
             }
