@@ -1,0 +1,905 @@
+<!DOCTYPE html>
+<html xmlns="http://www.w3.org/1999/xhtml">
+<head>
+  <meta charset="utf-8" />
+  <meta name="generator" content="pandoc 3.10" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=yes" />
+  <title>Bitacora de Desarrollo - SafeDriver</title>
+  <style>
+    /* Default styles provided by pandoc.
+    ** See https://pandoc.org/MANUAL.html#variables-for-html for config info.
+    */
+    html {
+      color: #1a1a1a;
+      background-color: #fdfdfd;
+    }
+    body {
+      margin: 0 auto;
+      max-width: 36em;
+      padding-left: 50px;
+      padding-right: 50px;
+      padding-top: 50px;
+      padding-bottom: 50px;
+      hyphens: auto;
+      overflow-wrap: break-word;
+      text-rendering: optimizeLegibility;
+      font-kerning: normal;
+    }
+    @media (max-width: 600px) {
+      body {
+        font-size: 0.9em;
+        padding: 12px;
+      }
+      h1 {
+        font-size: 1.8em;
+      }
+    }
+    @media print {
+      html {
+        background-color: white;
+      }
+      body {
+        background-color: transparent;
+        color: black;
+        font-size: 12pt;
+      }
+      p, h2, h3 {
+        orphans: 3;
+        widows: 3;
+      }
+      h2, h3, h4 {
+        page-break-after: avoid;
+      }
+    }
+    p {
+      margin: 1em 0;
+    }
+    a {
+      color: #1a1a1a;
+    }
+    a:visited {
+      color: #1a1a1a;
+    }
+    img {
+      max-width: 100%;
+    }
+    svg {
+      height: auto;
+      max-width: 100%;
+    }
+    h1, h2, h3, h4, h5, h6 {
+      margin-top: 1.4em;
+    }
+    h5, h6 {
+      font-size: 1em;
+      font-style: italic;
+    }
+    h6 {
+      font-weight: normal;
+    }
+    ol, ul {
+      padding-left: 1.7em;
+      margin-top: 1em;
+    }
+    li > ol, li > ul {
+      margin-top: 0;
+    }
+    blockquote {
+      margin: 1em 0 1em 1.7em;
+      padding-left: 1em;
+      border-left: 2px solid #e6e6e6;
+      color: #606060;
+    }
+    code {
+      white-space: pre-wrap;
+      font-family: Menlo, Monaco, Consolas, 'Lucida Console', monospace;
+      font-size: 85%;
+      margin: 0;
+      hyphens: manual;
+    }
+    pre {
+      margin: 1em 0;
+      overflow: auto;
+    }
+    pre code {
+      padding: 0;
+      overflow: visible;
+      overflow-wrap: normal;
+    }
+    .sourceCode {
+     background-color: transparent;
+     overflow: visible;
+    }
+    hr {
+      border: none;
+      border-top: 1px solid #1a1a1a;
+      height: 1px;
+      margin: 1em 0;
+    }
+    table {
+      margin: 1em 0;
+      border-collapse: collapse;
+      width: 100%;
+      overflow-x: auto;
+      display: block;
+      font-variant-numeric: lining-nums tabular-nums;
+    }
+    table caption {
+      margin-bottom: 0.75em;
+    }
+    tbody {
+      margin-top: 0.5em;
+      border-top: 1px solid #1a1a1a;
+      border-bottom: 1px solid #1a1a1a;
+    }
+    th {
+      border-top: 1px solid #1a1a1a;
+      padding: 0.25em 0.5em 0.25em 0.5em;
+    }
+    td {
+      padding: 0.125em 0.5em 0.25em 0.5em;
+    }
+    header {
+      margin-bottom: 4em;
+      text-align: center;
+    }
+    #TOC li {
+      list-style: none;
+    }
+    #TOC ul {
+      padding-left: 1.3em;
+    }
+    #TOC > ul {
+      padding-left: 0;
+    }
+    #TOC a:not(:hover) {
+      text-decoration: none;
+    }
+    span.smallcaps{font-variant: small-caps;}
+    div.columns{display: flex; gap: 1.5em;}
+    div.column{flex: auto;}
+    @media screen {
+    div.columns{gap: min(4vw, 1.5em);}
+    div.column{overflow-x: auto;}
+    }
+    div.hanging-indent{margin-left: 1.5em; text-indent: -1.5em;}
+    /* The extra [class] is a hack that increases specificity enough to
+       override a similar rule in reveal.js */
+    ul.task-list[class]{list-style: none;}
+    ul.task-list li input[type="checkbox"] {
+      font-size: inherit;
+      width: 0.8em;
+      margin: 0 0.8em 0.2em -1.6em;
+      vertical-align: middle;
+    }
+    .display.math{display: block; text-align: center; margin: 0.5rem auto;}
+  </style>
+</head>
+<body>
+<header id="title-block-header">
+<h1 class="title">Bitacora de Desarrollo - SafeDriver</h1>
+</header>
+<nav id="TOC" role="doc-toc">
+<ul>
+<li><a href="#bitácora-de-desarrollo-safedriver"
+id="toc-bitácora-de-desarrollo-safedriver">Bitácora de Desarrollo,
+SafeDriver</a>
+<ul>
+<li><a href="#metodología-y-herramientas"
+id="toc-metodología-y-herramientas">Metodología y herramientas</a></li>
+<li><a
+href="#etapa-1.-génesis-prototipo-arvuforia-y-la-decisión-de-pivotear-a-vr-3003-al-1304"
+id="toc-etapa-1.-génesis-prototipo-arvuforia-y-la-decisión-de-pivotear-a-vr-3003-al-1304">Etapa
+1. Génesis: prototipo AR/Vuforia y la decisión de pivotear a VR (30/03
+al 13/04)</a></li>
+<li><a
+href="#etapa-2.-cimientos-vr-y-subsistemas-en-paralelo-1504-al-1604"
+id="toc-etapa-2.-cimientos-vr-y-subsistemas-en-paralelo-1504-al-1604">Etapa
+2. Cimientos VR y subsistemas en paralelo (15/04 al 16/04)</a></li>
+<li><a
+href="#etapa-3.-el-volante-inmersivo-y-su-cadena-de-bugs-1704-al-1804"
+id="toc-etapa-3.-el-volante-inmersivo-y-su-cadena-de-bugs-1704-al-1804">Etapa
+3. El volante inmersivo y su cadena de bugs (17/04 al 18/04)</a></li>
+<li><a
+href="#etapa-4.-ciudad-tráfico-ambiental-ui-audio-y-build-2004-al-2604"
+id="toc-etapa-4.-ciudad-tráfico-ambiental-ui-audio-y-build-2004-al-2604">Etapa
+4. Ciudad, tráfico ambiental, UI, audio y build (20/04 al
+26/04)</a></li>
+<li><a
+href="#etapa-5.-integración-mayor-menú-niveles-pausa-tráfico-npc-y-tanda-de-fixes-0605-al-1205"
+id="toc-etapa-5.-integración-mayor-menú-niveles-pausa-tráfico-npc-y-tanda-de-fixes-0605-al-1205">Etapa
+5. Integración mayor: menú, niveles, pausa, tráfico NPC y tanda de fixes
+(06/05 al 12/05)</a></li>
+<li><a
+href="#etapa-6.-arte-sistema-data-driven-refactor-de-detección-y-ui-nueva-1705-al-0106"
+id="toc-etapa-6.-arte-sistema-data-driven-refactor-de-detección-y-ui-nueva-1705-al-0106">Etapa
+6. Arte, sistema data-driven, refactor de detección y UI nueva (17/05 al
+01/06)</a></li>
+<li><a
+href="#etapa-7.-consolidación-final-npc-sólidos-integridad-controles-nuevos-y-entrega-1206-al-1806"
+id="toc-etapa-7.-consolidación-final-npc-sólidos-integridad-controles-nuevos-y-entrega-1206-al-1806">Etapa
+7. Consolidación final: NPC sólidos, integridad, controles nuevos y
+entrega (12/06 al 18/06)</a></li>
+<li><a href="#estado-final-del-proyecto"
+id="toc-estado-final-del-proyecto">Estado final del proyecto</a></li>
+<li><a href="#lecciones-aprendidas-errores-recurrentes"
+id="toc-lecciones-aprendidas-errores-recurrentes">Lecciones aprendidas
+(errores recurrentes)</a></li>
+</ul></li>
+</ul>
+</nav>
+<h1 id="bitácora-de-desarrollo-safedriver">Bitácora de Desarrollo,
+SafeDriver</h1>
+<blockquote>
+<p>Registro cronológico del desarrollo de <strong>SafeDriver</strong>,
+simulador VR de escuela de manejo para Meta Quest (Unity 6 / URP / Meta
+XR SDK). Documenta, por etapas y con fechas, los
+<strong>cambios</strong> que se fueron haciendo y los
+<strong>errores/bugs</strong> que surgieron y cómo se resolvieron, desde
+el primer commit hasta la entrega.</p>
+<p><strong>Período:</strong> 30/03/2026 al 18/06/2026 · <strong>97
+commits</strong>. Reconstruida a partir de la historia real del
+repositorio Git.</p>
+</blockquote>
+<hr />
+<h2 id="metodología-y-herramientas">Metodología y herramientas</h2>
+<ul>
+<li><strong>Motor:</strong> Unity 6 (URP), target Meta Quest 3 (Android
+/ IL2CPP).</li>
+<li><strong>VR:</strong> Meta XR All-in-One SDK, Building Blocks +
+Interaction SDK (se migró desde el stack OVR clásico durante el
+desarrollo).</li>
+<li><strong>Arquitectura:</strong> un <strong>EventBus</strong> central
+desacopla las capas (Core, Vehicle, Scoring, Traffic, UI, Audio,
+Missions), cada una en su propia <em>assembly definition</em>.</li>
+<li><strong>Flujo de Git:</strong> trabajo por <strong>ramas</strong>
+(al principio una por subsistema; luego <em>feature branches</em> que se
+mergean a <code>develop</code>). <code>main</code> quedó como base
+estable.</li>
+<li><strong>Testing:</strong> validación en el headset (Quest 3) vía
+build/install; tests automáticos EditMode para el sistema de
+misiones.</li>
+</ul>
+<blockquote>
+<p>El proyecto pasó por un <strong>pivote tecnológico</strong> temprano:
+nació como prototipo de Realidad Aumentada (Vuforia) y se reorientó a
+Realidad Virtual para Meta Quest.</p>
+</blockquote>
+<hr />
+<h2
+id="etapa-1.-génesis-prototipo-arvuforia-y-la-decisión-de-pivotear-a-vr-3003-al-1304">Etapa
+1. Génesis: prototipo AR/Vuforia y la decisión de pivotear a VR (30/03
+al 13/04)</h2>
+<p>SafeDriver no nació como simulador VR. Arrancó como un prototipo de
+<strong>Realidad Aumentada</strong> sobre un marcador físico: la idea
+inicial era una tarjeta/carta que, al ser detectada por la cámara,
+hiciera aparecer una mini ciudad encima, con autos, peatones y semáforos
+con los que el usuario interactuaba tocando la pantalla. Recién al final
+de esta etapa se decidió cambiar de rumbo hacia VR para Meta Quest.</p>
+<ul>
+<li><strong>2026-03-30.</strong> Se crea el proyecto Unity
+(<code>Initial commit</code>) sobre el template URP (render pipeline PC
+y Mobile, volume profiles, nuevo Input System,
+<code>SampleScene</code>). El commit <code>base</code> deja el proyecto
+fijado a su versión de Unity y ajusta settings de editor/graphics/shader
+graph para partir limpio.</li>
+<li><strong>2026-04-07.</strong> <code>URP autofix?</code>:
+actualización de los URP RenderPipeline Assets de la v12 a la v13. El
+signo de pregunta refleja lo ocurrido: al abrir el proyecto, Unity
+disparó su <strong>migración automática</strong> de assets URP y
+reescribió los <code>.asset</code>. No fue un cambio buscado, sino una
+migración forzada por el editor que hubo que commitear para no arrastrar
+diffs sucios entre máquinas.</li>
+<li><strong>2026-04-12.</strong> Comienza el prototipo AR:
+<ul>
+<li><strong>Base de Vuforia:</strong> se integra <strong>Vuforia Engine
+11.4.4</strong> (vendorizado como <code>.tgz</code>), su configuración y
+el script de migración. La escena se arma alrededor de un Image
+Target.</li>
+<li><strong>Tarjeta AR + mini ciudad:</strong> entra el grueso del
+contenido, el marcador, los modelos low-poly
+(<code>MiniCity_Complete.fbx</code>), autos, peatones, semáforos y sus
+materiales de luz en dos estados, más un <code>SceneBuilder</code> para
+armar la escena por código. <code>ARTouchInteraction</code> lanza un
+raycast ante un tap (móvil) o click (editor) y cicla el estado del
+semáforo tocado.</li>
+<li><strong>Bug, modelos importados con rotaciones/pivotes mal:</strong>
+los <code>.fbx</code> venían girados desde el exportador. Se corrigieron
+en <strong>Blender</strong> con una tanda de scripts Python
+(<code>fix_models.py</code>, <code>build_city_final.py</code>,
+<code>build_final_noparents.py</code>, etc.); este último sugiere que
+además hubo que <strong>aplanar la jerarquía de padres</strong> del FBX
+para que instanciara bien.</li>
+</ul></li>
+<li><strong>2026-04-13.</strong>
+<code>UI interactiva para semáforos</code>: se reemplaza el control por
+tap directo por una <strong>UI en pantalla</strong> con tres scripts:
+<code>TrackingUIController</code> (muestra/oculta la UI según si el
+marcador está trackeado, con fade, resuelve que la UI no quede activa al
+perder la tarjeta), <code>TrafficLightButton</code> (botón con cooldown
+que evita el spam de pulsaciones durante el cambio de luces) y
+<code>TrafficLightIndicator</code>.</li>
+</ul>
+<p><strong>El pivote a VR:</strong></p>
+<ul>
+<li><strong>2026-04-12.</strong> <code>VR plug-ins</code>: se agregan al
+<code>manifest.json</code> los paquetes que definen el stack VR:
+<strong>XR Interaction Toolkit 3.3.1, XR Management 4.5.4, XR Oculus
+4.5.4 (loader de Quest), XR Hands 1.7.3, XR Composition Layers
+2.3.0</strong>, y los assets de configuración XR. Acá el proyecto deja
+de ser AR móvil y apunta a Meta Quest.</li>
+<li><strong>2026-04-12.</strong> <code>Scene and XR settings</code>:
+entra el paquete de arte <strong>SimplePoly City (Low Poly)</strong>,
+que pasa a ser la base de ciudad para el entorno VR en lugar de la mini
+ciudad sobre marcador.</li>
+<li><strong>2026-04-13.</strong> <code>Ciudad</code>: se crea la escena
+<code>Ciudad.unity</code>, primer escenario propio ya en clave VR. Este
+commit quedó como <code>origin/main</code> y cierra la génesis: el
+proyecto queda comprometido con VR sobre Quest, dejando atrás
+Vuforia.</li>
+</ul>
+<blockquote>
+<p><em>Nota:</em> en esta etapa aún no existe la estructura
+<code>Assets/_SafeDriver/</code> ni las asmdef; todo vive suelto bajo
+<code>Assets/</code>. El armado de modelos se hacía en otra máquina.</p>
+</blockquote>
+<hr />
+<h2
+id="etapa-2.-cimientos-vr-y-subsistemas-en-paralelo-1504-al-1604">Etapa
+2. Cimientos VR y subsistemas en paralelo (15/04 al 16/04)</h2>
+<p>En muy pocos días se levanta casi toda la base del simulador,
+trabajando por <strong>ramas paralelas, una por subsistema</strong>. Acá
+nace la estructura definitiva bajo <code>Assets/_SafeDriver/</code> y
+las assemblies (<code>Core</code>, <code>Audio</code>,
+<code>Scoring</code>, <code>Traffic</code>, <code>UI</code>,
+<code>VR</code>, <code>Vehicle</code>) con el <code>EventBus</code> como
+punto de integración.</p>
+<ul>
+<li><strong>2026-04-15. Fix “VR not working”.</strong> El primer gran
+escollo: el proyecto no arrancaba en el Quest. Se completó la
+configuración nativa de Android/Oculus que faltaba:
+<code>AndroidManifest.xml</code> con la categoría VR,
+<code>uses-feature</code> de head-tracking como requerido, lista de
+dispositivos soportados (quest/2/pro/3/3s), registro del
+<code>OculusLoader</code> en XR Plug-in Management y settings de Meta
+XR. Con eso el headset empezó a renderizar y trackear.</li>
+<li><strong>2026-04-16. Configuración de Oculus y escena VR
+base.</strong> Se crea la carpeta canónica
+<code>Assets/_SafeDriver/</code> y nace
+<code>Level_01_Basics.unity</code> como escena del nivel, migrando lo
+útil de la <code>SampleScene</code>. Entran los primeros modelos
+(<code>SafeDriver_Exterior_v1</code>,
+<code>SafeDriver_Interior_v1</code>) y <code>DrivingHaptics</code>.
+Luego un ajuste de piso para tener suelo y referencia espacial.</li>
+<li><strong>2026-04-16. Sistema de vehículo + núcleo (Core).</strong>
+Llega el “Sistema de Vehículo Funcional” junto con
+<code>EventBus</code>, <code>GameManager</code>, <code>GameState</code>
+y los tipos de dominio (<code>ActionType</code>,
+<code>InfractionType</code>, <code>MirrorCheckRequirement</code>), más
+los primeros stubs de <code>ScoreManager</code>,
+<code>InfractionDetector</code>, <code>NPCPedestrianAI</code>.</li>
+<li><strong>2026-04-16. Sistema de infracciones.</strong> Detectores por
+situación (<code>StopSignDetector</code>,
+<code>TrafficLightDetector</code>,
+<code>PedestrianCrossingDetector</code>, <code>SpeedLimitZone</code>),
+tabla de puntos (<code>ActionPoints</code>), estado de semáforo
+(<code>LightState</code>) y mejoras de feedback
+(<code>HapticsController</code>, <code>HeadTrackingDetector</code>,
+<code>HUDController</code>), todo conectado por
+<code>EventBus</code>.</li>
+<li><strong>2026-04-16. Sistema de score.</strong>
+<code>ScoreManager</code> con <code>InfractionRecord</code> (registro de
+cada falta) y <code>LevelResult</code> (resumen final).</li>
+<li><strong>2026-04-16. UI pedagógica (Canvas World Space VR).</strong>
+<code>HUDController</code>, <code>SpeedometerNeedle</code>,
+<code>LevelEndPanel</code>, <code>SafeFailScreen</code> y
+<code>VRCanvasSetup</code> para el canvas pointable en mundo.</li>
+<li><strong>2026-04-16. Tráfico y peatones.</strong>
+<code>NPCPedestrianAI</code> y <code>NPCVehicleAI</code> con lógica de
+movimiento/cruce, y la interfaz <code>IPedestrianCrossingNotifier</code>
+para desacoplar el aviso de cruce.</li>
+<li><strong>2026-04-16. Audio (primer intento con FMOD).</strong> El
+audio arrancó sobre <strong>FMOD</strong>
+(<code>FMODAudioManager</code>, <code>FMODEvents</code>,
+<code>SpatialAudioEmitter</code>) con su carpeta
+<code>FMODProject/</code>. <em>(Se revertiría a audio nativo en la Etapa
+4.)</em></li>
+<li><strong>2026-04-16. Steering (volante con controllers).</strong>
+<code>SteeringWheelController</code>: mientras se mantiene el grip del
+controller, su yaw se mapea a la rotación del volante (con sensibilidad,
+zona muerta anti-drift y ángulo máximo); al soltar, vuelve suave al
+centro. La rotación normalizada <code>-1..+1</code> alimenta
+<code>VehicleInput</code>.</li>
+</ul>
+<hr />
+<h2
+id="etapa-3.-el-volante-inmersivo-y-su-cadena-de-bugs-1704-al-1804">Etapa
+3. El volante inmersivo y su cadena de bugs (17/04 al 18/04)</h2>
+<p><strong>La etapa más densa en errores</strong> del proyecto. El
+objetivo: convertir el volante en un objeto VR <strong>agarrable
+real</strong> integrado con el Interaction SDK (ISDK), en lugar del
+input crudo de OVR. El cambio destapó una cascada de bugs físicos y
+geométricos que se cazaron uno por uno.</p>
+<ul>
+<li><strong>2026-04-17. Reescritura del
+<code>SteeringWheelController</code>.</strong> Se abandona el manejo
+manual por <code>OVRInput</code> y se delega el agarre, el snap de mano
+y la rotación al ISDK (<code>Grabbable</code> +
+<code>OneGrabRotateTransformer</code> +
+<code>GrabInteractable</code>/<code>HandGrabInteractable</code>). El
+script queda como mero lector del ángulo. (<em>Steering and Snap
+Feeling</em>)</li>
+<li><strong>2026-04-17. Bug: el volante se despega del auto.</strong> El
+auto giraba bien, pero al moverse el chasis el volante se quedaba atrás
+(clásico problema de Rigidbodies anidados). Se resolvió en tres
+iteraciones:
+<ol type="1">
+<li><code>FixedUpdate</code> que sincroniza el Rigidbody del volante +
+<code>IgnoreCollisionsWithParentRigidbody()</code> (<em>Auto Gira,
+Volante Bug</em>).</li>
+<li>Mover el pin a <code>LateUpdate</code> recalculando la pose world
+con <code>parent.TransformPoint</code> cada frame visual, para matar el
+jitter (<em>Fix volante parcial</em>).</li>
+<li><strong>Solución definitiva:</strong> eliminar por completo el
+<code>Rigidbody</code> propio del volante, sus componentes ISDK apuntan
+al Rigidbody del auto y su collider pasa al <em>compound</em> del
+chasis. Sin Rigidbody anidado, desaparecen el despegue y el jitter
+(<em>Fix Volante</em>). Esto rompió el snap visual de la mano.</li>
+</ol></li>
+<li><strong>2026-04-17.</strong> Para recuperar el snap se crea
+<code>SteeringWheelHandFollower</code>: pega la <code>HandVisual</code>
+al volante mientras se agarra y la hace seguir su rotación (desactivando
+<code>_updateRootPose</code> por reflection y restaurándolo al soltar).
+Soporta <code>GrabInteractor</code> y <code>HandGrabInteractor</code>.
+(<em>Steering Wheel Completely Immersive</em>)</li>
+<li><strong>2026-04-18. Fix: rango recortado al re-agarrar.</strong> El
+<code>OneGrabRotateTransformer</code> guarda su ángulo en campos
+privados que persisten entre agarres, así que al reagarrar el rango útil
+quedaba recortado. Solución: mientras el volante <strong>no</strong>
+está agarrado, sincronizar esos campos (<code>_relativeAngle</code>,
+<code>_constrainedRelativeAngle</code>) por reflection con el ángulo
+visual real, para que el próximo agarre parta del pose actual con el
+rango completo.</li>
+<li><strong>2026-04-18. Fix: salto del steering al lado opuesto en el
+tope.</strong> En unos 180 grados la precisión flotante hacía oscilar el
+ángulo y el unwrap manual lo saltaba entre +180 y -179.99, invirtiendo
+el steering de golpe. Se cambió <code>ReadAngle()</code> para leer
+directamente <code>_constrainedRelativeAngle</code> (ya
+signed/unwrapped/clampeado).</li>
+</ul>
+<p><strong>La tanda de bugs de ruedas (todo el 18/04, en
+cadena):</strong></p>
+<ul>
+<li><strong>Fix: WheelColliders delanteros/traseros swapeados.</strong>
+Los cuatro tenían los nombres cruzados respecto a su posición real, así
+que giraban las traseras y traccionaban las delanteras. Se renombraron
+por posición y se reasignaron los slots.</li>
+<li><strong>Fix: las mallas de ruedas no rotan ni siguen el
+steering.</strong> Los slots apuntaban a <em>anchors</em> vacíos sin
+geometría. Se reasignaron a los meshes reales y se capturó en
+<code>Start</code> el offset de rotación inicial de cada mesh para
+preservar la orientación artística del modelo importado.</li>
+<li><strong>Fix: steering invertido tras corregir los
+WheelColliders.</strong> Al mover el steering a las ruedas delanteras
+correctas, el signo quedó cruzado (la asignación errónea anterior lo
+disimulaba). Se negó el input en <code>ApplySteering</code>
+(<code>angle = -input * steerAngle</code>).</li>
+<li><strong>Espejos retrovisores (prototipo).</strong> Central + 2
+laterales: una <code>Camera</code> con <code>RenderTexture</code> por
+espejo, deshabilitada y renderizada manualmente cada N frames
+(<code>MirrorCamera</code>), monoscópica para abaratar costo en Quest.
+Editor tool <code>MirrorAssetCreator</code> para crear las
+texturas.</li>
+<li><strong>Palanca de marcha D/R con latch.</strong> Máquina de estados
+de marcha (Drive/Reverse + estados de <em>arming</em>). El cambio D-R
+exige estar detenido y sostener el freno 2 s. La pieza clave es el latch
+<code>brakeReleaseRequired</code>: se activa también al pasar de
+moviéndose a detenido, para que el freno que el conductor venía
+sosteniendo <em>para frenar</em> no arme un cambio por accidente.
+Cableado del <code>GearIndicator</code> (TMP en el tablero) vía
+<code>EventBus.OnGearChanged</code>.</li>
+</ul>
+<hr />
+<h2
+id="etapa-4.-ciudad-tráfico-ambiental-ui-audio-y-build-2004-al-2604">Etapa
+4. Ciudad, tráfico ambiental, UI, audio y build (20/04 al 26/04)</h2>
+<p>Esta etapa convierte el escenario de pruebas en una ciudad viva y
+deja el proyecto listo para correr en Quest. El hito técnico es la
+<strong>limpieza del stack VR clásico (OVR)</strong> para consolidar
+todo sobre Building Blocks / Interaction SDK.</p>
+<ul>
+<li><strong>2026-04-20.</strong> Jornada intensa de UI y tráfico
+ambiental:
+<ul>
+<li><strong>Tráfico NPC:</strong> se agregan dos autos con <strong>giro
+en esquina por probabilidad</strong> (<code>CarController</code> con
+<code>rightTurnWaypoints</code> + <code>rightTurnChance</code>;
+<code>Random.value &lt; chance</code> decide recto o giro). Ajuste de
+balance posterior (0.4 a 0.5 en cruces principales, 0.35 en uno) para
+que el flujo no quede ni predecible ni caótico.</li>
+<li><strong>Peatones:</strong> botón para habilitar/deshabilitar el
+cruce; reescritura de <code>PedestrianController</code> para que caminen
+por las veredas en vez de quedarse quietos.</li>
+<li><strong>UI:</strong> rediseño (“UI Remake”) con sprite redondeado;
+botón de encuesta wireado a <code>VideoPanelController</code> y ajuste
+de escala de botones.</li>
+<li><strong>Build inicial:</strong> primeros ajustes para Android/Quest
+(<code>app_icon</code>, Build Profile de Android, URP global
+settings).</li>
+</ul></li>
+<li><strong>2026-04-21. Limpieza del stack VR clásico (el cambio más
+importante de la etapa).</strong> Se abandona OVR y se consolida toda la
+VR sobre <strong>ISDK + Unity XR API</strong>:
+<ul>
+<li>Se borra <code>SimpleWheelGrab</code> (usaba <code>OVRInput</code>)
+y se quita la referencia <code>Oculus.VR</code> del asmdef.</li>
+<li><strong>Fix del grab del volante:</strong> en el rig BB “Controller
+and Hand” el <code>transform</code> del interactor queda fijo en el
+TrackingSpace y solo el <code>WristPoint</code>/<code>Rigidbody</code>
+se actualizan, así que el filtro de proximidad <strong>siempre</strong>
+devolvía “fuera”. Se corrige resolviendo la posición por la cadena
+<code>WristPoint</code>, <code>Rigidbody</code>,
+<code>transform</code>.</li>
+<li><strong>Fix del steering que no llegaba al auto:</strong> el
+<code>SteeringWheelController</code> estaba en la escena con
+<code>m_Enabled: 0</code>; su <code>Update</code> nunca corría. Se
+habilita.</li>
+<li>Limpieza de código muerto y de carpetas fantasma;
+<code>.claude/</code> y <code>_Recovery/</code> al
+<code>.gitignore</code>.</li>
+</ul></li>
+<li><strong>2026-04-22.</strong> Construcción de ciudad, audio nativo y
+limpieza:
+<ul>
+<li><strong>Arte:</strong> se suman modelos de calle y semáforos, y un
+minimapa para playtest. Entra <strong>SimplePoly City</strong> como base
+con su lighting bake.</li>
+<li><strong>Occlusion Culling:</strong> se hornea
+<code>OcclusionCullingData</code>, paso clave de performance para Quest,
+que no puede renderizar la ciudad entera a la vez.</li>
+<li><strong>Audio a nativo (se revierte FMOD):</strong> FMOD era
+<em>overkill</em> para el scope educativo y arrastraba fricción. Se
+reemplaza por <strong>AudioSource/AudioMixer nativo</strong> (nuevo
+<code>AudioManager</code> con motor 3D modulado por velocidad+throttle,
+ambiente 2D, one-shots; nuevo <code>SpatialAudioEmitter</code>). Se
+borran los scripts FMOD; “Motor Sound” suma el clip y “Volume Bar” el
+mixer + <code>MasterVolumeController</code>.</li>
+<li><strong>Limpieza:</strong> se eliminan eventos huérfanos del
+<code>EventBus</code>, packages sin uso (Visual Scripting, Multiplayer
+Center, Collab-Proxy), se reemplaza <code>SampleScene</code> por
+<code>Level_01_Basics</code> en Build Settings, y se limpian warnings
+CS0414 (campos asignados nunca leídos).</li>
+</ul></li>
+<li><strong>2026-04-26.</strong> Cierre de configuración de build
+(<code>OVRBuildConfig</code>, afinado de URP/ProjectSettings) para dejar
+un build instalable con la ciudad poblada, la UI rehecha, el audio
+nativo y el occlusion culling integrados.</li>
+</ul>
+<hr />
+<h2
+id="etapa-5.-integración-mayor-menú-niveles-pausa-tráfico-npc-y-tanda-de-fixes-0605-al-1205">Etapa
+5. Integración mayor: menú, niveles, pausa, tráfico NPC y tanda de fixes
+(06/05 al 12/05)</h2>
+<p>Salto de prototipos sueltos a un juego con <strong>flujo
+completo</strong>: menú principal navegable, nivel de ciudad jugable con
+detectores reales, palanca D/N/R diegética, menú de pausa y tráfico NPC
+que respeta semáforos y cruza la cebra. Se trabaja con <em>feature
+branches</em> que se mergean a <code>develop</code>.</p>
+<ul>
+<li><strong>2026-05-11. Día grande de integración:</strong>
+<ul>
+<li><strong>MainMenu + Level_01_City + palanca D/N/R + objetivos
+diegéticos.</strong> Escena de menú con botones Play/Quit wireados por
+código; nivel de ciudad con cartel PARE 3D, semáforo con materiales
+emisivos, paso peatonal y zonas de velocidad sobre los cruces reales. La
+lista de objetivos se muestra en el tablero (diegética) y se tacha al
+completar. La palanca D/N/R se <strong>clonó del SteeringWheel</strong>
+para un grab idéntico. Nuevas acciones: <code>PassedGreenLight</code>
+(+3) y <code>PedestrianNotPresent</code> (+3). <em>Detalle:</em> el
+<code>VehicleController</code> arranca en Neutral cuando hay shifter
+externo, para evitar una <em>race condition</em> con el
+<code>Start</code> del shifter.</li>
+<li><strong>Vibración de tope (haptics) para volante y palanca + shifter
+con snap</strong> (branch <code>grab-limit-feedback</code>):
+<code>GrabHaptics</code> (impulso por Unity XR, sin OVR),
+<code>CameraShake</code>, y <code>GrabLimitFeedback</code> (lee el
+<em>overshoot</em> del transformer por reflection, con <em>tiers</em>
+configurables y un último tier que fuerza el release + shake).
+<em>Nota:</em> los haptics de la palanca quedaron <em>inline</em> en la
+asmdef Vehicle para no crear un ciclo de asmdef (Vehicle no puede
+referenciar VR).</li>
+<li><strong>Menú de pausa</strong> (branch <code>pause-menu</code>):
+congela el tiempo y posiciona el canvas a 0.8 m frente a la cabeza
+<strong>proyectando el forward al plano horizontal</strong> para que no
+se incline. Toggle por botón B/Y.</li>
+<li><strong>Tráfico ambiental por waypoints</strong> (branch
+<code>traffic-and-pedestrians</code>): <code>TrafficWaypointPath</code>,
+<code>TrafficVehicle</code> (raycast forward para frenar ante el
+jugador) y <code>TrafficPedestrian</code>.</li>
+<li><strong>Autos NPC respetan el semáforo</strong> (branch
+<code>npc-respects-lights</code>): <code>TrafficLightStopZone</code> con
+trigger; el NPC frena suave si la zona activa está en rojo.</li>
+<li><strong>Peatones cruzando + detector multi-notifier</strong> (branch
+<code>crossing-pedestrians</code>): se introduce
+<code>IPedestrianCrossingMultiNotifier</code> (en Core, para romper el
+ciclo de asmdef Traffic con Scoring), con un <code>HashSet</code> de
+peatones presentes en vez de un bool, y un <strong>rango de cebra
+bidireccional</strong> (antes solo funcionaba en un sentido).</li>
+</ul></li>
+<li><strong>2026-05-12. Tanda de fixes finos de la palanca, surgidos del
+testeo en VR</strong> (los bugs más sutiles del proyecto):
+<ul>
+<li><strong>La palanca bajaba sola a Neutral al arrancar:</strong> el
+<code>ClampToZone</code> del <em>lock-when-moving</em> forzaba Neutral
+aunque estuviera en D/R. Fix: capturar la zona en la transición
+<em>stopped a moving</em> y clampear a esa misma zona. (También se
+agregó la referencia <code>Oculus.Interaction</code> faltante al asmdef
+Vehicle, y se corrigió la llamada inexistente
+<code>Dispatch_InfractionDetected</code> por
+<code>Dispatch_Infraction</code>.)</li>
+<li><strong>El pulso de tope no aparecía:</strong> el primer tier
+empezaba en <code>0</code> grados (ya “activo” al iniciar el grab). Fix:
+arrancar en <code>1</code> grado para que solo dispare con overshoot
+real. Rangos ampliados (volante x2, palanca x1.5).</li>
+<li><strong>“Salto hacia atrás” del lock:</strong> forzar el transform
+por script chocaba con la rotación del
+<code>OneGrabRotateTransformer</code>. Solución elegante: modificar
+dinámicamente los <strong>Constraints</strong>
+(<code>MinAngle</code>/<code>MaxAngle</code>) del transformer a la zona
+donde arrancó el auto, para que respete el límite sin pelearse con el
+script.</li>
+<li><strong>Jitter de zona / snap a N al soltar:</strong> con el
+constraint clampando a 20 grados exactos, <code>ZoneFor</code> devolvía
+Neutral (<code>20 &gt; 20 = false</code>). Fixes: <strong>margen de
+lock</strong> (<code>lockMargin 1.5</code>), <strong>histéresis</strong>
+(<code>zoneHysteresis 2</code>) anti-flicker en el borde, y snap a la
+<code>lockedZone</code> al soltar. Además se creó el
+<code>_PauseMenu</code> que faltaba en la escena (no abría porque no
+existía).</li>
+</ul></li>
+</ul>
+<p>Al cierre quedaron en <code>develop</code> el menú, el nivel jugable,
+la palanca D/N/R estable, el menú de pausa y el tráfico ambiental, todo
+validado en Quest.</p>
+<hr />
+<h2
+id="etapa-6.-arte-sistema-data-driven-refactor-de-detección-y-ui-nueva-1705-al-0106">Etapa
+6. Arte, sistema data-driven, refactor de detección y UI nueva (17/05 al
+01/06)</h2>
+<p>Salto de “prototipo jugable” a “producto con contenido y estilo
+propios”, en cuatro frentes paralelos.</p>
+<p><strong>Arte de la ciudad:</strong> - <strong>2026-05-17.</strong> Se
+reemplazan los modelos sueltos por mallas <strong>atlaseadas</strong>
+(<code>Calles.fbx</code>, <code>Semaforos2.fbx</code>) con sus texturas,
+y se crean prefabs de tramo (<code>CalleRecta</code>,
+<code>CalleCurva</code>, <code>Interseccion</code>). Se renombran los
+materiales auto-generados a nombres legibles. -
+<strong>2026-05-19.</strong> Edificios (<code>Edificios.fbx</code> +
+prefabs) para dar entorno urbano.</p>
+<p><strong>Fixes y ajustes:</strong> - <strong>2026-05-27. Bug del
+cuelgue en el loading (Android).</strong> La build se quedaba colgada al
+iniciar. Causa: el <code>OculusLoader</code> no estaba habilitado para
+Android, así que el APK no incluía <code>libOVRPlugin.so</code> y
+<code>OVRManager</code> reventaba con <code>DllNotFoundException</code>.
+Solución: habilitarlo en <code>XRGeneralSettingsPerBuildTarget</code> +
+una editor utility (<code>Fix Android XR Loader</code>) que lo re-asigna
+si vuelve a desconfigurarse. - <strong>2026-05-27. Volante: recentrado
+proporcional a la velocidad.</strong> El return-to-center escala por
+<code>CurrentSpeedKmh</code>: a 0 km/h queda quieto, a 30 km/h o más
+recentra a velocidad plena, simulando el self-aligning torque real. -
+<strong>2026-05-27. Fix del premio de frenar en rojo (primer
+intento).</strong> El <code>TrafficLightDetector</code> marcaba
+<code>RanRedLight</code> apenas tocaba el trigger en rojo y bloqueaba el
+premio <code>StoppedAtRedLight</code>. Parche: marcar infracción solo si
+el auto entra moviéndose. (Se vuelve definitivo en el refactor del
+29/05.)</p>
+<p><strong>Sistema de misiones y niveles data-driven:</strong> -
+<strong>2026-05-27.</strong> Nace <code>SafeDriver.Missions</code>. El
+contenido deja de estar cableado en escena y pasa a
+<strong>ScriptableObjects</strong> con patrón Definition/Runtime:
+<code>MissionDefinition</code> base con variantes
+<code>Countable</code>/<code>Sequence</code>/<code>Timed</code>/<code>Compound</code>;
+<code>MissionManager</code> orquesta y expone eventos a la UI;
+<code>LevelDefinition</code> + <code>LevelManager</code> +
+<code>LevelProgress</code> manejan progresión, desbloqueo y best score
+(PlayerPrefs), con modo libre. <code>ObjectivesController</code> pasa a
+generar las filas en runtime desde el manager. Se documenta todo
+(<code>CrearMisiones.md</code>, <code>CrearNiveles.md</code>). -
+<strong>2026-05-28. Tests EditMode, 8/8 verde.</strong> Nueva asmdef de
+tests con 8 casos NUnit que validan los 4 tipos de misión sin escena ni
+VR (contable cuenta/completa, secuencia avanza solo en orden, con-tiempo
+falla por timeout, compuesta agrega y propaga el fallo). Se llama
+<code>EventBus.Clear()</code> entre tests para no contaminar.</p>
+<p><strong>Refactor del sistema de detección:</strong> -
+<strong>2026-05-29.</strong> Reescritura grande a un patrón unificado de
+<strong>sensores</strong>. Todos heredan de <code>VehicleSensor</code>
+(identifica al player de forma consistente) y aparece
+<code>CrossingLineSensor</code> (detecta el cruce de una línea y su
+dirección con un BoxCollider ancho, evitando el <em>tunneling</em> a
+alta velocidad). Cambios clave: - <strong>Fix definitivo de “frenar en
+rojo no premiaba”:</strong> el semáforo se parte en
+<code>RedLightStopZone</code> (antes de la línea, premia y nunca
+penaliza) + <code>TrafficLightCrossLine</code> (sobre la línea: rojo =
+<code>RanRedLight</code> + SafeFail; verde =
+<code>PassedGreenLight</code>). El detector viejo queda
+<code>[Obsolete]</code>. - <strong>Atropello real de peatón:</strong>
+<code>PedestrianHitbox</code> sobre el cuerpo del peatón
+(<code>HitPedestrian</code>, grave). <strong>Contramano:</strong>
+<code>DirectionZone</code> (<code>WrongWay</code>). Se agregan ambos
+enums a <code>InfractionType</code>.</p>
+<p><strong>Rediseño de UI:</strong> - <strong>2026-06-01.</strong>
+Sistema visual unificado. El <code>UITheme</code> (ScriptableObject)
+centraliza paleta de <strong>señalética vial</strong>
+(verde/rojo/ámbar/azul, fondos crema tipo manual del conductor),
+tipografía y métricas, aplicado con <code>UIThemeUtil</code>. Sobre eso,
+el rediseño “infantil-redondeado”: fuentes redondeadas y sprite
+<code>RoundedRect</code> (<em>detalle de plataforma:</em> el sprite se
+generó <strong>RGBA32 sin comprimir</strong> porque comprimido no
+renderizaba en Quest); <code>SafeFail</code> y <code>LevelEnd</code>
+reconstruidos por composición; <strong>interacción por POKE, no por
+ray</strong>; se elimina el popup viejo y entra el
+<code>SuccessToast</code> (solo aciertos, arriba del volante). -
+<strong>2026-06-01. Panel de objetivos con scroll + fix de la hitbox del
+SafeFail.</strong> El panel pasa a header fijo + viewport recortado con
+<code>RectMask2D</code> scrolleable por poke. El fix: el
+<code>SafeFailScreen</code> ahora <strong>desactiva su contenido y su
+superficie de poke mientras está oculto</strong>; antes la mano chocaba
+con una “pared invisible” al estirarse hacia el volante porque el
+collider de poke seguía activo.</p>
+<hr />
+<h2
+id="etapa-7.-consolidación-final-npc-sólidos-integridad-controles-nuevos-y-entrega-1206-al-1806">Etapa
+7. Consolidación final: NPC sólidos, integridad, controles nuevos y
+entrega (12/06 al 18/06)</h2>
+<p>Tramo de cierre. Sobre una base estable se sumó el auto del player
+con IA y los NPC animados, se consolidó en un único commit grande (“UI
+Remake”) todo el trabajo final de jugabilidad y pulido, y se cerró con
+el diseño de nivel. Buena parte de la etapa fue cazar bugs que solo
+aparecían con la escena completa y en VR.</p>
+<ul>
+<li><p><strong>2026-06-12.</strong> Se agrega el auto del player junto
+con la IA del tráfico (“Add car player and IA”).</p></li>
+<li><p><strong>2026-06-15.</strong> Se incorporan los NPC (“Add NPC”) y,
+el mismo día, un <strong>“Fix NPC animation”:</strong> las animaciones
+de los NPC no se reproducían; se corrigió la configuración de
+animación.</p></li>
+<li><p><strong>2026-06-18.</strong> Se mergea a <code>develop</code> el
+commit grande <strong>“UI Remake” (191 archivos)</strong>, que consolida
+la jugabilidad final:</p>
+<p><strong>Tráfico NPC con colisión sólida.</strong> Hasta acá los NPC
+eran triggers sin física (el player los atravesaba). Se pasó a colisión
+real: nueva capa física <code>Traffic</code> +
+<code>TrafficLayerIsolator</code> que en <code>Awake</code> ignora la
+colisión contra todas las capas menos sí misma (por código, sin tocar la
+matriz del proyecto). Así el hitbox sólido del player choca con los NPC
+pero no se engancha con calle ni edificios; el daño entra por
+<code>OnCollisionEnter</code> con punto de contacto real.</p>
+<p><strong>Error: los NPC se movían “a pasitos” / a velocidad
+inconsistente.</strong> Se movían con <code>transform.position</code> en
+<code>Update</code> (dependiente del framerate, crítico en VR). Se
+reescribió <code>TrafficVehicle</code> para moverse por
+<strong>Rigidbody kinematic con
+<code>MovePosition</code>/<code>MoveRotation</code> en
+<code>FixedUpdate</code></strong> (velocidad consistente) +
+<code>interpolation = Interpolate</code> (suavidad).</p>
+<p><strong>Error: los NPC frenaban sobre la senda o quedaban clavados en
+el cruce.</strong> La detención por semáforo dependía de zonas-trigger,
+que dejaron de dispararse al aislar la capa <code>Traffic</code>. Se
+reemplazó por <strong>líneas de detención por distancia</strong>
+(<code>TrafficStopLine</code>): si una línea está en rojo, en su carril
+y todavía adelante, el NPC desacelera para parar justo antes
+(<code>vMax = sqrt(2*accel*d)</code>); si <strong>ya pasó</strong> la
+línea, la ignora y termina de cruzar. La detección de obstáculos pasó de
+un raycast fino a un <code>SphereCastAll</code>. Se agregó
+<code>CrosswalkTrafficGate</code> (por distancia) para que el peatón
+sepa si es seguro bajar del cordón.</p>
+<p><strong>Sistema de integridad del vehículo (8 zonas) + SafeFail por
+daño.</strong> Nuevo <code>VehicleIntegrity</code>: clasifica cada
+impacto en una de 8 zonas (frente, atrás, 2 laterales, 4 ruedas) por el
+punto de contacto local, y el daño escala con la velocidad. Es aditivo
+(solo escucha colisiones). Dispara <code>SafeFail</code> (nuevo
+<code>InfractionType.SevereCollision</code>, grave) por golpe fuerte
+único o por integridad total crítica, con cooldown anti-spam. Se refleja
+en <code>VehicleDamageSymbol</code> (símbolo top-down verde a rojo +
+porcentaje total), en el tablero y en fin de nivel.</p>
+<p><strong>Error: la pantalla SafeFail mostraba la infracción
+ANTERIOR.</strong> <em>Race condition</em> de orden de eventos: la UI
+cacheaba el tipo por evento, pero al transicionar a SafeFail el tipo
+nuevo todavía no estaba seteado. Se agregó
+<code>GameManager.TriggerSafeFail(type, message)</code>, que setea tipo
+y mensaje <strong>sincrónicamente y luego</strong> transiciona. De paso,
+los botones Retry/Menú pasaron a <strong>recargar la escena</strong>
+(antes <code>TransitionTo(Driving)</code> no reseteaba
+auto/score/misiones/timer) y se sumaron mensajes pedagógicos para
+<code>HitPedestrian</code>, <code>WrongWay</code> y
+<code>SevereCollision</code>.</p>
+<p><strong>Controles nuevos: freno de mano y luces
+direccionales.</strong> Montados <strong>clonando el
+SteeringWheel</strong> (mismo stack de grab ya probado), vía editor
+scripts. <code>HandbrakeController</code> (palanca de 2 posiciones, snap
++ háptico al enganchar, corta motor y aplica freno máximo) y luces
+direccionales (<code>TurnSignalStalk</code> de 3 posiciones +
+<code>TurnSignalController</code> que parpadea el par correspondiente,
+con indicadores en el tablero).</p>
+<p><strong>Pulido de UI y workflow de nivel.</strong> Se corrigió que el
+cluster/panel de objetivos se despegaba del auto y que el timer salía
+del color del fondo (invisible). Se agregaron <strong>prefabs de zonas
+de misión drag-and-drop</strong> (<code>MissionZone_*</code>,
+<code>Pedestrian_Crossing</code>) para armar niveles sin código, el
+símbolo de daño en el tablero, y la documentación de entrega
+(<code>GuiaLevelDesigner</code> en md/html/docx).</p></li>
+<li><p><strong>2026-06-18.</strong> Se agrega el
+<strong><code>LevelDesign</code></strong> final (commit en
+<code>origin/develop</code>), cerrando la etapa con el armado del nivel
+sobre todos los sistemas consolidados.</p></li>
+</ul>
+<hr />
+<h2 id="estado-final-del-proyecto">Estado final del proyecto</h2>
+<p>Al cierre, SafeDriver es un simulador VR de manejo funcional con:</p>
+<ul>
+<li><strong>Conducción VR completa:</strong> volante agarrable,
+acelerador/freno por gatillos, palanca D/N/R, freno de mano y luces
+direccionales, todos controles físicos.</li>
+<li><strong>Evaluación pedagógica:</strong> puntaje (1000 inicial,
+aprobación 600), 9 tipos de infracción y 7 de acierto, pantalla
+<strong>SafeFail</strong> con cita a la Ley 24.449 (nunca muestra el
+choque), y boletín de fin de nivel.</li>
+<li><strong>Integridad del vehículo</strong> por 8 zonas con SafeFail
+por daño.</li>
+<li><strong>Tráfico AI</strong> (autos NPC con colisión sólida que
+respetan semáforos + peatones que ceden el paso).</li>
+<li><strong>Contenido data-driven:</strong> misiones (4 tipos) y niveles
+como assets, con tests EditMode.</li>
+<li><strong>UI diegética</strong> estilo manual del conductor,
+interacción por poke.</li>
+<li><strong>Documentación de entrega:</strong> guía del level designer,
+GDD de mecánicas y esta bitácora.</li>
+</ul>
+<p><strong>Integración Git al cierre:</strong> todo el trabajo quedó
+consolidado en <code>feature/ui-apply</code> y mergeado a
+<code>develop</code> (<code>5adc4ba</code>, “UI Remake”); sobre
+<code>origin/develop</code> se sumó luego <code>LevelDesign</code>. Las
+ramas por subsistema de las primeras etapas quedan como historial del
+trabajo paralelo.</p>
+<h2 id="lecciones-aprendidas-errores-recurrentes">Lecciones aprendidas
+(errores recurrentes)</h2>
+<ul>
+<li><strong>Rigidbodies anidados en VR:</strong> un grabbable con
+Rigidbody propio se despega del padre que se mueve. Patrón que funcionó:
+<strong>sin Rigidbody propio</strong>, compartir el del chasis y seguir
+la mano por <code>LateUpdate</code>.</li>
+<li><strong>Estado interno del
+<code>OneGrabRotateTransformer</code>:</strong> sus ángulos privados
+persisten entre agarres y hay que <strong>sincronizarlos por
+reflection</strong> (rango recortado, salto en el tope, snap de
+palancas).</li>
+<li><strong>Triggers vs. aislamiento de capas:</strong> aislar una capa
+de física por performance/colisión rompe toda detección basada en
+triggers de esa capa, hay que reemplazar por <strong>detección por
+distancia</strong>.</li>
+<li><strong>Movimiento dependiente del framerate:</strong> mover por
+<code>transform</code> en <code>Update</code> da velocidad inconsistente
+en VR; conviene <code>MovePosition</code> en <code>FixedUpdate</code> +
+interpolación.</li>
+<li><strong>Race conditions de orden de eventos:</strong> setear el
+estado <strong>sincrónicamente antes</strong> de transicionar (caso
+SafeFail).</li>
+<li><strong>Gotchas de plataforma Quest:</strong>
+<code>OculusLoader</code> habilitado (si no, cuelga el loading),
+<strong>Vulkan</strong> como API gráfica, sprites <strong>sin
+comprimir</strong> para que rendericen, y hornear iluminación +
+occlusion culling.</li>
+<li><strong>El patrón “clonar el volante”:</strong> la forma confiable
+de crear nuevos grabbables compuestos en este proyecto (palanca de
+cambios, freno de mano, stalk de guiños, tablilla).</li>
+<li><strong>Desacople por EventBus + asmdefs:</strong> permitió sumar
+feedback (audio, háptica, toasts) sin acoplar capas; cuando aparecía un
+ciclo de asmdef, se resolvió moviendo la interfaz a <code>Core</code> o
+dejando código <em>inline</em>.</li>
+</ul>
+<hr />
+<p><em>Bitácora reconstruida a partir de la historia completa del
+repositorio Git (97 commits, 30/03 al 18/06/2026), analizando los diffs
+reales de cada etapa.</em></p>
+</body>
+</html>

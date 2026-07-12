@@ -1,0 +1,1586 @@
+<!DOCTYPE html>
+<html xmlns="http://www.w3.org/1999/xhtml">
+<head>
+  <meta charset="utf-8" />
+  <meta name="generator" content="pandoc 3.10" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=yes" />
+  <title>SafeDriver — Mecánicas y Features (GDD)</title>
+  <style>
+    /* Default styles provided by pandoc.
+    ** See https://pandoc.org/MANUAL.html#variables-for-html for config info.
+    */
+    html {
+      color: #1a1a1a;
+      background-color: #fdfdfd;
+    }
+    body {
+      margin: 0 auto;
+      max-width: 36em;
+      padding-left: 50px;
+      padding-right: 50px;
+      padding-top: 50px;
+      padding-bottom: 50px;
+      hyphens: auto;
+      overflow-wrap: break-word;
+      text-rendering: optimizeLegibility;
+      font-kerning: normal;
+    }
+    @media (max-width: 600px) {
+      body {
+        font-size: 0.9em;
+        padding: 12px;
+      }
+      h1 {
+        font-size: 1.8em;
+      }
+    }
+    @media print {
+      html {
+        background-color: white;
+      }
+      body {
+        background-color: transparent;
+        color: black;
+        font-size: 12pt;
+      }
+      p, h2, h3 {
+        orphans: 3;
+        widows: 3;
+      }
+      h2, h3, h4 {
+        page-break-after: avoid;
+      }
+    }
+    p {
+      margin: 1em 0;
+    }
+    a {
+      color: #1a1a1a;
+    }
+    a:visited {
+      color: #1a1a1a;
+    }
+    img {
+      max-width: 100%;
+    }
+    svg {
+      height: auto;
+      max-width: 100%;
+    }
+    h1, h2, h3, h4, h5, h6 {
+      margin-top: 1.4em;
+    }
+    h5, h6 {
+      font-size: 1em;
+      font-style: italic;
+    }
+    h6 {
+      font-weight: normal;
+    }
+    ol, ul {
+      padding-left: 1.7em;
+      margin-top: 1em;
+    }
+    li > ol, li > ul {
+      margin-top: 0;
+    }
+    blockquote {
+      margin: 1em 0 1em 1.7em;
+      padding-left: 1em;
+      border-left: 2px solid #e6e6e6;
+      color: #606060;
+    }
+    code {
+      white-space: pre-wrap;
+      font-family: Menlo, Monaco, Consolas, 'Lucida Console', monospace;
+      font-size: 85%;
+      margin: 0;
+      hyphens: manual;
+    }
+    pre {
+      margin: 1em 0;
+      overflow: auto;
+    }
+    pre code {
+      padding: 0;
+      overflow: visible;
+      overflow-wrap: normal;
+    }
+    .sourceCode {
+     background-color: transparent;
+     overflow: visible;
+    }
+    hr {
+      border: none;
+      border-top: 1px solid #1a1a1a;
+      height: 1px;
+      margin: 1em 0;
+    }
+    table {
+      margin: 1em 0;
+      border-collapse: collapse;
+      width: 100%;
+      overflow-x: auto;
+      display: block;
+      font-variant-numeric: lining-nums tabular-nums;
+    }
+    table caption {
+      margin-bottom: 0.75em;
+    }
+    tbody {
+      margin-top: 0.5em;
+      border-top: 1px solid #1a1a1a;
+      border-bottom: 1px solid #1a1a1a;
+    }
+    th {
+      border-top: 1px solid #1a1a1a;
+      padding: 0.25em 0.5em 0.25em 0.5em;
+    }
+    td {
+      padding: 0.125em 0.5em 0.25em 0.5em;
+    }
+    header {
+      margin-bottom: 4em;
+      text-align: center;
+    }
+    #TOC li {
+      list-style: none;
+    }
+    #TOC ul {
+      padding-left: 1.3em;
+    }
+    #TOC > ul {
+      padding-left: 0;
+    }
+    #TOC a:not(:hover) {
+      text-decoration: none;
+    }
+    span.smallcaps{font-variant: small-caps;}
+    div.columns{display: flex; gap: 1.5em;}
+    div.column{flex: auto;}
+    @media screen {
+    div.columns{gap: min(4vw, 1.5em);}
+    div.column{overflow-x: auto;}
+    }
+    div.hanging-indent{margin-left: 1.5em; text-indent: -1.5em;}
+    /* The extra [class] is a hack that increases specificity enough to
+       override a similar rule in reveal.js */
+    ul.task-list[class]{list-style: none;}
+    ul.task-list li input[type="checkbox"] {
+      font-size: inherit;
+      width: 0.8em;
+      margin: 0 0.8em 0.2em -1.6em;
+      vertical-align: middle;
+    }
+    .display.math{display: block; text-align: center; margin: 0.5rem auto;}
+  </style>
+</head>
+<body>
+<header id="title-block-header">
+<h1 class="title">SafeDriver — Mecánicas y Features (GDD)</h1>
+</header>
+<nav id="TOC" role="doc-toc">
+<ul>
+<li><a href="#safedriver-mecánicas-y-features-sección-para-el-gdd"
+id="toc-safedriver-mecánicas-y-features-sección-para-el-gdd">SafeDriver
+— Mecánicas y Features (sección para el GDD)</a>
+<ul>
+<li><a href="#pilares-de-diseño" id="toc-pilares-de-diseño">0. Pilares
+de diseño</a></li>
+<li><a href="#bucle-de-juego-y-estados"
+id="toc-bucle-de-juego-y-estados">1. Bucle de juego y estados</a></li>
+<li><a href="#conducción-y-vehículo" id="toc-conducción-y-vehículo">2.
+Conducción y vehículo</a></li>
+<li><a href="#interacción-vr-controles-físicos"
+id="toc-interacción-vr-controles-físicos">3. Interacción VR (controles
+físicos)</a></li>
+<li><a href="#luces-direccionales-guiños"
+id="toc-luces-direccionales-guiños">4. Luces direccionales
+(guiños)</a></li>
+<li><a href="#espejos-y-chequeo-de-espejos"
+id="toc-espejos-y-chequeo-de-espejos">5. Espejos y chequeo de
+espejos</a></li>
+<li><a href="#sistema-de-evaluación-puntaje-infracciones-y-aciertos"
+id="toc-sistema-de-evaluación-puntaje-infracciones-y-aciertos">6.
+Sistema de evaluación: puntaje, infracciones y aciertos</a></li>
+<li><a href="#sensores-de-detección-de-manejo"
+id="toc-sensores-de-detección-de-manejo">7. Sensores de detección de
+manejo</a></li>
+<li><a href="#integridad-del-vehículo-sistema-de-daño"
+id="toc-integridad-del-vehículo-sistema-de-daño">8. Integridad del
+vehículo (sistema de daño)</a></li>
+<li><a href="#tráfico-ai" id="toc-tráfico-ai">9. Tráfico AI</a></li>
+<li><a href="#sistema-de-misiones-data-driven"
+id="toc-sistema-de-misiones-data-driven">10. Sistema de misiones
+(data-driven)</a></li>
+<li><a href="#niveles-y-progresión" id="toc-niveles-y-progresión">11.
+Niveles y progresión</a></li>
+<li><a href="#ui-hud-feedback-y-tema-visual"
+id="toc-ui-hud-feedback-y-tema-visual">12. UI, HUD, feedback y tema
+visual</a></li>
+<li><a href="#audio" id="toc-audio">13. Audio</a></li>
+<li><a href="#apéndice-marco-legal-ley-nacional-de-tránsito-24.449"
+id="toc-apéndice-marco-legal-ley-nacional-de-tránsito-24.449">14.
+Apéndice — Marco legal (Ley Nacional de Tránsito 24.449)</a></li>
+<li><a href="#apéndice-mapa-rápido-de-sistemas"
+id="toc-apéndice-mapa-rápido-de-sistemas">15. Apéndice — Mapa rápido de
+sistemas</a></li>
+</ul></li>
+</ul>
+</nav>
+<h1 id="safedriver-mecánicas-y-features-sección-para-el-gdd">SafeDriver
+— Mecánicas y Features (sección para el GDD)</h1>
+<blockquote>
+<p>Documento de diseño consolidado de <strong>todas</strong> las
+mecánicas y features implementadas en SafeDriver. Pensado para anexarse
+al Documento de Diseño del Juego (GDD). Los valores de parámetros son
+los reales del proyecto al momento de redacción; pueden ajustarse desde
+el Inspector de Unity.</p>
+<p><strong>Proyecto:</strong> simulador VR de escuela de manejo para
+Meta Quest 3 (Unity 6, URP, Oculus Interaction SDK / Meta XR Building
+Blocks). Idioma de juego: español (Argentina). Marco normativo de
+referencia: <strong>Ley Nacional de Tránsito 24.449</strong>.</p>
+</blockquote>
+<hr />
+<h2 id="pilares-de-diseño">0. Pilares de diseño</h2>
+<p>SafeDriver no es un juego de manejo arcade: es una
+<strong>herramienta pedagógica</strong> de educación vial en VR. Cuatro
+pilares atraviesan todas las mecánicas:</p>
+<ol type="1">
+<li><strong>Filosofía “SafeFail”.</strong> El juego <strong>nunca
+muestra el choque ni el accidente</strong>. Cuando el alumno comete una
+falta grave, la acción se congela y se reemplaza por una
+<strong>micro-lección</strong> que cita el artículo concreto de la Ley
+24.449 que regula esa conducta. El error enseña, no castiga con
+violencia.</li>
+<li><strong>Aprendizaje por refuerzo doble.</strong> Se
+<strong>penaliza</strong> la conducta insegura (resta de puntos) y se
+<strong>premia</strong> la conducta segura (suma de puntos +
+felicitación). El alumno parte de un crédito de confianza y lo
+administra.</li>
+<li><strong>Inmersión por controles físicos.</strong> Todo se maneja con
+<strong>gestos reales</strong> en VR: agarrar y girar el volante, mover
+la palanca de cambios, tirar del freno de mano, accionar el guiño, girar
+la cabeza para mirar los espejos. La UI es <strong>diegética</strong>
+(pintada sobre el tablero del auto, no flotando ante la cara).</li>
+<li><strong>Contenido data-driven.</strong> Misiones y niveles son
+<strong>assets</strong> (ScriptableObjects) que un diseñador crea y
+encadena desde el Inspector sin tocar código. La dificultad del tráfico
+se escala con un perfil editable.</li>
+</ol>
+<p><strong>Arquitectura de integración:</strong> todos los sistemas se
+comunican por un <strong>EventBus</strong> central (eventos de
+velocidad, score, infracción, acción correcta, cambio de estado, fin de
+nivel). Esto mantiene desacopladas las capas (Vehículo, Scoring, UI,
+Audio, Misiones) y permite agregar features sin tocar los sistemas
+finalizados.</p>
+<hr />
+<h2 id="bucle-de-juego-y-estados">1. Bucle de juego y estados</h2>
+<h3 id="máquina-de-estados-gamestate">1.1 Máquina de estados
+(GameState)</h3>
+<p>El juego transita entre cinco estados, cada uno con un efecto sobre
+la escala de tiempo:</p>
+<table>
+<colgroup>
+<col style="width: 33%" />
+<col style="width: 33%" />
+<col style="width: 33%" />
+</colgroup>
+<thead>
+<tr>
+<th>Estado</th>
+<th>Qué es</th>
+<th><code>Time.timeScale</code></th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><strong>MainMenu</strong></td>
+<td>Menú principal (pantalla de inicio)</td>
+<td>—</td>
+</tr>
+<tr>
+<td><strong>Driving</strong></td>
+<td>Conduciendo (estado de juego activo)</td>
+<td>1 (corre)</td>
+</tr>
+<tr>
+<td><strong>SafeFail</strong></td>
+<td>Pantalla pedagógica tras falta grave</td>
+<td><strong>sin cambio</strong> (no congela)</td>
+</tr>
+<tr>
+<td><strong>LevelEnd</strong></td>
+<td>Resumen / boletín de fin de nivel</td>
+<td>0 (congela)</td>
+</tr>
+<tr>
+<td><strong>Paused</strong></td>
+<td>Menú de pausa</td>
+<td>0 (congela)</td>
+</tr>
+</tbody>
+</table>
+<p>El juego arranca en <code>MainMenu</code> y pasa a
+<code>Driving</code> al comenzar. Cada transición dispara un evento al
+que reaccionan todas las capas desde su propio código (la UI muestra
+paneles, el vehículo frena, el timer se pausa). <strong>Decisión
+clave:</strong> <code>SafeFail</code> <strong>no</strong> congela el
+tiempo (a diferencia de <code>LevelEnd</code>/<code>Paused</code>); esto
+permite el <strong>frenado suave animado</strong> del auto en lugar de
+un congelamiento abrupto, coherente con no dramatizar el error.</p>
+<h3 id="condiciones-de-fin-de-nivel-fail-states">1.2 Condiciones de fin
+de nivel (fail-states)</h3>
+<p>El nivel tiene <strong>tres caminos de fracaso</strong> distintos y
+dos resultados de cierre:</p>
+<ul>
+<li><strong>SafeFail por infracción grave</strong> → detiene el auto
+(frenado suave) + pantalla pedagógica. El jugador solo puede
+<strong>Reintentar</strong> o ir al <strong>Menú</strong> (no hay
+reanudación automática).</li>
+<li><strong>Tiempo agotado</strong> → cuando el cronómetro llega a
+<code>0:00</code> se dispara <em>nivel fallido</em> y aparece el panel
+de fin de nivel.</li>
+<li><strong>Puntaje en cero</strong> → si el score cae a 0 por
+acumulación de faltas, se dispara <em>nivel fallido</em>.</li>
+<li><strong>Al terminar normalmente:</strong> <strong>APROBADO</strong>
+si el puntaje final ≥ <code>minimumPassScore</code> (600),
+<strong>REPROBADO</strong> si es menor.</li>
+</ul>
+<h3 id="cronómetro-del-nivel-leveltimer">1.3 Cronómetro del nivel
+(LevelTimer)</h3>
+<p>Cuenta regresiva de <strong>120 s</strong> por defecto, en formato
+<code>MM:SS</code>. Arranca al entrar en <code>Driving</code> y se pausa
+en SafeFail/Paused/LevelEnd/MainMenu. Cambia de color de forma
+escalonada para dar feedback anticipado sin leer los números:</p>
+<table>
+<thead>
+<tr>
+<th>Tiempo restante</th>
+<th>Color</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>&gt; 30 s</td>
+<td>Blanco (normal)</td>
+</tr>
+<tr>
+<td>≤ 30 s</td>
+<td>Amarillo (warning)</td>
+</tr>
+<tr>
+<td>≤ 10 s</td>
+<td>Rojo (crítico)</td>
+</tr>
+</tbody>
+</table>
+<hr />
+<h2 id="conducción-y-vehículo">2. Conducción y vehículo</h2>
+<p>El vehículo es de <strong>tracción trasera (RWD)</strong>, conducido
+por físicas reales (WheelColliders). El centro de masa está bajado para
+que sea estable y predecible (no vuelca en curvas), de modo que la
+dificultad del modelo físico no distraiga del objetivo pedagógico.</p>
+<h3 id="controles-de-conducción">2.1 Controles de conducción</h3>
+<table>
+<colgroup>
+<col style="width: 33%" />
+<col style="width: 33%" />
+<col style="width: 33%" />
+</colgroup>
+<thead>
+<tr>
+<th>Control</th>
+<th>Acción</th>
+<th>Cómo</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><strong>Volante</strong></td>
+<td>Dirección</td>
+<td>Se <strong>agarra</strong> físicamente con la(s) mano(s) y se gira;
+el aro mapea linealmente a las ruedas delanteras</td>
+</tr>
+<tr>
+<td><strong>Gatillo derecho</strong></td>
+<td>Acelerador</td>
+<td>Eje analógico (más apretás, más acelera) — torque a ruedas
+traseras</td>
+</tr>
+<tr>
+<td><strong>Gatillo izquierdo</strong></td>
+<td>Freno</td>
+<td>Eje analógico — freno a las 4 ruedas</td>
+</tr>
+<tr>
+<td><strong>Palanca de cambios</strong></td>
+<td>Marcha D/N/R</td>
+<td>Se agarra y se mueve adelante/atrás</td>
+</tr>
+<tr>
+<td><strong>Freno de mano</strong></td>
+<td>Retener el auto</td>
+<td>Se agarra y se tira hacia arriba</td>
+</tr>
+<tr>
+<td><strong>Palanca de guiños</strong></td>
+<td>Luz direccional</td>
+<td>Se agarra y se sube/baja (ver §4)</td>
+</tr>
+</tbody>
+</table>
+<h3 id="volante-vr-y-dirección">2.2 Volante VR y dirección</h3>
+<p>El volante se <strong>agarra de verdad</strong> y gira siguiendo la
+muñeca; la mano virtual queda “pegada” al aro. Un <strong>filtro de
+proximidad</strong> evita agarrarlo desde cualquier punto del auto (solo
+dentro de la esfera del volante). Mapeo lineal aro → ruedas: el tope del
+aro (180°) corresponde al ángulo máximo de las ruedas (32°).</p>
+<p><strong>Recentrado proporcional a la velocidad:</strong> al soltar el
+volante, vuelve solo al centro <strong>solo si el auto se
+mueve</strong>. A baja velocidad el recentrado es lento; a velocidad de
+crucero o más, rápido. Parado (0 km/h) el volante se queda donde se
+dejó. Simula el <em>self-aligning torque</em> real y enseña que el auto
+se autoendereza al avanzar.</p>
+<h3 id="palanca-de-cambios-dnr">2.3 Palanca de cambios D/N/R</h3>
+<p>Palanca física de tres posiciones (Drive adelante, Neutral medio,
+Reverse atrás). Al soltarla, <strong>snapea</strong> al centro de la
+zona elegida y da un <strong>pulso háptico</strong> al cambiar.
+<strong>Seguridad de manejo modelada:</strong></p>
+<ul>
+<li><strong>No se cambia de marcha en movimiento:</strong> cuando el
+auto pasa de parado a andando, la palanca se <strong>bloquea</strong> en
+su zona actual (se estrechan los topes de rotación); al detenerse se
+libera.</li>
+<li><strong>No se invierte el sentido sin pasar por Neutral:</strong> un
+salto D↔︎R con el auto en movimiento fuerza Neutral.</li>
+</ul>
+<p><strong>Modo alternativo sin palanca</strong> (configuración
+simplificada): estando totalmente detenido, mantener el <strong>freno
+apretado 2 s</strong> alterna entre Drive y Reverse; durante esos 2 s el
+indicador de marcha parpadea mostrando el destino. Un <em>latch</em>
+exige soltar y re-apretar el freno para evitar inversiones
+accidentales.</p>
+<h3 id="freno-de-mano">2.4 Freno de mano</h3>
+<p>Palanca de <strong>dos posiciones</strong> que se agarra y se
+<strong>tira hacia arriba</strong> (puesto) o se baja (sacado). Con el
+freno puesto, el motor se corta (aunque el jugador acelere, no avanza) y
+se aplica freno máximo a las 4 ruedas: el auto queda firmemente
+retenido. Snap a arriba/abajo al soltar + pulso háptico al
+enganchar/desenganchar. Enseña a asegurar el auto al estacionar/detener
+y a soltarlo antes de arrancar.</p>
+<h3 id="frenado-suave-en-safefail-smoothstop">2.5 Frenado suave en
+SafeFail (SmoothStop)</h3>
+<p>Cuando ocurre una falta grave, el auto <strong>no frena de
+golpe</strong>: desacelera suavemente hasta detenerse (rampa de ~1.5 s),
+evitando un frenazo brusco incómodo en VR. Durante la parada se ignora
+el input del jugador. Es comfort VR + consecuencia clara sin castigar el
+cuerpo del alumno.</p>
+<h3 id="tablero-diegético">2.6 Tablero diegético</h3>
+<p>El tablero muestra, sin sacar la vista del parabrisas:
+<strong>velocímetro analógico</strong> (aguja suavizada, display hasta
+120 km/h), número de velocidad en km/h, puntaje acumulado, cartel de
+<strong>límite de velocidad</strong> de la zona, e <strong>indicador de
+marcha</strong> D (verde) / N (ámbar) / R (naranja) que parpadea con la
+marcha de destino durante un cambio.</p>
+<h3 id="parámetros-de-conducción">2.7 Parámetros de conducción</h3>
+<table>
+<colgroup>
+<col style="width: 33%" />
+<col style="width: 33%" />
+<col style="width: 33%" />
+</colgroup>
+<thead>
+<tr>
+<th>Parámetro</th>
+<th>Valor</th>
+<th>Nota</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>Velocidad máxima adelante</td>
+<td><strong>80 km/h</strong></td>
+<td>Cap urbano</td>
+</tr>
+<tr>
+<td>Velocidad máxima en reversa</td>
+<td><strong>10 km/h</strong></td>
+<td>Seguridad/realismo</td>
+</tr>
+<tr>
+<td>Ángulo máximo de ruedas</td>
+<td><strong>32°</strong></td>
+<td>A input ±1</td>
+</tr>
+<tr>
+<td>Tope visual del volante</td>
+<td><strong>180°</strong></td>
+<td>Mapea a input ±1</td>
+</tr>
+<tr>
+<td>Escala de aceleración</td>
+<td>12</td>
+<td>Torque al motor</td>
+</tr>
+<tr>
+<td>Escala de freno</td>
+<td>30</td>
+<td>Torque de freno</td>
+</tr>
+<tr>
+<td>Recentrado del volante</td>
+<td>180 °/s a 30 km/h</td>
+<td>Proporcional a la velocidad</td>
+</tr>
+<tr>
+<td>Offset de centro de masa</td>
+<td>(0, −0.4, 0) m</td>
+<td>Antivuelco</td>
+</tr>
+<tr>
+<td>Freno de mano: ángulo puesto / umbral</td>
+<td>40° / 20°</td>
+<td>Snap binario</td>
+</tr>
+<tr>
+<td>Palanca cambios: snap D/R / zona Neutral</td>
+<td>±40° / ±20°</td>
+<td>Con histéresis 2°</td>
+</tr>
+<tr>
+<td>Cambio por freno sostenido</td>
+<td>2 s (detenido)</td>
+<td>Modo sin palanca</td>
+</tr>
+<tr>
+<td>Frenado suave (SmoothStop)</td>
+<td>~1.5 s</td>
+<td>Rampa de freno</td>
+</tr>
+</tbody>
+</table>
+<hr />
+<h2 id="interacción-vr-controles-físicos">3. Interacción VR (controles
+físicos)</h2>
+<p>Todo objeto manipulable usa el <strong>mismo stack de agarre
+validado</strong> (el del volante, clonado): así volante, palanca de
+cambios, freno de mano, palanca de guiños y tablilla del examinador
+conviven de forma confiable, cada uno scopeado por su propio filtro de
+proximidad.</p>
+<h3 id="agarre-y-manos">3.1 Agarre y manos</h3>
+<ul>
+<li><strong>Seguimiento de la mano:</strong> al agarrar un objeto, la
+mano virtual se “pega” y lo sigue (no queda flotando ni atravesándolo).
+Funciona con controllers y con manos híbridas.</li>
+<li><strong>Filtros de proximidad:</strong> solo se puede agarrar un
+objeto cuando la mano está <strong>físicamente sobre él</strong>, no a
+distancia (“agarre fantasma”).</li>
+</ul>
+<h3 id="háptica">3.2 Háptica</h3>
+<table>
+<colgroup>
+<col style="width: 33%" />
+<col style="width: 33%" />
+<col style="width: 33%" />
+</colgroup>
+<thead>
+<tr>
+<th>Sistema</th>
+<th>Cuándo</th>
+<th>Sensación</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><strong>Pulsos por agarre</strong></td>
+<td>Al manipular un objeto agarrable</td>
+<td>Vibra el controller que lo sostiene (lado correcto)</td>
+</tr>
+<tr>
+<td><strong>Controlador háptico central</strong></td>
+<td>Infracción / acierto (vía EventBus)</td>
+<td>Infracción: doble golpe firme. Acierto: rampa ascendente suave</td>
+</tr>
+<tr>
+<td><strong>Feedback de límite de agarre</strong></td>
+<td>Forzar un control más allá de su tope</td>
+<td>Vibración escalonada por niveles; si se insiste, el objeto
+<strong>se suelta solo</strong> + sacudón de cámara</td>
+</tr>
+</tbody>
+</table>
+<p>El <strong>sacudón de cámara</strong> está deliberadamente acotado
+(&lt; 5 cm, ~0.3 s) porque un shake fuerte marea en VR.</p>
+<h3 id="tablilla-del-examinador-panel-de-objetivos">3.3 Tablilla del
+examinador (panel de objetivos)</h3>
+<p>El <strong>panel de objetivos</strong> vive en una tablilla estilo
+examinador montada en el tablero. El jugador puede <strong>agarrarla y
+moverla libremente (6DOF)</strong> para leerla de cerca; al soltarla,
+vuelve sola y suavemente a su lugar de reposo (siempre legible).
+Refuerza la diégesis de “escuela de manejo”: el examinador lleva su
+checklist.</p>
+<hr />
+<h2 id="luces-direccionales-guiños">4. Luces direccionales (guiños)</h2>
+<p>Palanca/stalk que sale de la columna de dirección, a la izquierda del
+volante. Se <strong>agarra</strong> y se mueve sobre su eje:</p>
+<table>
+<thead>
+<tr>
+<th>Posición</th>
+<th>Resultado</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>Arriba (&gt; +12°)</td>
+<td>Guiño <strong>derecho</strong></td>
+</tr>
+<tr>
+<td>Centro (±12°)</td>
+<td>Apagado</td>
+</tr>
+<tr>
+<td>Abajo (&lt; −12°)</td>
+<td>Guiño <strong>izquierdo</strong></td>
+</tr>
+</tbody>
+</table>
+<p>Al soltar, <strong>snapea</strong> y queda enclavada (el guiño sigue
+activo sin sostenerla, liberando las manos para el volante).
+<strong>No</strong> hay auto-cancelación al enderezar el volante (a
+diferencia de un auto real). Las luces parpadean en <strong>ámbar a
+~1.25 Hz</strong> (arrancan encendidas al accionar). Cada lado agrupa
+<strong>3 luces</strong>: esquina delantera + esquina trasera +
+<strong>indicador en el tablero</strong> frente al conductor, todas
+sincronizadas, para que la señal sea visible desde afuera y desde la
+cabina.</p>
+<blockquote>
+<p><strong>Nota de diseño:</strong> actualmente el guiño es una mecánica
+de <strong>inmersión/realismo</strong>; ningún sistema de scoring
+penaliza no señalizar ni premia señalizar. Es un gancho disponible para
+futuras misiones (ej. “señalizá antes de girar”).</p>
+</blockquote>
+<hr />
+<h2 id="espejos-y-chequeo-de-espejos">5. Espejos y chequeo de
+espejos</h2>
+<h3 id="espejos-funcionales">5.1 Espejos funcionales</h3>
+<p>Los tres espejos (central/retrovisor, lateral izquierdo, lateral
+derecho) renderizan el <strong>reflejo real</strong> del mundo detrás
+del auto (tráfico, peatones, semáforos). Por rendimiento en Quest 3,
+cada espejo se actualiza <strong>1 de cada 2 frames</strong> (~36 FPS
+efectivos), ahorrando ~50% del costo de GPU sin perder fluidez del
+tráfico lejano.</p>
+<h3 id="detección-del-chequeo">5.2 Detección del chequeo</h3>
+<p>El juego registra cuándo el alumno <strong>mira un espejo</strong> y
+lo premia. Dos detectores coexisten:</p>
+<ul>
+<li><strong>Por giro de cabeza (Quest 3, principal):</strong> girar la
+cabeza &gt; 45° a un lado cuenta como mirar ese espejo lateral; mirar
+&gt; 15° hacia arriba cuenta como retrovisor. No requiere eye
+tracking.</li>
+<li><strong>Por mirada (Quest Pro, si hay eye tracking):</strong> posar
+la mirada sobre un espejo (raycast a objetos con tag
+<code>Mirror</code>) lo cuenta. Si no hay hardware de eye tracking,
+queda inactivo y actúa el de cabeza.</li>
+</ul>
+<p>Cada espejo se detecta una vez por ciclo de maniobra (<em>rising
+edge</em>; se reinicia al iniciar una nueva maniobra). <strong>Requisito
+por maniobra:</strong> girar a la izquierda exige el espejo izquierdo, a
+la derecha el derecho, <strong>dar marcha atrás exige el retrovisor
+central</strong>. Cada chequeo otorga <strong>+5 puntos</strong> (acción
+correcta <code>CheckedMirrorsBeforeTurn</code>) y avanza la misión de
+espejos (requiere 2).</p>
+<hr />
+<h2 id="sistema-de-evaluación-puntaje-infracciones-y-aciertos">6.
+Sistema de evaluación: puntaje, infracciones y aciertos</h2>
+<h3 id="puntaje-base">6.1 Puntaje base</h3>
+<p>El alumno <strong>arranca cada nivel con 1000 puntos</strong> y
+conduce intentando no perderlos. El puntaje nunca baja de 0 ni tiene
+techo. <strong>Aprobado = puntaje final ≥ 600.</strong> Modelo de examen
+de manejo: se parte de un crédito de confianza y se pierde con cada
+error (el manejo seguro es el estado por defecto; el error es la
+excepción penalizada).</p>
+<h3 id="tabla-de-infracciones-penalizaciones">6.2 Tabla de infracciones
+(penalizaciones)</h3>
+<p>Cada error resta puntos. Las faltas que ponen vidas en riesgo pesan
+mucho más que las de hábito. <strong>Las graves</strong> (★) disparan
+<strong>SafeFail inmediato</strong> (detención del auto + pantalla
+pedagógica); las demás solo restan y la conducción continúa.</p>
+<table>
+<thead>
+<tr>
+<th>Infracción</th>
+<th style="text-align: right;">Penalización</th>
+<th style="text-align: center;">¿Grave?</th>
+<th>Ley 24.449</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>Atropellar a un peatón (<code>HitPedestrian</code>)</td>
+<td style="text-align: right;">−30</td>
+<td style="text-align: center;">★ SÍ</td>
+<td>Art. 41</td>
+</tr>
+<tr>
+<td>Choque grave (<code>SevereCollision</code>)</td>
+<td style="text-align: right;">−25</td>
+<td style="text-align: center;">★ SÍ</td>
+<td>Art. 50</td>
+</tr>
+<tr>
+<td>Cruzar en rojo (<code>RanRedLight</code>)</td>
+<td style="text-align: right;">−20</td>
+<td style="text-align: center;">★ SÍ</td>
+<td>Art. 43</td>
+</tr>
+<tr>
+<td>Circular en contramano (<code>WrongWay</code>)</td>
+<td style="text-align: right;">−18</td>
+<td style="text-align: center;">No</td>
+<td>Art. 42</td>
+</tr>
+<tr>
+<td>No ceder al peatón (<code>PedestrianNotYielded</code>)</td>
+<td style="text-align: right;">−15</td>
+<td style="text-align: center;">★ SÍ</td>
+<td>Art. 41</td>
+</tr>
+<tr>
+<td>No detenerse en PARE (<code>FailedToStopAtSign</code>)</td>
+<td style="text-align: right;">−12</td>
+<td style="text-align: center;">No</td>
+<td>Art. 44</td>
+</tr>
+<tr>
+<td>Exceso de velocidad (<code>Speeding</code>)</td>
+<td style="text-align: right;">−10</td>
+<td style="text-align: center;">No</td>
+<td>Art. 51</td>
+</tr>
+<tr>
+<td>Maniobra peligrosa (<code>DangerousManeuver</code>)</td>
+<td style="text-align: right;">−8</td>
+<td style="text-align: center;">No</td>
+<td>Art. 48</td>
+</tr>
+<tr>
+<td>No chequear espejos (<code>NoMirrorCheck</code>)</td>
+<td style="text-align: right;">−5</td>
+<td style="text-align: center;">No</td>
+<td>Art. 39</td>
+</tr>
+</tbody>
+</table>
+<p>Cada infracción queda registrada con su <strong>timestamp</strong> en
+el historial del nivel (se lista al final). Las cuatro graves son:
+cruzar en rojo, no ceder al peatón, atropello y choque grave.</p>
+<h3 id="tabla-de-aciertos-bonus-por-manejo-correcto">6.3 Tabla de
+aciertos (bonus por manejo correcto)</h3>
+<p>El alumno <strong>recupera puntos</strong> haciendo lo correcto. Las
+acciones de mayor riesgo evitado valen más, espejando la jerarquía de
+las penalizaciones:</p>
+<table>
+<thead>
+<tr>
+<th>Acción correcta</th>
+<th style="text-align: right;">Bonus</th>
+<th><code>ActionType</code></th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>Ceder el paso a un peatón</td>
+<td style="text-align: right;">+15</td>
+<td><code>YieldedToPedestrian</code></td>
+</tr>
+<tr>
+<td>Detenerse en semáforo rojo</td>
+<td style="text-align: right;">+10</td>
+<td><code>StoppedAtRedLight</code></td>
+</tr>
+<tr>
+<td>Detenerse en señal PARE</td>
+<td style="text-align: right;">+8</td>
+<td><code>StoppedAtPareSign</code></td>
+</tr>
+<tr>
+<td>Chequear espejos antes de girar</td>
+<td style="text-align: right;">+5</td>
+<td><code>CheckedMirrorsBeforeTurn</code></td>
+</tr>
+<tr>
+<td>Cruzar en verde</td>
+<td style="text-align: right;">+3</td>
+<td><code>PassedGreenLight</code></td>
+</tr>
+<tr>
+<td>Cruzar senda despejada (sin peatón)</td>
+<td style="text-align: right;">+3</td>
+<td><code>PedestrianNotPresent</code></td>
+</tr>
+<tr>
+<td>Mantener velocidad legal</td>
+<td style="text-align: right;">+2 (cada 5 s)</td>
+<td><code>MaintainedLegalSpeed</code></td>
+</tr>
+</tbody>
+</table>
+<h3 id="pantalla-safefail-retroalimentación-pedagógica">6.4 Pantalla
+SafeFail (retroalimentación pedagógica)</h3>
+<p>Es el <strong>núcleo de la propuesta de valor</strong>. Al cometer
+una falta grave, en vez de un choque o un “Game Over” genérico, aparece
+(con fade in suave de 0.5 s) una tarjeta con tres bloques:</p>
+<ol type="1">
+<li><strong>Título</strong> corto de la falta (ej. “Semáforo en
+Rojo”).</li>
+<li><strong>Descripción</strong> didáctica: qué se hizo mal y cuál era
+la conducta correcta.</li>
+<li><strong>Referencia legal:</strong> el artículo exacto de la Ley
+24.449.</li>
+</ol>
+<p>Más dos botones: <strong>Reintentar</strong> (recarga el nivel
+limpio: auto, score, misiones, timer) y <strong>Menú Principal</strong>.
+Mapeo infracción → contenido pedagógico:</p>
+<table>
+<colgroup>
+<col style="width: 33%" />
+<col style="width: 33%" />
+<col style="width: 33%" />
+</colgroup>
+<thead>
+<tr>
+<th>Infracción</th>
+<th>Título de la pantalla</th>
+<th>Artículo</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><code>RanRedLight</code></td>
+<td>Semáforo en Rojo</td>
+<td>Art. 43 — Señales semafóricas</td>
+</tr>
+<tr>
+<td><code>PedestrianNotYielded</code></td>
+<td>Prioridad Peatonal</td>
+<td>Art. 41 — Prioridad del peatón</td>
+</tr>
+<tr>
+<td><code>HitPedestrian</code></td>
+<td>Atropellaste a un Peatón</td>
+<td>Art. 41 — Prioridad del peatón</td>
+</tr>
+<tr>
+<td><code>FailedToStopAtSign</code></td>
+<td>Señal de PARE</td>
+<td>Art. 44 — Señales de tránsito</td>
+</tr>
+<tr>
+<td><code>Speeding</code></td>
+<td>Exceso de Velocidad</td>
+<td>Art. 51 — Límites de velocidad</td>
+</tr>
+<tr>
+<td><code>NoMirrorCheck</code></td>
+<td>Espejos No Chequeados</td>
+<td>Art. 39 — Requisitos para girar</td>
+</tr>
+<tr>
+<td><code>DangerousManeuver</code></td>
+<td>Maniobra Peligrosa</td>
+<td>Art. 48 — Prohibiciones</td>
+</tr>
+<tr>
+<td><code>WrongWay</code></td>
+<td>Circulaste en Contramano</td>
+<td>Art. 42 — Sentido de circulación</td>
+</tr>
+<tr>
+<td><code>SevereCollision</code></td>
+<td>Choque Grave</td>
+<td>Art. 50 — Velocidad precautoria</td>
+</tr>
+</tbody>
+</table>
+<h3 id="pantalla-de-fin-de-nivel-boletín">6.5 Pantalla de fin de nivel
+(boletín)</h3>
+<p>Al terminar, aparece “FIN DEL NIVEL” con: <strong>puntaje
+final</strong>, veredicto <strong>APROBADO/REPROBADO</strong>, y la
+<strong>lista cronológica de infracciones</strong> cometidas con su
+timestamp <code>[MM:SS]</code> y mensaje. Botones Reintentar y Menú.
+Cierre tipo boletín de examen: el alumno ve no solo la nota, sino el
+desglose de qué hizo mal y cuándo (retroalimentación formativa).</p>
+<hr />
+<h2 id="sensores-de-detección-de-manejo">7. Sensores de detección de
+manejo</h2>
+<p>Cada situación de tránsito se evalúa con un <strong>sensor</strong>
+dedicado. Todos reconocen al jugador por el tag
+<code>PlayerVehicle</code> (en el collider o su Rigidbody) y despachan
+premio/infracción al EventBus, que ScoreManager, háptica, audio y toasts
+consumen sin conocerse entre sí.</p>
+<h3 id="semáforo-sistema-de-dos-zonas">7.1 Semáforo (sistema de dos
+zonas)</h3>
+<p>Separado deliberadamente en dos componentes para resolver el bug
+donde aproximarse en rojo penalizaba y bloqueaba el premio de
+frenar:</p>
+<ul>
+<li><strong>Zona de detención (<code>RedLightStopZone</code>):</strong>
+volumen <strong>antes</strong> de la línea (7 m). Si el auto se detiene
+≥ 0.5 s con el semáforo en rojo → premio <strong>+10</strong>.
+<strong>Nunca</strong> dispara infracción.</li>
+<li><strong>Línea de cruce
+(<code>TrafficLightCrossLine</code>):</strong> sobre la línea. Al
+cruzarla hacia adelante: en rojo → infracción <strong>−20 +
+SafeFail</strong>; en verde → premio <strong>+3</strong>; amarillo
+configurable (sin penalidad por defecto). Retroceder sobre la línea no
+se evalúa.</li>
+</ul>
+<p>La detección de cruce usa un volumen ancho que mide el <strong>cambio
+de lado</strong> del auto respecto a la línea, robusto al
+<em>tunneling</em> a alta velocidad, y distingue avance de
+retroceso.</p>
+<h3 id="señal-pare">7.2 Señal PARE</h3>
+<p>El auto debe <strong>detenerse por completo</strong> (≤ 2 km/h)
+durante <strong>1.5 s</strong> antes de avanzar. Si frena lo suficiente
+→ premio <strong>+8</strong>; si pasa de largo sin frenar el tiempo
+requerido → infracción <strong>−12</strong> (no grave). El umbral exige
+una detención real, no un <em>rolling stop</em>.</p>
+<h3 id="senda-peatonal">7.3 Senda peatonal</h3>
+<table>
+<colgroup>
+<col style="width: 50%" />
+<col style="width: 50%" />
+</colgroup>
+<thead>
+<tr>
+<th>Situación</th>
+<th>Resultado</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>Hay peatón cruzando y el auto <strong>NO</strong> está detenido al
+entrar</td>
+<td>Infracción <code>PedestrianNotYielded</code> <strong>−15 +
+SafeFail</strong></td>
+</tr>
+<tr>
+<td>Hay peatón y el auto se detiene ≥ 0.8 s</td>
+<td>Premio <code>YieldedToPedestrian</code> <strong>+15</strong></td>
+</tr>
+<tr>
+<td>No hay peatón (cruce despejado)</td>
+<td>Premio <code>PedestrianNotPresent</code> <strong>+3</strong></td>
+</tr>
+<tr>
+<td>El auto <strong>toca el cuerpo</strong> del peatón</td>
+<td>Infracción <code>HitPedestrian</code> <strong>−30 +
+SafeFail</strong></td>
+</tr>
+</tbody>
+</table>
+<p>El atropello se detecta como <strong>colisión real con el cuerpo del
+peatón</strong> (no como evento de zona), por eso es inequívoco y carga
+la consecuencia más dura del juego. Prioridad peatonal absoluta (Art.
+41).</p>
+<h3 id="contramano">7.4 Contramano</h3>
+<p>En ciertos carriles, si el alumno circula en sentido opuesto al
+permitido (rumbo a más de ~120° del sentido legal) → infracción
+<code>WrongWay</code> <strong>−18</strong> (no grave). Un umbral
+generoso evita falsos positivos en giros, y un mínimo de velocidad evita
+evaluar rumbo errático estando casi parado.</p>
+<h3 id="límite-de-velocidad-por-zona">7.5 Límite de velocidad por
+zona</h3>
+<p>Cada tramo tiene su límite (40 km/h por defecto), que se muestra en
+el HUD al entrar. Si el alumno excede el límite + tolerancia (5 km/h) →
+infracción <code>Speeding</code> <strong>−10</strong> (un disparo por
+exceso, no spam). Si mantiene velocidad legal en movimiento → premio
+<code>MaintainedLegalSpeed</code> <strong>+2 cada 5 s</strong>.</p>
+<h3 id="resumen-de-sensores">7.6 Resumen de sensores</h3>
+<table>
+<colgroup>
+<col style="width: 25%" />
+<col style="width: 25%" />
+<col style="width: 25%" />
+<col style="width: 25%" />
+</colgroup>
+<thead>
+<tr>
+<th>Sensor</th>
+<th>Premio</th>
+<th>Infracción</th>
+<th>Parámetros clave</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>Zona de rojo</td>
+<td>+10 (frenar)</td>
+<td>—</td>
+<td>detenido ≥ 0.5 s, 7 m antes</td>
+</tr>
+<tr>
+<td>Línea de semáforo</td>
+<td>+3 (verde)</td>
+<td>−20 + SafeFail (rojo)</td>
+<td>sobre la línea, solo hacia adelante</td>
+</tr>
+<tr>
+<td>PARE</td>
+<td>+8</td>
+<td>−12</td>
+<td>≤ 2 km/h por 1.5 s</td>
+</tr>
+<tr>
+<td>Senda peatonal</td>
+<td>+15 / +3</td>
+<td>−15 + SafeFail</td>
+<td>detenido ≥ 0.8 s</td>
+</tr>
+<tr>
+<td>Atropello</td>
+<td>—</td>
+<td>−30 + SafeFail</td>
+<td>contacto con el cuerpo</td>
+</tr>
+<tr>
+<td>Contramano</td>
+<td>—</td>
+<td>−18</td>
+<td>dot &lt; −0.5, &gt; 3 km/h</td>
+</tr>
+<tr>
+<td>Velocidad</td>
+<td>+2 / 5 s</td>
+<td>−10</td>
+<td>límite + 5 km/h</td>
+</tr>
+</tbody>
+</table>
+<hr />
+<h2 id="integridad-del-vehículo-sistema-de-daño">8. Integridad del
+vehículo (sistema de daño)</h2>
+<p>Puntuación <strong>paralela</strong> al score que modela el desgaste
+del auto por zona. No toca la física del vehículo: solo escucha
+colisiones.</p>
+<h3 id="ocho-zonas">8.1 Ocho zonas</h3>
+<p>El auto tiene 8 zonas independientes, cada una de 0 a 100, que
+arrancan en 100:</p>
+<pre><code>        ┌───────────────┐
+   FL ● │     FRENTE     │ ● FR        (carrocería: Frente, Atrás,
+        │               │              Lateral Izq, Lateral Der)
+   IZQ ▌│               │▐ DER         (ruedas: FL, FR, RL, RR
+        │               │               en las 4 esquinas)
+   RL ● │     ATRÁS      │ ● RR
+        └───────────────┘</code></pre>
+<p>La <strong>integridad total</strong> es el promedio de las 8 zonas,
+mostrado como porcentaje.</p>
+<h3 id="daño-por-impacto">8.2 Daño por impacto</h3>
+<p>El auto se daña al rozar <strong>obstáculos altos</strong>
+(edificios, postes) y al <strong>chocar contra autos NPC</strong>. El
+piso plano y los triggers de misión no dañan. El daño escala con la
+velocidad del impacto:</p>
+<pre><code>daño = velocidad_kmh × 0.8   (acotado entre 6 y 60)</code></pre>
+<p>Ejemplos: 20 km/h → 16 de daño; 50 km/h → 40; 80 km/h → tope 60. La
+<strong>zona golpeada</strong> se determina por el punto de contacto en
+el espacio local del auto (frente/atrás/laterales, y las esquinas
+cuentan como rueda). Un <strong>cooldown de 0.3 s</strong> evita que un
+roce continuo acumule daño infinito.</p>
+<h3 id="safefail-por-daño">8.3 SafeFail por daño</h3>
+<p>Dos condiciones disparan el SafeFail “Choque Grave”
+(<code>SevereCollision</code>, −25):</p>
+<ul>
+<li><strong>Golpe grave único:</strong> un solo impacto ≥ <strong>35 de
+daño</strong> (≈ choque a &gt; 44 km/h).</li>
+<li><strong>Daño acumulado crítico:</strong> la integridad total cae a
+<strong>≤ 35%</strong>.</li>
+</ul>
+<p>Cada una muestra un mensaje pedagógico distinto (“chocaste fuerte” vs
+“acumuló demasiado daño”).</p>
+<h3 id="símbolo-visual">8.4 Símbolo visual</h3>
+<p>Silueta top-down del auto con las 8 zonas que pasan de <strong>verde
+(100%) a rojo (0%)</strong> + un porcentaje grande al centro. Se ve
+<strong>en vivo en el tablero</strong> (en VR) y en la pantalla de fin
+de nivel como puntuación de cierre aparte del score.</p>
+<h3 id="parámetros-de-integridad">8.5 Parámetros de integridad</h3>
+<table>
+<thead>
+<tr>
+<th>Parámetro</th>
+<th>Valor</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>Daño por km/h</td>
+<td>0.8</td>
+</tr>
+<tr>
+<td>Daño mínimo / máximo por golpe</td>
+<td>6 / 60</td>
+</tr>
+<tr>
+<td>Umbral de golpe grave</td>
+<td>35</td>
+</tr>
+<tr>
+<td>Integridad crítica (SafeFail)</td>
+<td>35%</td>
+</tr>
+<tr>
+<td>Cooldown entre impactos</td>
+<td>0.3 s</td>
+</tr>
+</tbody>
+</table>
+<hr />
+<h2 id="tráfico-ai">9. Tráfico AI</h2>
+<h3 id="autos-npc">9.1 Autos NPC</h3>
+<p>El alumno ve autos circulando solos por la avenida en un <strong>loop
+oval continuo</strong> (suben por un carril, bajan de frente por el
+otro, giran en los extremos). Comportamiento:</p>
+<ul>
+<li><strong>Movimiento por waypoints</strong>, suave y a velocidad
+<strong>consistente e independiente del framerate</strong> (clave para
+no marear en VR).</li>
+<li><strong>Frenado por obstáculo adelante:</strong> un
+<em>sphere-cast</em> detecta al jugador, a otro NPC o a un peatón en el
+camino y frena en vez de embestir; reanuda al despejarse.</li>
+<li><strong>Frenado ante semáforo en rojo:</strong> desacelera y se
+detiene antes de la línea; si ya pasó la línea, <strong>termina de
+cruzar</strong> en vez de clavarse en medio de la intersección.</li>
+<li><strong>Colisión sólida con el jugador:</strong> si el alumno choca
+un NPC, el impacto es <strong>físico</strong> (no se atraviesan). Esto
+se logra con una <strong>capa de física aislada</strong> (“Traffic”) que
+solo colisiona consigo misma: los vehículos chocan entre sí pero ninguno
+se engancha con calle/edificios.</li>
+</ul>
+<p><strong>Dificultad data-driven
+(<code>TrafficProfile</code>):</strong> un asset define velocidad de
+crucero, variación de velocidad por auto, escala de los modelos y
+cantidad de autos. Subir velocidad/cantidad por nivel escala la
+exigencia <strong>sin reabrir la escena</strong>. Valores por defecto:
+~14 km/h de crucero, 4 autos.</p>
+<h3 id="peatones">9.2 Peatones</h3>
+<ul>
+<li><strong>Ciclo de cruce:</strong> un peatón espera en la vereda un
+tiempo variable (2–8 s), baja a la senda y la cruza caminando; al
+terminar vuelve a esperar. Mientras cruza, marca “peatón presente” para
+el detector de cesión.</li>
+<li><strong>“Mirar antes de cruzar”:</strong> el peatón <strong>no baja
+a la calle mientras haya un vehículo</strong> (el del jugador o un NPC)
+dentro de la zona de peligro sobre el asfalto. Así un atropello
+<strong>siempre es atribuible a una mala decisión del jugador</strong>,
+nunca a un peatón que se tira bajo las ruedas.</li>
+<li><strong>Soporte multi-peatón:</strong> varios peatones pueden cruzar
+a la vez sin que uno, al salir, apague el estado de “hay peatones
+cruzando” mientras otro sigue.</li>
+</ul>
+<hr />
+<h2 id="sistema-de-misiones-data-driven">10. Sistema de misiones
+(data-driven)</h2>
+<h3 id="concepto">10.1 Concepto</h3>
+<p>Cada misión es un <strong>asset</strong> (ScriptableObject) con
+título, descripción didáctica opcional, puntos al completar (10 por
+defecto) y un flag <em>opcional</em>. El jugador <strong>no interactúa
+directamente</strong> con las misiones: maneja bien (para en rojo, cede
+al peatón, chequea espejos…) y esas conductas correctas <strong>avanzan
+las misiones automáticamente</strong> vía el vocabulario común de
+<code>ActionType</code>. Un diseñador crea y tunea objetivos desde el
+Inspector, sin programar.</p>
+<h3 id="tipos-de-misión">10.2 Tipos de misión</h3>
+<table>
+<colgroup>
+<col style="width: 25%" />
+<col style="width: 25%" />
+<col style="width: 25%" />
+<col style="width: 25%" />
+</colgroup>
+<thead>
+<tr>
+<th>Tipo</th>
+<th>Qué pide</th>
+<th>Ejemplo</th>
+<th>Panel</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><strong>Contable</strong></td>
+<td>Hacer una acción <strong>N veces</strong></td>
+<td>“Detenerse en rojo ×1”, “Chequear espejos ×2”</td>
+<td><code>1/3</code></td>
+</tr>
+<tr>
+<td><strong>Secuencia</strong></td>
+<td>Acciones <strong>en orden</strong></td>
+<td>Recorrido A → B → C</td>
+<td>paso <code>1/3</code></td>
+</tr>
+<tr>
+<td><strong>Con tiempo</strong></td>
+<td>Acción N veces <strong>contrarreloj</strong></td>
+<td>N antes de agotar el reloj</td>
+<td><code>2/3 · 12s</code></td>
+</tr>
+<tr>
+<td><strong>Compuesta</strong></td>
+<td><strong>Todas</strong> las sub-misiones</td>
+<td>“Conducción segura en la intersección” = parar en rojo + ceder +
+chequear</td>
+<td><code>2/3 subs</code></td>
+</tr>
+</tbody>
+</table>
+<p>Diseño tolerante: las misiones de secuencia <strong>ignoran</strong>
+acciones fuera de orden (no fallan), para reducir frustración en VR. Las
+compuestas pueden anidarse.</p>
+<h3 id="estados-y-orquestación">10.3 Estados y orquestación</h3>
+<p>Cada misión tiene un estado: <strong>Pendiente · En progreso ·
+Cumplida · Fallada</strong>. El <code>MissionManager</code> gestiona el
+ciclo de vida y avisa cuando <strong>todas las obligatorias</strong>
+están cumplidas (<code>AllRequiredCompleted</code>) — la condición de
+victoria del nivel. Las misiones <strong>opcionales</strong> suman pero
+no bloquean. Sin misiones obligatorias no hay fin por misiones (modo
+libre).</p>
+<hr />
+<h2 id="niveles-y-progresión">11. Niveles y progresión</h2>
+<h3 id="definición-de-nivel-data-driven">11.1 Definición de nivel
+(data-driven)</h3>
+<p>Cada nivel es un asset con: id, nombre de menú, descripción,
+<strong>escena</strong> a cargar, <strong>lista de misiones</strong>,
+<strong>siguiente nivel</strong> (lo que se desbloquea al completar) y
+flag de <strong>modo libre</strong>. Permite crear y
+<strong>encadenar</strong> niveles sin tocar código.</p>
+<h3 id="flujo-de-un-nivel">11.2 Flujo de un nivel</h3>
+<ol type="1">
+<li>Al cargar la escena, el panel de objetivos se
+<strong>puebla</strong> con las misiones del nivel.</li>
+<li>El alumno maneja; aciertos avanzan misiones, errores restan/disparan
+SafeFail.</li>
+<li>Al cumplir todas las misiones obligatorias: se <strong>guarda el
+mejor puntaje</strong>, se <strong>desbloquea el siguiente
+nivel</strong> (o se marca la campaña como completa) y aparece el
+boletín de fin de nivel.</li>
+</ol>
+<h3 id="modo-libre-free-roam">11.3 Modo libre (free roam)</h3>
+<p>Modo sandbox sin misiones obligatorias ni condición de fin: el alumno
+practica manejo seguro libremente, sumando puntos. Se <strong>habilita
+al completar la campaña</strong>. Recompensa por terminar los niveles
+guiados.</p>
+<h3 id="persistencia">11.4 Persistencia</h3>
+<p>Se recuerda entre sesiones (PlayerPrefs): qué niveles están
+<strong>desbloqueados</strong>, el <strong>mejor puntaje</strong> por
+nivel (solo mejora si se supera) y si la <strong>campaña está
+completa</strong>. El reset es por-nivel para no pisar otras
+preferencias (ej. volumen).</p>
+<h3 id="build-settings">11.5 Build Settings</h3>
+<ul>
+<li>Índice 0 = <strong>MainMenu</strong> (carga al inicio).</li>
+<li>Índice 1 = <strong>Level_01_Basics</strong>.</li>
+</ul>
+<p>El <code>sceneName</code> de cada nivel debe estar registrado en
+Build Settings.</p>
+<hr />
+<h2 id="ui-hud-feedback-y-tema-visual">12. UI, HUD, feedback y tema
+visual</h2>
+<h3 id="hud-diegético">12.1 HUD diegético</h3>
+<p>Toda la información crítica está <strong>pintada sobre el tablero del
+auto</strong> (no flota ante la cara): velocímetro analógico + número de
+velocidad, puntaje, cartel de límite, indicador de marcha y panel de
+objetivos. Mantiene la inmersión VR y enseña a monitorear la velocidad
+como en un auto real.</p>
+<h3 id="notificaciones-de-feedback">12.2 Notificaciones de feedback</h3>
+<table>
+<colgroup>
+<col style="width: 33%" />
+<col style="width: 33%" />
+<col style="width: 33%" />
+</colgroup>
+<thead>
+<tr>
+<th>UI</th>
+<th>Cuándo</th>
+<th>Contenido</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><strong>Success Toast</strong></td>
+<td>Acierto de manejo</td>
+<td>“¡Muy bien!” + mensaje + <code>+N</code>, se desvanece solo, sobre
+el volante</td>
+</tr>
+<tr>
+<td><strong>Panel de objetivos</strong></td>
+<td>Siempre</td>
+<td>Checklist con casilla □ pendiente / ✔ cumplida (tachada) / ✘
+fallada</td>
+</tr>
+<tr>
+<td><strong>Pantalla SafeFail</strong></td>
+<td>Falta grave</td>
+<td>Lección + cita legal (ver §6.4)</td>
+</tr>
+<tr>
+<td><strong>Panel fin de nivel</strong></td>
+<td>Fin de nivel</td>
+<td>Boletín con score, veredicto e historial (ver §6.5)</td>
+</tr>
+</tbody>
+</table>
+<h3 id="menús">12.3 Menús</h3>
+<ul>
+<li><strong>Menú principal:</strong> Jugar (entra al nivel) /
+Salir.</li>
+<li><strong>Menú de pausa:</strong> se abre con un botón del control;
+congela el juego y aparece <strong>siempre frente a la mirada</strong>
+(proyectado al plano horizontal para no quedar inclinado), a distancia
+de confort. Opciones: Reanudar / Reintentar / Menú principal.</li>
+</ul>
+<h3 id="reglas-de-ui-en-vr">12.4 Reglas de UI en VR</h3>
+<p>Todos los canvas son <strong>world-space</strong>, a escala en metros
+(0.001), parentados a ~0.8–1.2 m de la cámara (zona de confort). La
+interacción es por <strong>poke/ray del Oculus Interaction SDK</strong>
+(los botones se tocan). Las pantallas que aparecen/desaparecen
+<strong>desactivan su hitbox</strong> mientras están ocultas, para que
+la mano no choque con una “pared invisible” al estirarse hacia el
+volante.</p>
+<h3 id="tema-visual-manual-del-conductor-señalética-vial">12.5 Tema
+visual (“manual del conductor + señalética vial”)</h3>
+<p>Look coherente con metáfora de escuela de manejo: fondos crema tipo
+manual, esquinas redondeadas, tipografía legible a distancia, y colores
+de <strong>señalética vial</strong>:</p>
+<table>
+<thead>
+<tr>
+<th>Color</th>
+<th>Rol</th>
+<th>Hex</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>Verde</td>
+<td>Éxito / avanzar</td>
+<td><code>#3DAE5A</code></td>
+</tr>
+<tr>
+<td>Rojo</td>
+<td>Peligro / detener</td>
+<td><code>#D64550</code></td>
+</tr>
+<tr>
+<td>Ámbar</td>
+<td>Precaución / warning</td>
+<td><code>#F2A93B</code></td>
+</tr>
+<tr>
+<td>Azul</td>
+<td>Info / marca</td>
+<td><code>#2D7DD2</code></td>
+</tr>
+<tr>
+<td>Crema</td>
+<td>Fondo base</td>
+<td><code>#F7F4EC</code></td>
+</tr>
+</tbody>
+</table>
+<p>El verde/rojo/ámbar mapean al semáforo y a las señales, anclando el
+feedback de la UI al código vial real.</p>
+<hr />
+<h2 id="audio">13. Audio</h2>
+<p>Todo el audio reacciona al EventBus y se rutea a un mixer master (un
+solo slider de volumen controla todo, con curva perceptual y
+persistencia entre sesiones).</p>
+<table>
+<colgroup>
+<col style="width: 33%" />
+<col style="width: 33%" />
+<col style="width: 33%" />
+</colgroup>
+<thead>
+<tr>
+<th>Sonido</th>
+<th>Tipo</th>
+<th>Comportamiento</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><strong>Motor</strong></td>
+<td>3D posicional</td>
+<td>Pitch y volumen suben con la velocidad y el acelerador; Doppler bajo
+(confort VR)</td>
+</tr>
+<tr>
+<td><strong>Bocina</strong></td>
+<td>3D one-shot</td>
+<td>Advertir a otros <em>(API lista; falta wirear el botón)</em></td>
+</tr>
+<tr>
+<td><strong>Infracción</strong></td>
+<td>2D one-shot</td>
+<td>Sonido de error inmediato y sin ambigüedad</td>
+</tr>
+<tr>
+<td><strong>Acierto</strong></td>
+<td>2D one-shot</td>
+<td>Sonido de éxito (refuerzo positivo)</td>
+</tr>
+<tr>
+<td><strong>Fin de nivel</strong></td>
+<td>2D jingle</td>
+<td>Jingle de victoria + se silencia el ambiente</td>
+</tr>
+<tr>
+<td><strong>Ambiente de ciudad</strong></td>
+<td>2D loop</td>
+<td>Da vida al entorno de fondo</td>
+</tr>
+<tr>
+<td><strong>Entidades del mundo</strong></td>
+<td>3D HRTF</td>
+<td>Autos NPC, peatones y semáforos suenan con dirección y distancia
+reales</td>
+</tr>
+</tbody>
+</table>
+<p>La conciencia situacional auditiva (escuchar de dónde viene el
+tráfico) es en sí una habilidad de manejo seguro que el audio 3D
+entrena.</p>
+<hr />
+<h2 id="apéndice-marco-legal-ley-nacional-de-tránsito-24.449">14.
+Apéndice — Marco legal (Ley Nacional de Tránsito 24.449)</h2>
+<p>Cada conducta evaluada está anclada a un artículo real, que se cita
+en la pantalla SafeFail y en los mensajes de los detectores:</p>
+<table>
+<thead>
+<tr>
+<th>Artículo</th>
+<th>Tema</th>
+<th>Mecánica asociada</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><strong>Art. 39</strong></td>
+<td>Requisitos para girar</td>
+<td>Chequeo de espejos</td>
+</tr>
+<tr>
+<td><strong>Art. 41</strong></td>
+<td>Prioridad del peatón</td>
+<td>Ceder el paso / atropello</td>
+</tr>
+<tr>
+<td><strong>Art. 42</strong></td>
+<td>Sentido de circulación</td>
+<td>Contramano</td>
+</tr>
+<tr>
+<td><strong>Art. 43</strong></td>
+<td>Señales semafóricas</td>
+<td>Semáforo rojo/verde</td>
+</tr>
+<tr>
+<td><strong>Art. 44</strong></td>
+<td>Señales de tránsito</td>
+<td>Señal PARE</td>
+</tr>
+<tr>
+<td><strong>Art. 48</strong></td>
+<td>Prohibiciones al conductor</td>
+<td>Maniobra peligrosa</td>
+</tr>
+<tr>
+<td><strong>Art. 50</strong></td>
+<td>Velocidad precautoria</td>
+<td>Choque grave</td>
+</tr>
+<tr>
+<td><strong>Art. 51</strong></td>
+<td>Límites de velocidad</td>
+<td>Exceso de velocidad</td>
+</tr>
+</tbody>
+</table>
+<hr />
+<h2 id="apéndice-mapa-rápido-de-sistemas">15. Apéndice — Mapa rápido de
+sistemas</h2>
+<table>
+<colgroup>
+<col style="width: 33%" />
+<col style="width: 33%" />
+<col style="width: 33%" />
+</colgroup>
+<thead>
+<tr>
+<th>Sistema</th>
+<th>Rol</th>
+<th>Integración</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><strong>EventBus</strong></td>
+<td>Bus de eventos central</td>
+<td>Punto de integración de todas las capas</td>
+</tr>
+<tr>
+<td><strong>GameManager</strong></td>
+<td>Máquina de estados + SafeFail</td>
+<td>Despacha cambios de estado</td>
+</tr>
+<tr>
+<td><strong>VehicleController</strong></td>
+<td>Conducción (WheelColliders, marchas, freno de mano)</td>
+<td>Lee input, escucha estado</td>
+</tr>
+<tr>
+<td><strong>ScoreManager</strong></td>
+<td>Puntaje, infracciones, aciertos, aprobación</td>
+<td>Escucha detectores por EventBus</td>
+</tr>
+<tr>
+<td><strong>VehicleIntegrity</strong></td>
+<td>Daño por zonas → SafeFail</td>
+<td>Escucha colisiones, despacha infracción</td>
+</tr>
+<tr>
+<td><strong>Detectores (Scoring)</strong></td>
+<td>Semáforo, PARE, senda, contramano, velocidad, espejos</td>
+<td>Despachan premio/infracción</td>
+</tr>
+<tr>
+<td><strong>MissionManager / LevelManager</strong></td>
+<td>Objetivos y progresión data-driven</td>
+<td>Escuchan acciones correctas y score</td>
+</tr>
+<tr>
+<td><strong>UIManager</strong></td>
+<td>Ruteo de paneles por estado</td>
+<td>Solo escucha eventos</td>
+</tr>
+<tr>
+<td><strong>AudioManager</strong></td>
+<td>Sonido reactivo</td>
+<td>Solo escucha eventos</td>
+</tr>
+<tr>
+<td><strong>Tráfico (Traffic)</strong></td>
+<td>NPCs y peatones</td>
+<td>Capa de física aislada</td>
+</tr>
+</tbody>
+</table>
+<hr />
+<p><em>Documento generado a partir del relevamiento del código fuente
+del proyecto. Para el detalle de implementación de cada sistema, ver los
+scripts en <code>Assets/_SafeDriver/Scripts/</code>. Para armar niveles
+nuevos, ver <code>Docs/GuiaLevelDesigner.md</code>.</em></p>
+</body>
+</html>

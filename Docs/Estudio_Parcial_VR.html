@@ -1,0 +1,1148 @@
+<!DOCTYPE html>
+<html xmlns="http://www.w3.org/1999/xhtml">
+<head>
+  <meta charset="utf-8" />
+  <meta name="generator" content="pandoc 3.10" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=yes" />
+  <title>Resumen de estudio — Parcial VR (Meta XR SDK + Diseño)</title>
+  <style>
+    /* Default styles provided by pandoc.
+    ** See https://pandoc.org/MANUAL.html#variables-for-html for config info.
+    */
+    html {
+      color: #1a1a1a;
+      background-color: #fdfdfd;
+    }
+    body {
+      margin: 0 auto;
+      max-width: 36em;
+      padding-left: 50px;
+      padding-right: 50px;
+      padding-top: 50px;
+      padding-bottom: 50px;
+      hyphens: auto;
+      overflow-wrap: break-word;
+      text-rendering: optimizeLegibility;
+      font-kerning: normal;
+    }
+    @media (max-width: 600px) {
+      body {
+        font-size: 0.9em;
+        padding: 12px;
+      }
+      h1 {
+        font-size: 1.8em;
+      }
+    }
+    @media print {
+      html {
+        background-color: white;
+      }
+      body {
+        background-color: transparent;
+        color: black;
+        font-size: 12pt;
+      }
+      p, h2, h3 {
+        orphans: 3;
+        widows: 3;
+      }
+      h2, h3, h4 {
+        page-break-after: avoid;
+      }
+    }
+    p {
+      margin: 1em 0;
+    }
+    a {
+      color: #1a1a1a;
+    }
+    a:visited {
+      color: #1a1a1a;
+    }
+    img {
+      max-width: 100%;
+    }
+    svg {
+      height: auto;
+      max-width: 100%;
+    }
+    h1, h2, h3, h4, h5, h6 {
+      margin-top: 1.4em;
+    }
+    h5, h6 {
+      font-size: 1em;
+      font-style: italic;
+    }
+    h6 {
+      font-weight: normal;
+    }
+    ol, ul {
+      padding-left: 1.7em;
+      margin-top: 1em;
+    }
+    li > ol, li > ul {
+      margin-top: 0;
+    }
+    blockquote {
+      margin: 1em 0 1em 1.7em;
+      padding-left: 1em;
+      border-left: 2px solid #e6e6e6;
+      color: #606060;
+    }
+    code {
+      white-space: pre-wrap;
+      font-family: Menlo, Monaco, Consolas, 'Lucida Console', monospace;
+      font-size: 85%;
+      margin: 0;
+      hyphens: manual;
+    }
+    pre {
+      margin: 1em 0;
+      overflow: auto;
+    }
+    pre code {
+      padding: 0;
+      overflow: visible;
+      overflow-wrap: normal;
+    }
+    .sourceCode {
+     background-color: transparent;
+     overflow: visible;
+    }
+    hr {
+      border: none;
+      border-top: 1px solid #1a1a1a;
+      height: 1px;
+      margin: 1em 0;
+    }
+    table {
+      margin: 1em 0;
+      border-collapse: collapse;
+      width: 100%;
+      overflow-x: auto;
+      display: block;
+      font-variant-numeric: lining-nums tabular-nums;
+    }
+    table caption {
+      margin-bottom: 0.75em;
+    }
+    tbody {
+      margin-top: 0.5em;
+      border-top: 1px solid #1a1a1a;
+      border-bottom: 1px solid #1a1a1a;
+    }
+    th {
+      border-top: 1px solid #1a1a1a;
+      padding: 0.25em 0.5em 0.25em 0.5em;
+    }
+    td {
+      padding: 0.125em 0.5em 0.25em 0.5em;
+    }
+    header {
+      margin-bottom: 4em;
+      text-align: center;
+    }
+    #TOC li {
+      list-style: none;
+    }
+    #TOC ul {
+      padding-left: 1.3em;
+    }
+    #TOC > ul {
+      padding-left: 0;
+    }
+    #TOC a:not(:hover) {
+      text-decoration: none;
+    }
+    span.smallcaps{font-variant: small-caps;}
+    div.columns{display: flex; gap: 1.5em;}
+    div.column{flex: auto;}
+    @media screen {
+    div.columns{gap: min(4vw, 1.5em);}
+    div.column{overflow-x: auto;}
+    }
+    div.hanging-indent{margin-left: 1.5em; text-indent: -1.5em;}
+    /* The extra [class] is a hack that increases specificity enough to
+       override a similar rule in reveal.js */
+    ul.task-list[class]{list-style: none;}
+    ul.task-list li input[type="checkbox"] {
+      font-size: inherit;
+      width: 0.8em;
+      margin: 0 0.8em 0.2em -1.6em;
+      vertical-align: middle;
+    }
+    .display.math{display: block; text-align: center; margin: 0.5rem auto;}
+  </style>
+</head>
+<body>
+<header id="title-block-header">
+<h1 class="title">Resumen de estudio — Parcial VR (Meta XR SDK +
+Diseño)</h1>
+</header>
+<nav id="TOC" role="doc-toc">
+<ul>
+<li><a href="#resumen-de-estudio-parcial-de-vr-meta-xr-sdk-diseño"
+id="toc-resumen-de-estudio-parcial-de-vr-meta-xr-sdk-diseño">Resumen de
+estudio — Parcial de VR (Meta XR SDK + Diseño)</a></li>
+<li><a href="#parte-a-meta-xr-all-in-one-sdk-herramientas"
+id="toc-parte-a-meta-xr-all-in-one-sdk-herramientas">PARTE A — Meta XR
+All-in-One SDK (herramientas)</a>
+<ul>
+<li><a href="#a.1-setup-del-proyecto"
+id="toc-a.1-setup-del-proyecto">A.1 Setup del proyecto</a></li>
+<li><a href="#a.2-building-blocks-qué-son"
+id="toc-a.2-building-blocks-qué-son">A.2 Building Blocks — qué
+son</a></li>
+<li><a href="#a.3-arquitectura-de-interacción-el-modelo-mental"
+id="toc-a.3-arquitectura-de-interacción-el-modelo-mental">A.3
+Arquitectura de Interacción (el modelo mental)</a></li>
+<li><a href="#a.4-grab-interactions-agarre"
+id="toc-a.4-grab-interactions-agarre">A.4 Grab interactions
+(agarre)</a></li>
+<li><a href="#a.5-hand-grab-poses-poses-de-mano"
+id="toc-a.5-hand-grab-poses-poses-de-mano">A.5 Hand Grab Poses (poses de
+mano)</a></li>
+<li><a href="#a.6-interacción-multimodal-manos-controles-a-la-vez"
+id="toc-a.6-interacción-multimodal-manos-controles-a-la-vez">A.6
+Interacción multimodal (manos + controles a la vez)</a></li>
+<li><a href="#a.7-ui-en-vr" id="toc-a.7-ui-en-vr">A.7 UI en VR</a></li>
+<li><a href="#a.8-locomoción" id="toc-a.8-locomoción">A.8
+Locomoción</a></li>
+<li><a href="#a.9-passthrough-realidad-mixta"
+id="toc-a.9-passthrough-realidad-mixta">A.9 Passthrough / Realidad
+Mixta</a></li>
+<li><a href="#a.10-eye-gaze-mirada" id="toc-a.10-eye-gaze-mirada">A.10
+Eye Gaze (mirada)</a></li>
+<li><a href="#a.11-build-y-gotchas" id="toc-a.11-build-y-gotchas">A.11
+Build y gotchas</a></li>
+</ul></li>
+<li><a href="#parte-b-conceptos-de-diseño"
+id="toc-parte-b-conceptos-de-diseño">PARTE B — Conceptos de diseño</a>
+<ul>
+<li><a href="#b.1-game-feel-juice" id="toc-b.1-game-feel-juice">B.1 Game
+feel / “juice”</a></li>
+<li><a href="#b.2-feedback-positivo-vs-negativo"
+id="toc-b.2-feedback-positivo-vs-negativo">B.2 Feedback positivo vs
+negativo</a></li>
+<li><a href="#b.3-affordance-y-signifiers-gibson-y-norman"
+id="toc-b.3-affordance-y-signifiers-gibson-y-norman">B.3 Affordance y
+signifiers (Gibson y Norman)</a></li>
+<li><a href="#b.4-embodiment-encarnación-y-presencia"
+id="toc-b.4-embodiment-encarnación-y-presencia">B.4 Embodiment /
+encarnación y presencia</a></li>
+<li><a href="#b.5-iluminación-para-vr-unity-urp"
+id="toc-b.5-iluminación-para-vr-unity-urp">B.5 Iluminación para VR /
+Unity URP</a></li>
+</ul></li>
+<li><a href="#parte-c-práctica-del-profe-resuelta-y-verificada"
+id="toc-parte-c-práctica-del-profe-resuelta-y-verificada">PARTE C —
+Práctica del profe (resuelta y verificada)</a></li>
+<li><a href="#parte-d-cómo-lo-aplicamos-en-safedriver-ejemplos-propios"
+id="toc-parte-d-cómo-lo-aplicamos-en-safedriver-ejemplos-propios">PARTE
+D — Cómo lo aplicamos en SafeDriver (ejemplos propios)</a></li>
+<li><a href="#apéndice-chuleta-de-nombres-y-frameworks"
+id="toc-apéndice-chuleta-de-nombres-y-frameworks">Apéndice — Chuleta de
+nombres y frameworks</a></li>
+</ul>
+</nav>
+<h1 id="resumen-de-estudio-parcial-de-vr-meta-xr-sdk-diseño">Resumen de
+estudio — Parcial de VR (Meta XR SDK + Diseño)</h1>
+<blockquote>
+<p>Resumen completo para el parcial teórico. Combina: (1) los resúmenes
+de las clases en video, (2) la <strong>verificación contra el código
+fuente real</strong> del Meta XR Interaction SDK que está en el
+proyecto, y (3) la experiencia propia de haber construido
+<strong>SafeDriver</strong> (sim VR de manejo). Al final está la
+<strong>práctica del profe resuelta</strong> (Parte C) y
+<strong>ejemplos propios</strong> para defender en el oral (Parte
+D).</p>
+<p>Temario: herramientas del SDK de Meta (AIO / Building Blocks /
+Interaction SDK) + conceptos de diseño: <strong>iluminación, game
+feeling, affordance, embodiment</strong>.</p>
+</blockquote>
+<hr />
+<h1 id="parte-a-meta-xr-all-in-one-sdk-herramientas">PARTE A — Meta XR
+All-in-One SDK (herramientas)</h1>
+<h2 id="a.1-setup-del-proyecto">A.1 Setup del proyecto</h2>
+<ol type="1">
+<li><strong>Android Build Support</strong> instalado en Unity (es Quest
+= Android).</li>
+<li><strong>Meta XR All-in-One SDK</strong> desde el Asset Store
+(paquete que junta core + interaction + platform).</li>
+<li><strong>Plataforma → Android</strong> en Build Settings.</li>
+<li><strong>Project Setup Tool</strong> (en <em>Oculus / Meta →
+Tools</em>): configura automáticamente los parámetros del proyecto (fix
+all).</li>
+<li><strong>API gráfica → Vulkan</strong> (no OpenGLES3): si falla la
+compilación en el visor, este suele ser el motivo.</li>
+<li><strong>Modo desarrollador</strong> activado en el casco desde la
+app móvil de Meta Quest.</li>
+<li>Probar con <strong>Oculus/Meta Link</strong> (cable USB-C, juega
+desde el editor) o <strong>Build and Run</strong> (.apk al casco). Ojo:
+el comportamiento en el editor puede diferir del device — varias cosas
+de rig solo se validan con un <strong>Build</strong> real.</li>
+</ol>
+<h2 id="a.2-building-blocks-qué-son">A.2 Building Blocks — qué son</h2>
+<p>Piezas <strong>modulares</strong> que instalan funcionalidad sin
+armar todo a mano. Claves para el examen:</p>
+<ul>
+<li>Cada bloque tiene un <strong>id (GUID)</strong> estable; el
+instalador <strong>resuelve dependencias por GUID</strong>, no por
+nombre. Por eso instalar <em>Interactions Rig</em> arrastra solo el
+<em>Camera Rig</em>.</li>
+<li>Hay <strong>singletons</strong> (Camera Rig, Eye Gaze…): si ya
+existen, la instalación los <strong>saltea</strong> en vez de
+duplicar.</li>
+<li>Se acceden desde <em>Oculus/Meta → Tools → Building Blocks</em>
+(drag &amp; drop a la escena).</li>
+</ul>
+<h3 id="catálogo-los-principales">Catálogo (los principales)</h3>
+<table>
+<colgroup>
+<col style="width: 33%" />
+<col style="width: 33%" />
+<col style="width: 33%" />
+</colgroup>
+<thead>
+<tr>
+<th>Categoría</th>
+<th>Building Block</th>
+<th>Qué hace</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><strong>Rig / tracking</strong></td>
+<td><strong>Camera Rig</strong></td>
+<td>Rig VR base (OVRCameraRig): cabeza + anclas de ojos/manos.
+Dependencia raíz. <em>Singleton.</em></td>
+</tr>
+<tr>
+<td></td>
+<td><strong>Controller Tracking</strong></td>
+<td>Trackea y muestra los controladores Touch</td>
+</tr>
+<tr>
+<td></td>
+<td><strong>Hand Tracking</strong></td>
+<td>Tracking de manos desnudas (poner frecuencia en
+<strong>High</strong>)</td>
+</tr>
+<tr>
+<td></td>
+<td><strong>Synthetic / Virtual Hands</strong></td>
+<td>Manos virtuales que se “pegan” al objeto agarrado (no lo
+atraviesan)</td>
+</tr>
+<tr>
+<td></td>
+<td><strong>Eye Gaze</strong></td>
+<td>Eye tracking (Quest Pro): dirección de la mirada.
+<em>Singleton.</em></td>
+</tr>
+<tr>
+<td></td>
+<td><strong>Haptics</strong></td>
+<td>Reproducción de vibración en los controllers</td>
+</tr>
+<tr>
+<td></td>
+<td><strong>Controller Buttons Mapper</strong></td>
+<td>Mapea botones a UnityEvents <strong>sin código</strong></td>
+</tr>
+<tr>
+<td><strong>Passthrough / MR</strong></td>
+<td><strong>Passthrough</strong></td>
+<td>Ver el mundo real por las cámaras (base de MR)</td>
+</tr>
+<tr>
+<td></td>
+<td>Occlusion / Scene Mesh / Room Model</td>
+<td>Oclusión real, malla de la sala, modelo semántico del cuarto</td>
+</tr>
+<tr>
+<td></td>
+<td>Spatial Anchors</td>
+<td>Anclar contenido a un punto del mundo real</td>
+</tr>
+<tr>
+<td><strong>Interacción</strong></td>
+<td><strong>Interactions Rig</strong></td>
+<td>Rig comprehensivo de interacción (ISDK). Pulla el Camera Rig</td>
+</tr>
+<tr>
+<td></td>
+<td>Hand/Controller Interactions, Real/Virtual Hands</td>
+<td>Habilitan interacción por manos / controles</td>
+</tr>
+<tr>
+<td></td>
+<td><strong>Interactores</strong> (en la mano)</td>
+<td>Grab, Hand Poke, Hand Ray</td>
+</tr>
+<tr>
+<td></td>
+<td><strong>Interactables</strong> (en el objeto)</td>
+<td>HandGrab, Distance Grab, <strong>Grabbable Item</strong>,
+<strong>Ray Interaction (Pointable Item)</strong>, <strong>Poke
+Interaction</strong>, Throwable</td>
+</tr>
+<tr>
+<td><strong>Locomoción</strong></td>
+<td><strong>Teleport</strong></td>
+<td>Locomoción por <strong>teletransporte</strong> (apuntar y
+aparecer)</td>
+</tr>
+<tr>
+<td><strong>Otros</strong></td>
+<td>Spatial Audio, Virtual Keyboard</td>
+<td>Audio posicional Meta, teclado VR</td>
+</tr>
+</tbody>
+</table>
+<blockquote>
+<p><strong>Trampa de nomenclatura:</strong> <em>Ray Interaction</em> en
+el archivo se llama <em>Pointable Item</em>; <em>Virtual Hands</em> en
+el archivo es <em>Synthetic Hands</em>. En el examen conviene nombrar
+ambos.</p>
+</blockquote>
+<h2 id="a.3-arquitectura-de-interacción-el-modelo-mental">A.3
+Arquitectura de Interacción (el modelo mental)</h2>
+<p>El Interaction SDK separa tres roles:</p>
+<ul>
+<li><strong>Interactor</strong> → va en la <strong>mano/control</strong>
+(ej. <code>HandGrabInteractor</code>, <code>PokeInteractor</code>,
+<code>RayInteractor</code>). Es <strong>quién</strong> actúa.</li>
+<li><strong>Interactable</strong> → va en el <strong>objeto</strong>
+(ej. <code>HandGrabInteractable</code>, <code>PokeInteractable</code>).
+Es <strong>qué</strong> se puede accionar.</li>
+<li>Entre ellos corre una <strong>máquina de estados</strong>:
+<code>Normal → Hover → Select</code>. Hover = lo estás
+apuntando/tocando; Select = lo agarraste/apretaste.</li>
+</ul>
+<p><strong>Pointable / PointerEvent:</strong> muchos componentes emiten
+un <code>PointerEvent</code> con un <code>Type</code>
+(<code>Hover</code>, <code>Unhover</code>, <code>Select</code>,
+<code>Unselect</code>, <code>Move</code>, <code>Cancel</code>). Es el
+canal de bajo nivel que usan los <strong>event wrappers</strong>.</p>
+<h3 id="event-wrappers-clave-para-el-feedback-por-eventos">Event
+Wrappers (clave para el feedback por eventos)</h3>
+<p>Son <code>MonoBehaviour</code> que se suscriben a un objeto de
+interacción y re-exponen sus eventos como
+<strong><code>UnityEvent</code></strong> cableables desde el Inspector →
+permiten disparar <strong>sonido, partículas, activar GameObjects sin
+escribir código</strong>.</p>
+<table>
+<colgroup>
+<col style="width: 33%" />
+<col style="width: 33%" />
+<col style="width: 33%" />
+</colgroup>
+<thead>
+<tr>
+<th>Wrapper</th>
+<th>Envuelve</th>
+<th>Eventos que expone</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><strong><code>PointableUnityEventWrapper</code></strong></td>
+<td>un <code>IPointable</code> (ej. el <code>Grabbable</code>)</td>
+<td><code>WhenHover</code>, <code>WhenUnhover</code>,
+<strong><code>WhenSelect</code></strong>, <code>WhenUnselect</code>,
+<code>WhenMove</code>, <code>WhenCancel</code>, <code>WhenRelease</code>
+— cada uno pasa el <code>PointerEvent</code></td>
+</tr>
+<tr>
+<td><strong><code>InteractableUnityEventWrapper</code></strong></td>
+<td>un <code>IInteractableView</code> (ej.
+<code>HandGrabInteractable</code>)</td>
+<td><code>WhenHover/Unhover/Select/Unselect</code> (sin parámetro) +
+<code>WhenInteractorViewAdded/Removed</code>,
+<code>WhenSelectingInteractorViewAdded/Removed</code></td>
+</tr>
+<tr>
+<td><strong><code>PointableCanvasUnityEventWrapper</code></strong></td>
+<td>un <code>IPointableCanvas</code> (UI uGUI)</td>
+<td>eventos de highlight/select del
+<code>PointableCanvasModule</code></td>
+</tr>
+</tbody>
+</table>
+<p>Matices de examen: - <code>WhenSelect</code> = <strong>al
+agarrar</strong>. <code>WhenRelease</code> <strong>≠</strong>
+<code>WhenUnselect</code>: en <code>Unselect</code> siempre se invoca
+<code>WhenUnselect</code>, y <code>WhenRelease</code> <strong>solo
+además</strong> si el puntero seguía sobre el objeto (no se soltó
+“afuera”). - Cada wrapper tiene <strong>un campo de referencia
+obligatorio</strong> (<code>_pointable</code> /
+<code>_interactableView</code> / <code>_pointableCanvas</code>) que
+<strong>hay que asignar</strong> en el Inspector. Si queda sin asignar
+(o apuntás al GameObject equivocado), en <code>Start</code> salta un
+<strong><code>AssertField</code></strong>, el componente <strong>no
+arranca</strong> y <strong>nunca se suscribe</strong> → “no pasa nada”
+silencioso (ver práctica P4).</p>
+<h2 id="a.4-grab-interactions-agarre">A.4 Grab interactions
+(agarre)</h2>
+<p><strong>Método automático:</strong> menú contextual <em>Interaction
+SDK → Add Grab Interaction</em>. El asistente agrega solo el
+<strong><code>Rigidbody</code></strong>, el
+<strong><code>Collider</code></strong> y el
+<strong><code>GrabInteractable</code>/<code>HandGrabInteractable</code></strong>.</p>
+<p><strong>Método manual (estructura recomendada):</strong> un objeto
+<strong>Root</strong> con sub-objetos para <em>visuals, colliders, hand
+grab, controller grab y sfx</em>. Componentes clave:</p>
+<ul>
+<li><strong><code>Grabbable</code></strong> → define si el objeto es
+afectado por físicas (gravedad/cinemática) y si permite
+<strong>transferencia entre manos</strong>. (Internamente es un
+<code>IPointable</code>.)</li>
+<li><strong><code>HandGrabInteractable</code></strong> +
+<strong><code>ControllerGrabInteractable</code></strong> → reglas de
+agarre (gestos <strong>pinch</strong> o <strong>palm</strong>), para
+manos y para controles.</li>
+<li><strong><code>HandGrabVisual</code></strong> (vincula la mano
+sintética para mostrar la pose) y
+<strong><code>HandGrabGlow</code></strong> (brillo/contorno al
+interactuar).</li>
+</ul>
+<h3 id="flujo-agarrar-con-la-mano-sonido-pregunta-típica">Flujo: AGARRAR
+con la mano → SONIDO (pregunta típica)</h3>
+<pre><code>[objeto con Rigidbody + Collider + Grabbable + HandGrabInteractable]
+   -&gt; agregar PointableUnityEventWrapper, campo _pointable = el Grabbable
+   -&gt; evento WhenSelect (al agarrar)
+   -&gt; arrastrar el GameObject con el AudioSource al evento
+   -&gt; elegir la función AudioSource.Play()</code></pre>
+<h2 id="a.5-hand-grab-poses-poses-de-mano">A.5 Hand Grab Poses (poses de
+mano)</h2>
+<p>Definen <strong>cómo</strong> se ve la mano al agarrar (rotación de
+cada dedo) y dónde <strong>encaja</strong> (snap). <strong>Cuatro
+componentes</strong> y dónde viven:</p>
+<table>
+<colgroup>
+<col style="width: 25%" />
+<col style="width: 25%" />
+<col style="width: 25%" />
+<col style="width: 25%" />
+</colgroup>
+<thead>
+<tr>
+<th>Componente</th>
+<th>Tipo</th>
+<th>Dónde va</th>
+<th>Qué hace</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><strong><code>HandGrabInteractable</code></strong></td>
+<td>MonoBehaviour</td>
+<td><strong>objeto</strong> (raíz, junto al Rigidbody)</td>
+<td>Declara que se puede agarrar; guarda la lista de poses</td>
+</tr>
+<tr>
+<td><strong><code>HandGrabPose</code></strong></td>
+<td>MonoBehaviour</td>
+<td><strong>hijo</strong> del objeto</td>
+<td>Punto/orientación local donde se alinea la mano</td>
+</tr>
+<tr>
+<td><strong><code>HandPose</code></strong></td>
+<td>clase <code>[Serializable]</code> (<strong>no</strong> es
+componente)</td>
+<td><strong>embebida</strong> en el <code>HandGrabPose</code></td>
+<td>Datos: handedness, rotaciones de joints, <strong>libertad de
+dedos</strong></td>
+</tr>
+<tr>
+<td><strong><code>HandGrabInteractor</code></strong></td>
+<td>MonoBehaviour</td>
+<td><strong>la mano</strong> del rig</td>
+<td>Detecta y ejecuta el agarre; puntúa las poses y snapea a la
+mejor</td>
+</tr>
+</tbody>
+</table>
+<blockquote>
+<p>Regla mental: <strong>Interactable + Pose → en el OBJETO; Interactor
+→ en la MANO.</strong></p>
+</blockquote>
+<p><strong>Libertad de dedos (<code>JointFreedom</code>)</strong>, uno
+por dedo: - <strong><code>Free</code></strong> (libre): el dedo no se
+fuerza, sigue el tracking real. -
+<strong><code>Constrained</code></strong> (restringido): se mueve pero
+acotado a la pose. - <strong><code>Locked</code></strong> (bloqueado):
+se clava en la rotación de la pose.</p>
+<p><strong>Flujo de pasos:</strong></p>
+<pre><code>[objeto: Rigidbody + Collider + Grabbable]
+   -&gt; agregar HandGrabInteractable (autobusca Rigidbody/Grabbable en el padre)
+   -&gt; crear HandGrabPose como HIJO (Add HandGrab Pose)
+   -&gt; dejar usesHandPose = true + asignar HandGhostProvider (mano fantasma de preview)
+   -&gt; en SceneView colocar la pose y, en &quot;Edit fingers&quot;, ajustar JointFreedom + rotar joints
+   -&gt; (opcional) &quot;Create Mirrored HandGrabInteractable&quot; para la mano opuesta</code></pre>
+<h2 id="a.6-interacción-multimodal-manos-controles-a-la-vez">A.6
+Interacción multimodal (manos + controles a la vez)</h2>
+<p>Combina la inmersión del hand tracking con la precisión/háptica de
+los controles. Configuración en el <strong>OVR Manager</strong> del
+Camera Rig:</p>
+<ul>
+<li><strong>Controller Driven Hand Type → Conform to
+Controller</strong>.</li>
+<li>Activar <strong>Simultaneous Hands and Controllers</strong>.</li>
+<li>Hand Tracking con <strong>show state = Always</strong>.</li>
+<li>Conectar <strong>OVR Hand Data Source</strong> con el controller;
+configurar los <strong>Synthetic Hands</strong> en los <em>Visuals</em>
+para que el sistema sepa qué mano usa qué input.</li>
+<li>Agregar un <strong><code>HandGrabInteractor</code></strong> a cada
+mano; el <strong>Controller Pinch Injector</strong> y los grupos de
+interactores hacen que el agarre funcione con cualquier input.</li>
+</ul>
+<h2 id="a.7-ui-en-vr">A.7 UI en VR</h2>
+<ul>
+<li><strong>Canvas en World Space</strong> (obligatorio) a
+<strong>escala 0.001</strong> (1 unidad de canvas = 1 mm).</li>
+<li>Click derecho sobre el Canvas → <em>Interaction SDK</em> agrega
+<strong>Ray Interaction</strong> (a distancia) o <strong>Poke
+Interaction</strong> (tocar con el dedo). Internamente:
+<code>PointableCanvas</code> + un <code>PointableCanvasModule</code> en
+el <code>EventSystem</code> (sin él, <code>Button.onClick</code> no
+dispara).</li>
+<li>Estructurar con <strong>Vertical/Horizontal Layout Group</strong> +
+<strong>TextMeshPro</strong>; <strong>Scroll View</strong> para listas;
+<strong>Toggle</strong> + <strong>Layout Element</strong> para botones
+de tamaño fijo (UI espacial estilo Vision Pro: fondo con esquinas
+redondeadas semitransparente).</li>
+<li>La lógica se cablea con los <strong>eventos de Unity</strong>
+(<code>OnClick</code>, <code>OnValueChanged</code>).</li>
+<li><strong>Poke vs Ray:</strong> poke = contacto físico directo
+(botones cercanos); ray = puntero a distancia.</li>
+</ul>
+<h2 id="a.8-locomoción">A.8 Locomoción</h2>
+<p><strong>Teletransporte (Building Block
+<code>Teleport</code>):</strong> define <strong>dónde</strong> puede ir
+el jugador. Tres formas de crear zonas válidas: - <strong>NavMesh
+Surface</strong> — áreas amplias (un piso); requiere
+<strong>Bake</strong> de la malla. - <strong>Collider Surface</strong> —
+áreas puntuales/inclinadas (un Box Collider que el sistema reconoce). -
+<strong>Áreas inválidas</strong> (el vacío) — <code>score = -10</code>
+en el <code>Teleport Interactable</code> para que no se pueda
+teletransportar ahí. - <strong>Teleport Points</strong>
+(<code>Target Point</code>) — destino exacto + rotación final de
+llegada. - Componentes: <code>TeleportInteractable</code>,
+<code>ReticleDataTeleport</code> (el cursor),
+<code>ColliderSurface</code>.</p>
+<p><strong>Caminar room-scale con colisión (no atravesar
+paredes):</strong> lo dan los componentes
+<strong><code>FirstPersonLocomotor</code> +
+<code>CharacterController</code></strong> (una <strong>cápsula física
+con colisión</strong>). ⚠️ <strong>No hay un Building Block de un
+clic</strong> para esto: se monta con el <strong>prefab
+<code>Locomotor.prefab</code></strong> del sample de Locomotion. El
+único BB rotulado “Locomotion” es <strong>Teleport</strong> (que es
+teletransporte).</p>
+<h2 id="a.9-passthrough-realidad-mixta">A.9 Passthrough / Realidad
+Mixta</h2>
+<ul>
+<li>Building Block <strong>Passthrough</strong>, o a mano: en el
+<strong>OVR Manager</strong> activar <strong>Passthrough
+Support</strong> + <strong>Enable Passthrough</strong>.</li>
+<li>En el <strong>Center Eye Anchor</strong>, <strong>Clear Flag → Solid
+Color</strong> (negro con <strong>alpha 0</strong>) para que se vea el
+mundo real.</li>
+<li>Componente clave: <strong><code>OVRPassthroughLayer</code></strong>
+(renderiza y compone la capa real con la virtual).</li>
+<li>Tipos de composición:
+<ul>
+<li><strong>AR (reconstruido):</strong> la imagen real es el
+<strong>fondo</strong> de toda la escena (se le pueden aplicar estilos,
+ej. efecto Matrix).</li>
+<li><strong>Surface projection:</strong> la imagen real solo se proyecta
+sobre <strong>geometrías específicas</strong> (un quad) → ventanas/áreas
+concretas.</li>
+<li><strong>Windows (área):</strong> “ventanas” al mundo real usando un
+<strong>shader Selective Passthrough</strong> + la capa
+<strong>Transparent</strong>.</li>
+</ul></li>
+</ul>
+<h2 id="a.10-eye-gaze-mirada">A.10 Eye Gaze (mirada)</h2>
+<ul>
+<li>Building Block <strong>Eye Gaze</strong> (requiere <strong>Quest
+Pro</strong>; depende del Camera Rig; <em>singleton</em>).</li>
+<li>Instancia el componente <strong><code>OVREyeGaze</code></strong>. La
+elección de ojo se hace <strong>sin código</strong>, con el campo
+<strong><code>Eye</code></strong> (enum
+<strong><code>EyeId { Left, Right }</code></strong>).</li>
+<li>Campos del Inspector: <strong><code>ApplyRotation</code></strong>
+(el objeto rota siguiendo la mirada), <code>ApplyPosition</code>,
+<code>ConfidenceThreshold</code>, <code>ReferenceFrame</code>.</li>
+</ul>
+<h2 id="a.11-build-y-gotchas">A.11 Build y gotchas</h2>
+<ul>
+<li><strong>Vulkan</strong> (no OpenGLES3) para evitar fallos de
+compilación en el visor.</li>
+<li><strong>Build and Run</strong> genera el <code>.apk</code>. Varias
+configuraciones de rig <strong>solo se validan en el device</strong>, no
+en el editor.</li>
+</ul>
+<hr />
+<h1 id="parte-b-conceptos-de-diseño">PARTE B — Conceptos de diseño</h1>
+<h2 id="b.1-game-feel-juice">B.1 Game feel / “juice”</h2>
+<p><strong>Steve Swink (2009):</strong> game feel = <strong>“el control
+en tiempo real de objetos virtuales en un espacio simulado, con las
+interacciones enfatizadas mediante pulido (polish).”</strong> Tres
+pilares:</p>
+<ol type="1">
+<li><strong>Control en tiempo real</strong> — el jugador manipula frame
+a frame, con latencia mínima. En VR es literal: tu mano <em>es</em> el
+input.</li>
+<li><strong>Simulación espacial</strong> — hay un espacio con reglas
+físicas coherentes (colisiones, inercia, peso). El cerebro “compra” el
+espacio.</li>
+<li><strong>Pulido (polish) / “juice”</strong> — capas de feedback que
+<strong>enfatizan la interacción sin cambiar la simulación</strong>. La
+pelota rebota igual matemáticamente, pero el <em>squash &amp;
+stretch</em> + sonido + partícula te hacen <em>sentir</em> el
+rebote.</li>
+</ol>
+<p><strong>Capas de feedback:</strong> visual (animación con
+anticipación→acción→follow-through, squash&amp;stretch, flash,
+hit-stop), <strong>audio</strong> (el más barato y subestimado:
+<em>thunk</em> = peso, <em>click</em> = precisión),
+<strong>háptico</strong> (en VR es <strong>central</strong>, sustituye
+al tacto), <strong>partículas</strong>, <strong>anticipación</strong>
+(micro windup). <strong>Screen shake: PROHIBIDO en VR</strong> (mover el
+horizonte = mareo) → se reemplaza por shake del <em>objeto</em>, del HUD
+diegético o un pulso háptico.</p>
+<p><strong>Tip de examen:</strong> citá las <strong>3 palabras de
+Swink</strong> (control en tiempo real + simulación espacial + pulido) y
+la frase <em>“el polish enfatiza sin alterar la simulación”</em>.</p>
+<h2 id="b.2-feedback-positivo-vs-negativo">B.2 Feedback positivo vs
+negativo</h2>
+<ul>
+<li><strong>Positivo</strong> (recompensa): confirma lo correcto,
+refuerza la conducta.</li>
+<li><strong>Negativo</strong> (castigo/error): informa lo que salió mal,
+corrige la conducta.</li>
+</ul>
+<blockquote>
+<p><em>Aclaración:</em> en teoría de sistemas “negativo” =
+autorregulación y “positivo” = amplificación. Acá hablamos en sentido
+<strong>UX: recompensa vs castigo</strong>. Conviene aclararlo en el
+examen.</p>
+</blockquote>
+<p><strong>¿Por qué hay que tener MÁS cuidado con el
+negativo?</strong></p>
+<ol type="1">
+<li><strong>Sesgo de negatividad / aversión a la pérdida:</strong> lo
+malo pesa psicológicamente más que lo bueno. Un castigo mal calibrado
+“arruina” la sesión aunque haya habido muchos aciertos. El positivo
+<strong>perdona el exceso</strong>; el negativo no.</li>
+<li><strong>Frustración e injusticia:</strong> nadie se queja de una
+recompensa de más; el castigo dispara <em>“¿fue mi culpa?”</em>. Si es
+<strong>desproporcionado, abrupto o por algo fuera del control del
+jugador</strong> (tracking impreciso), se siente injusto. Debe ser
+<strong>legible, anticipable y proporcional</strong>.</li>
+<li><strong>Castigo vs información:</strong> buen feedback negativo
+<strong>informa</strong> qué hacer distinto, no solo “perdiste”.</li>
+<li><strong>Confort físico en VR (lo más crítico):</strong> flashes de
+pantalla completa, vignette rojo agresivo, screen shake y <em>knockback
+de cámara</em> → <strong>mareo / cybersickness</strong>; sonidos de
+error fuertes espacializados en la cabeza → sobresalto amplificado. El
+negativo en VR debe ser <strong>suave, diegético y sin tocar la
+cámara</strong>.</li>
+<li><strong>No romper inmersión/embodiment:</strong> un “GAME OVER”
+gigante te saca del mundo → rompe la presencia. Ideal: que el castigo
+viva dentro de la ficción.</li>
+<li><strong>Accesibilidad:</strong> si la señal de error es
+<em>solo</em> color → un daltónico la pierde; <em>solo</em> sonido →
+alguien con hipoacusia. <strong>Redundancia multicanal</strong>
+obligatoria en feedback crítico.</li>
+</ol>
+<p><strong>Síntesis:</strong> el positivo refuerza con <strong>margen de
+error amplio</strong>; el negativo opera contra el sesgo de negatividad,
+puede sentirse injusto, <strong>marea</strong> en VR y <strong>rompe
+inmersión</strong> → debe ser <strong>proporcional, anticipable,
+informativo, cómodo, diegético y multicanal</strong>.</p>
+<h2 id="b.3-affordance-y-signifiers-gibson-y-norman">B.3 Affordance y
+signifiers (Gibson y Norman)</h2>
+<ul>
+<li><strong>Affordance (Gibson, 1979):</strong> la <strong>relación
+objeto–agente</strong> que determina qué acciones son <em>posibles</em>
+(una silla “ofrece” sentarse). <strong>Existe objetivamente</strong>, se
+perciba o no.</li>
+<li><strong>Norman</strong> lo llevó al diseño y distinguió:
+<ul>
+<li><strong>Affordance real:</strong> lo que el objeto efectivamente
+permite.</li>
+<li><strong>Affordance percibida:</strong> lo que el usuario
+<em>cree</em> que puede hacer al mirarlo.</li>
+<li><strong>Signifier (significante):</strong> la <strong>señal
+perceptible</strong> que comunica dónde/cómo actuar. La manija de una
+puerta no es la affordance: es el <strong>signifier</strong>. El “Norman
+door” (manija de tirar en una puerta que se empuja) es un signifier que
+<strong>miente</strong>.</li>
+</ul></li>
+</ul>
+<p><strong>En VR importan más</strong> (el usuario espera usar sus manos
+como en la vida real, sin teclado que explique): <strong>forma =
+affordance</strong> (algo del tamaño de la mano con un asa se ve
+agarrable); <strong>glow / outline de hover</strong> = el signifier
+digital por excelencia (equivale al cursor del escritorio);
+<strong>manos virtuales que cambian de pose</strong> anticipan la
+acción. Un interactivo <strong>sin</strong> signifier es invisible; un
+no-interactivo que <em>parece</em> agarrable y la mano lo atraviesa =
+<strong>promesa rota</strong> que rompe la presencia.</p>
+<p><strong>Tip de examen:</strong> los <strong>tres niveles de
+Norman</strong> (real / percibida / signifier) + <em>Gibson dice que la
+affordance existe en la relación objeto-agente; Norman trabaja la
+percibida vía signifiers</em>.</p>
+<h2 id="b.4-embodiment-encarnación-y-presencia">B.4 Embodiment /
+encarnación y presencia</h2>
+<p><strong>Embodiment</strong> = la sensación de que un cuerpo virtual
+<strong>es tu cuerpo</strong>. <strong>Kilteni, Groten &amp; Slater
+(2012)</strong> — marco canónico — lo descomponen en <strong>tres
+componentes</strong>:</p>
+<ol type="1">
+<li><strong>Body ownership</strong> (“este cuerpo es mío”) — el cerebro
+adopta las manos/avatar virtuales (cf. <em>rubber hand
+illusion</em>).</li>
+<li><strong>Agency</strong> (“yo lo controlo”) — ser el autor de los
+movimientos; depende de <strong>baja latencia</strong> y
+<strong>correspondencia motora</strong>.</li>
+<li><strong>Self-location</strong> (“estoy ubicado dentro de este cuerpo
+/ lugar”).</li>
+</ol>
+<p><strong>Inmersión vs presencia:</strong> <em>inmersión</em> =
+capacidad <strong>técnica</strong> del sistema (FOV, tracking, audio
+espacial); <em>presencia</em> = la <strong>respuesta
+psicológica</strong> de “estar ahí”. Embodiment y presencia se
+retroalimentan.</p>
+<p><strong>Cómo se rompe (break-in-presence):</strong> latencia (mata la
+agency), la <strong>mano que atraviesa objetos sólidos</strong> (rompe
+ownership), mover/teletransportar la cámara sin tu intención (rompe
+self-location + marea), UI 2D pegada a la cara / menús no diegéticos,
+avatar en pose imposible.</p>
+<p><strong>Mareo (cybersickness):</strong> sobre todo por romper
+<strong>agency/self-location</strong> — el conflicto
+<strong>vestíbulo-visual</strong> (los ojos ven movimiento que el oído
+interno no siente). Regla: <strong>no mover la cámara</strong> salvo que
+el usuario lo comande con su cuerpo. (Caso delicado del sim de manejo:
+el auto se mueve y el cuerpo está quieto → se mitiga con velocidad
+estable, aceleraciones suaves, horizonte fijo.)</p>
+<p><strong>Tip de examen:</strong> los <strong>3 de Kilteni</strong>
+(ownership / agency / self-location) y a qué ruptura se asocia cada uno;
+diferenciar <strong>inmersión (técnica)</strong> de <strong>presencia
+(psicológica)</strong>.</p>
+<h2 id="b.5-iluminación-para-vr-unity-urp">B.5 Iluminación para VR /
+Unity URP</h2>
+<p><strong>Modos de luz:</strong> - <strong>Realtime:</strong> se
+calcula cada frame; sombras dinámicas; <strong>cara</strong> en
+mobile/Quest. - <strong>Baked (horneada):</strong> se
+<strong>precalcula</strong> en el editor y se guarda en
+<strong>lightmaps</strong> (la luz “pintada” sobre la geometría
+estática); costo en runtime casi nulo, pero <strong>no</strong>
+reacciona a lo que se mueve. - <strong>Mixed:</strong> combina — directa
+realtime (sombras de dinámicos) + indirecta/GI horneada.</p>
+<p><strong>Herramientas:</strong> - <strong>Lightmaps</strong> → luz
+horneada de la geometría <strong>estática</strong> (objetos <em>Static /
+Contribute GI</em>). - <strong>Light Probes</strong> → como los
+lightmaps son solo para estáticos, los <strong>objetos
+dinámicos</strong> (auto, peatones) reciben la GI interpolando entre
+<strong>muestras de luz</strong> capturadas en el espacio. <em>(Unity 6
+/ URP: <strong>Adaptive Probe Volumes (APV)</strong> automatizan
+esto.)</em> - <strong>Reflection Probes</strong> → cubemap del entorno
+para <strong>reflejos</strong> (carrocería, vidrios). - <strong>Light
+Cookies</strong> → una <strong>textura que modula/recorta la
+luz</strong> proyectada (como un <em>gobo</em> delante del foco):
+proyecta patrones (persiana, follaje, ventana) <strong>sin geometría
+real</strong>. Es exactamente el video de Blender: en vez de modelar y
+calcular sombras caras, <strong>horneás el patrón en una cookie</strong>
+y lo proyectás barato.</p>
+<p><strong>Costo en Quest (mobile):</strong> las luces realtime con
+sombras son <strong>carísimas</strong>. Presupuesto típico: <strong>una
+sola direccional realtime (el sol, en modo Mixed)</strong> y
+<strong>todo lo demás horneado</strong>. Bakear convierte iluminación en
+<strong>lookup de textura</strong> (lo que la GPU móvil hace mejor).
+Dinámicos → <strong>Light Probes / APV</strong> para que no se vean
+“despegados” del fondo.</p>
+<p><strong>Cómo la luz sostiene los otros conceptos:</strong>
+<strong>affordance</strong> (la luz <strong>dirige la atención</strong>
+y resalta lo interactivo — es un signifier ambiental),
+<strong>embodiment/presencia</strong> (sombras y reflejos coherentes son
+<strong>claves de realidad</strong>; una sombra bajo tu mano refuerza la
+self-location), <strong>mood</strong> (temperatura/contraste = tono) y
+<strong>legibilidad</strong> (que el alumno vea bien señales y
+tráfico).</p>
+<p><strong>Tip de examen:</strong> <em>“en Quest se hornea todo lo
+posible porque la luz realtime es el principal costo de GPU; bakear =
+convertir luz en textura”</em> + el trío <strong>lightmaps (estáticos) +
+light probes/APV (dinámicos) + reflection probes (reflejos)</strong> +
+<strong>light cookie = textura que recorta la luz</strong>.</p>
+<hr />
+<h1 id="parte-c-práctica-del-profe-resuelta-y-verificada">PARTE C —
+Práctica del profe (resuelta y verificada)</h1>
+<blockquote>
+<p>Las 5 respuestas fueron verificadas contra el <strong>código fuente
+real</strong> del SDK (<code>PointableUnityEventWrapper.cs</code>,
+<code>HandGrabPose.cs</code>, <code>CharacterController.cs</code>,
+<code>FirstPersonLocomotor.cs</code>, <code>OVREyeGaze.cs</code>).</p>
+</blockquote>
+<h3
+id="flujo-para-relacionar-un-sonido-con-agarrar-un-objeto-con-las-manos">1)
+Flujo para relacionar un SONIDO con AGARRAR un objeto con las MANOS</h3>
+<p><strong>Objeto agarrable (<code>Rigidbody</code> +
+<code>Collider</code> + <code>Grabbable</code> +
+<code>HandGrabInteractable</code>) → agregar
+<code>PointableUnityEventWrapper</code> con <code>_pointable</code> = el
+<code>Grabbable</code> → evento <code>WhenSelect</code> → arrastrar el
+GameObject con el <code>AudioSource</code> → función
+<code>AudioSource.Play()</code>.</strong></p>
+<p>Pasos: 1. El objeto debe poder agarrarse: <code>Rigidbody</code> +
+<code>Collider</code> + <code>Grabbable</code> +
+<code>HandGrabInteractable</code> (esto permite que el
+<code>HandGrabInteractor</code> de la mano llegue al estado
+<strong>Select</strong>). 2. Agregar el
+<strong><code>PointableUnityEventWrapper</code></strong> y en su campo
+<strong><code>_pointable</code></strong> arrastrar el
+<strong><code>Grabbable</code></strong> (vale porque
+<code>Grabbable</code> es un <code>IPointable</code>). <em>Alternativa
+equivalente:</em> <code>InteractableUnityEventWrapper</code> con
+<code>_interactableView</code> = el <code>HandGrabInteractable</code>.
+3. Agregar un <strong><code>AudioSource</code></strong> (con <em>Play On
+Awake = false</em>). 4. En el evento
+<strong><code>WhenSelect</code></strong>: <code>+</code> → arrastrar el
+GameObject del <code>AudioSource</code> → función
+<strong><code>AudioSource.Play()</code></strong>.</p>
+<p>⚠️ Usar <strong><code>WhenSelect</code></strong> (al agarrar),
+<strong>no</strong> <code>WhenRelease</code> (eso sería al soltar).</p>
+<h3
+id="por-qué-más-cuidado-con-el-feedback-negativo-que-con-el-positivo">2)
+¿Por qué más cuidado con el feedback NEGATIVO que con el positivo?</h3>
+<p>Porque el negativo <strong>castiga</strong>, y un castigo mal
+calibrado deteriora la experiencia más rápido de lo que un premio la
+mejora: <strong>(a)</strong> sesgo de negatividad (lo malo pesa más; el
+positivo perdona el exceso, el negativo no); <strong>(b)</strong> riesgo
+de sentirse <strong>injusto</strong> si es desproporcionado, abrupto o
+por algo fuera del control del jugador; <strong>(c)</strong> en VR puede
+<strong>marear/sobresaltar</strong> físicamente (flashes, screen shake,
+knockback de cámara, audio fuerte); <strong>(d)</strong> puede
+<strong>romper la inmersión/ embodiment</strong> (un GAME OVER que te
+saca del mundo); <strong>(e)</strong> debe ser <strong>informativo, no
+punitivo</strong> (decir qué corregir). Por eso el negativo se planifica
+<strong>proporcional, anticipable, legible, cómodo, diegético y
+multicanal</strong>; el positivo tiene margen de error amplio.</p>
+<h3 id="flujo-para-establecer-poses-de-manos-componentes-y-objetos">3)
+Flujo para establecer POSES DE MANOS — componentes y objetos</h3>
+<p>Componentes (regla: <strong>Interactable + Pose → en el OBJETO;
+Interactor → en la MANO</strong>): -
+<strong><code>HandGrabInteractable</code></strong> (MonoBehaviour) en el
+<strong>objeto raíz</strong>, junto al <code>Rigidbody</code>. -
+<strong><code>HandGrabPose</code></strong> (MonoBehaviour) como
+<strong>hijo</strong> del objeto. -
+<strong><code>HandPose</code></strong> (clase
+<code>[Serializable]</code>, <strong>no</strong> componente)
+<strong>embebida</strong> dentro del <code>HandGrabPose</code> (campos
+de dedos: <code>JointFreedom</code> =
+<code>Free</code>/<code>Constrained</code>/<code>Locked</code>). -
+<strong><code>HandGhostProvider</code></strong> para la <strong>mano
+fantasma (ghost)</strong> de preview. -
+<strong><code>HandGrabInteractor</code></strong> en la
+<strong>mano</strong> del rig.</p>
+<p>Pasos: objeto con
+<code>Rigidbody</code>+<code>Collider</code>+<code>Grabbable</code> →
+agregar <code>HandGrabInteractable</code> → crear
+<code>HandGrabPose</code> como <strong>hijo</strong> (“Add HandGrab
+Pose”) → <code>usesHandPose = true</code> + asignar
+<code>HandGhostProvider</code> → colocar la pose en el SceneView y, en
+<strong>“Edit fingers”</strong>, ajustar la libertad y rotar los joints
+→ <em>(opcional)</em> <strong>“Create Mirrored
+HandGrabInteractable”</strong> para la otra mano.</p>
+<h3
+id="puse-un-event-wrapper-con-un-evento-de-partículas-en-select-y-no-pasa-nada.-por-qué">4)
+Puse un <em>event wrapper</em> con un evento de partículas en
+<em>Select</em> y “no pasa nada”. ¿Por qué?</h3>
+<p>Causas, de la más común a la más sutil: 1. <strong>La referencia del
+wrapper quedó sin asignar o apunta al objeto equivocado</strong> (causa
+#1). En <code>Start</code> el wrapper hace <code>AssertField</code>
+sobre <code>_pointable</code>/<code>_interactableView</code>; si está
+nulo (o arrastraste el root vacío en vez del
+<strong><code>Grabbable</code>/<code>HandGrabInteractable</code></strong>),
+la assertion salta, el componente <strong>no se inicia</strong> y
+<strong>nunca se suscribe</strong> → “no pasa nada” silencioso.
+<strong>Mirá la Console:</strong> un <code>AssertField</code> rojo lo
+confirma. 2. <strong>El objeto nunca llega a Select</strong> porque le
+falta lo de aguas arriba (sin
+<code>Grabbable</code>/<code>HandGrabInteractable</code> real, o sin
+<code>Rigidbody</code>/<code>Collider</code>). 3. <strong>Falta el
+interactor en la mano</strong> (<code>HandGrabInteractor</code>): nadie
+selecciona el objeto. 4. <strong>Evento en el campo equivocado</strong>
+(<code>WhenRelease</code>/<code>WhenUnselect</code> en vez de
+<code>WhenSelect</code>). 5. <strong>El <code>ParticleSystem</code> no
+se reproduce</strong> (no llamaste a <code>ParticleSystem.Play()</code>,
+o apunta al componente equivocado). 6. <strong>El componente/GameObject
+del wrapper está deshabilitado</strong> → <code>OnEnable</code> no
+corre.</p>
+<h3
+id="sin-programar-no-atravesar-paredes-con-el-caminar-real-mecánica-por-ojo-izqder">5)
+Sin programar: no atravesar paredes con el caminar real + mecánica por
+ojo izq/der</h3>
+<p><strong>(a) No atravesar paredes/superficies (room-scale):</strong>
+los componentes <strong><code>FirstPersonLocomotor</code> +
+<code>CharacterController</code></strong> (una <strong>cápsula física
+con colisión</strong>: <code>CapsuleCollider</code>,
+<code>LayerMask</code> de qué bloquea, slopes y steps; resuelve la
+colisión <strong>deslizando</strong> sobre las superficies). El
+<code>FirstPersonLocomotor</code> mantiene esa cápsula
+<strong>sincronizada con el jugador real</strong>, así el caminar
+natural no atraviesa geometría. Se integra con el <strong>prefab
+<code>Locomotor.prefab</code></strong> del sample de Locomotion. ⚠️
+<strong>No hay un Building Block de un clic</strong> para esto; el único
+BB de locomoción es <strong>Teleport</strong> (teletransporte, no
+caminar con colisión).</p>
+<p><strong>(b) Mecánica por ojo:</strong> <strong>Building Block “Eye
+Gaze”</strong> (requiere Quest Pro; depende del Camera Rig), que agrega
+<strong><code>OVREyeGaze</code></strong>; el ojo se elige <strong>sin
+código</strong> con el campo <strong><code>Eye</code></strong> =
+<code>Left</code> o <code>Right</code> (enum <code>EyeId</code>). Para
+ambos ojos por separado, dos GameObjects con <code>OVREyeGaze</code>,
+uno <code>Left</code> y otro <code>Right</code>.</p>
+<hr />
+<h1 id="parte-d-cómo-lo-aplicamos-en-safedriver-ejemplos-propios">PARTE
+D — Cómo lo aplicamos en SafeDriver (ejemplos propios)</h1>
+<p>Ejemplos defendibles “porque lo construimos así” — útiles para dar
+respuestas de primera mano.</p>
+<p><strong>Flujo grab + feedback (vía EventBus):</strong> al enganchar
+el freno de mano o la palanca de guiños, sale un <strong>pulso háptico
+solo en la mano que lo sostiene</strong> (<code>GrabHaptics</code>
+resuelve qué interactor está en <code>Select</code>). Y todo el feedback
+de acierto/infracción está <strong>desacoplado por un EventBus</strong>:
+chequear un espejo despacha <code>CheckedMirrorsBeforeTurn</code> y
+reaccionan háptica, audio y toast <strong>sin conocerse</strong> entre
+sí.</p>
+<p><strong>Game feel / juice:</strong> <strong>háptica
+escalonada</strong> (<code>GrabLimitFeedback</code>: cuanto más forzás
+un control más allá de su tope, más fuerte vibra), <strong>snap de
+palancas</strong> (lerp de ~0.15 s a la posición discreta),
+<strong>recentrado del volante proporcional a la velocidad</strong>
+(simula el self-aligning torque), <strong>camera shake corto y
+decreciente</strong> al perder un control forzado.</p>
+<p><strong>Feedback negativo cuidado:</strong> <strong>SafeFail no
+muestra el choque</strong> (congela y enseña con el artículo de la Ley
+24.449); <strong>frenado suave</strong> en vez de frenazo (el estado
+SafeFail a propósito <em>no</em> congela el tiempo, para poder rampar la
+desaceleración); <strong>shake acotado &lt; 5 cm</strong> para no
+marear; háptica de infracción “alerta sin susto” (doble golpe corto, no
+zumbido agresivo).</p>
+<p><strong>Affordance:</strong> <strong>filtros de proximidad</strong>
+(<code>WheelGrabProximityFilter</code>) para que el volante solo se
+agarre <strong>donde se ve agarrable</strong> (no desde cualquier punto
+del auto); controles físicos con forma reconocible y posiciones
+discretas (D/N/R, freno arriba/abajo) que comunican “esto cambia de
+estado”.</p>
+<p><strong>Embodiment:</strong> la <strong>mano virtual se “pega” al
+objeto</strong> (<code>GrabbableHandFollower</code> /
+<code>SteeringWheelHandFollower</code>): toma un snapshot de la pose y
+cada <code>LateUpdate</code> fuerza la mano al volante, evitando que
+flote o lo atraviese — sostiene ownership + agency.</p>
+<p><strong>Eye gaze / head tracking:</strong> chequeo de espejos por
+<strong>giro de cabeza</strong> (Quest 3, principal) o por
+<strong>mirada real</strong> (<code>OVREyeGaze</code>, Quest Pro,
+fallback graceful); ambos despachan el <strong>mismo
+evento</strong>.</p>
+<p><strong>UI world-space poke:</strong> canvas a escala 0.001 a
+distancia de confort, botones por <strong>poke</strong>; el
+<strong>hitbox se apaga</strong> cuando el panel está oculto para no
+chocar con una “pared invisible”.</p>
+<hr />
+<h1 id="apéndice-chuleta-de-nombres-y-frameworks">Apéndice — Chuleta de
+nombres y frameworks</h1>
+<table>
+<colgroup>
+<col style="width: 50%" />
+<col style="width: 50%" />
+</colgroup>
+<thead>
+<tr>
+<th>Tema</th>
+<th>Recordá</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><strong>Game feel</strong></td>
+<td>Swink: control tiempo real + simulación espacial +
+<strong>pulido</strong> (enfatiza sin alterar la simulación)</td>
+</tr>
+<tr>
+<td><strong>Embodiment</strong></td>
+<td>Kilteni: <strong>ownership + agency + self-location</strong></td>
+</tr>
+<tr>
+<td><strong>Affordance</strong></td>
+<td>Norman: real / percibida / <strong>signifier</strong> (Gibson:
+existe en la relación objeto-agente)</td>
+</tr>
+<tr>
+<td><strong>Feedback</strong></td>
+<td>El negativo: proporcional, anticipable, informativo, cómodo (VR),
+diegético, multicanal</td>
+</tr>
+<tr>
+<td><strong>Luz en Quest</strong></td>
+<td>Bakear todo; lightmaps (estáticos) + light probes/APV (dinámicos) +
+reflection probes; cookie = textura que recorta la luz</td>
+</tr>
+<tr>
+<td><strong>Event wrapper</strong></td>
+<td><code>PointableUnityEventWrapper</code> (IPointable,
+<code>WhenSelect</code>) / <code>InteractableUnityEventWrapper</code>
+(IInteractableView). Necesitan su referencia asignada o “no pasa
+nada”</td>
+</tr>
+<tr>
+<td><strong>Grab</strong></td>
+<td><code>Grabbable</code> + <code>HandGrabInteractable</code> (objeto)
+↔︎ <code>HandGrabInteractor</code> (mano)</td>
+</tr>
+<tr>
+<td><strong>Hand pose</strong></td>
+<td><code>HandGrabInteractable</code> + <code>HandGrabPose</code> (hijo)
++ <code>HandPose</code> (embebida, JointFreedom Free/Constrained/Locked)
++ <code>HandGrabInteractor</code></td>
+</tr>
+<tr>
+<td><strong>No atravesar paredes</strong></td>
+<td><code>FirstPersonLocomotor</code> + <code>CharacterController</code>
+(prefab <code>Locomotor.prefab</code>); <strong>no</strong> hay BB (solo
+Teleport)</td>
+</tr>
+<tr>
+<td><strong>Mecánica por ojo</strong></td>
+<td>BB <strong>Eye Gaze</strong> → <code>OVREyeGaze.Eye</code> =
+<code>Left</code>/<code>Right</code></td>
+</tr>
+<tr>
+<td><strong>UI VR</strong></td>
+<td>Canvas <strong>World Space</strong> escala <strong>0.001</strong> +
+Ray/Poke Interaction + PointableCanvasModule</td>
+</tr>
+<tr>
+<td><strong>Passthrough</strong></td>
+<td>Enable Passthrough + Center Eye Clear Flag = Solid Color (alpha 0) +
+<code>OVRPassthroughLayer</code></td>
+</tr>
+<tr>
+<td><strong>Build</strong></td>
+<td>API gráfica <strong>Vulkan</strong></td>
+</tr>
+</tbody>
+</table>
+<hr />
+<p><em>Resumen generado combinando los resúmenes de las clases en video,
+la verificación contra el código fuente del Meta XR Interaction SDK del
+proyecto, y la experiencia de construir SafeDriver. ¡Éxitos en el
+parcial!</em></p>
+</body>
+</html>
