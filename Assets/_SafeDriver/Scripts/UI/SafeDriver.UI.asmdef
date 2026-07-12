@@ -5,6 +5,7 @@
         "SafeDriver.Core",
         "SafeDriver.Scoring",
         "SafeDriver.Missions",
+        "SafeDriver.VR",
         "UnityEngine.UI",
         "Unity.TextMeshPro"
     ],

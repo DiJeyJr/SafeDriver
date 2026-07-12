@@ -4,15 +4,29 @@ using UnityEngine;
 namespace SafeDriver.VR
 {
     /// <summary>
-    /// Pide al OS de Quest una frecuencia de refresco mayor a los 72 Hz default.
-    /// Intenta la frecuencia objetivo (90) y si el visor no la soporta se queda con
-    /// la mas alta disponible que no la supere. Se auto-instancia en el arranque.
+    /// Pide al OS de Quest la frecuencia de refresco elegida por el usuario (persistida,
+    /// default 90 Hz en vez de los 72 default del OS). Si el visor no soporta el valor
+    /// exacto, usa la mas alta disponible que no lo supere. Se auto-instancia al arrancar;
+    /// el slider de opciones del menu la cambia en vivo via Target.
     /// </summary>
     public class DisplayRefreshRate : MonoBehaviour
     {
-        // 90 es el sweet spot en Quest 3: mas fluido que 72 y alcanzable en performance.
-        // (120 existe pero si el juego no lo sostiene, la reproyeccion se siente peor.)
-        private const float TargetHz = 90f;
+        private const string PrefKey = "sd_refresh_hz";
+
+        private static DisplayRefreshRate instance;
+        private bool ready;
+
+        /// <summary>Frecuencia objetivo en Hz (persistida). Al setearla se aplica al toque.</summary>
+        public static float Target
+        {
+            get => PlayerPrefs.GetFloat(PrefKey, 90f);
+            set
+            {
+                PlayerPrefs.SetFloat(PrefKey, value);
+                PlayerPrefs.Save();
+                if (instance != null && instance.ready) instance.Apply();
+            }
+        }
 
         [RuntimeInitializeOnLoadMethod(RuntimeInitializeLoadType.AfterSceneLoad)]
         private static void Bootstrap()
@@ -25,25 +39,39 @@ namespace SafeDriver.VR
 
         IEnumerator Start()
         {
+            instance = this;
+
             // Esperar a que OVRManager/OVRPlugin esten inicializados.
             while (OVRManager.instance == null || !OVRManager.OVRManagerinitialized)
                 yield return null;
 
+            ready = true;
+            Apply();
+        }
+
+        void OnDestroy()
+        {
+            if (instance == this) instance = null;
+        }
+
+        private void Apply()
+        {
             float[] disponibles = OVRManager.display != null
                 ? OVRManager.display.displayFrequenciesAvailable
                 : null;
-            if (disponibles == null || disponibles.Length == 0) yield break;
+            if (disponibles == null || disponibles.Length == 0) return;
 
-            // La mas alta que no supere el target.
+            // La mas alta disponible que no supere el target elegido.
+            float target = Target;
             float mejor = 0f;
             foreach (float hz in disponibles)
-                if (hz <= TargetHz + 0.5f && hz > mejor) mejor = hz;
+                if (hz <= target + 0.5f && hz > mejor) mejor = hz;
 
             if (mejor > 0f)
             {
                 OVRManager.display.displayFrequency = mejor;
-                Debug.Log("[DisplayRefreshRate] Frecuencia pedida: " + mejor + " Hz (disponibles: " +
-                          string.Join(", ", disponibles) + ")");
+                Debug.Log("[DisplayRefreshRate] Frecuencia pedida: " + mejor + " Hz (target " + target +
+                          ", disponibles: " + string.Join(", ", disponibles) + ")");
             }
         }
     }
