@@ -3,6 +3,7 @@ using UnityEngine.SceneManagement;
 using UnityEngine.UI;
 using TMPro;
 using SafeDriver.Core;
+using SafeDriver.Missions;
 using SafeDriver.Scoring;
 
 namespace SafeDriver.UI
@@ -23,12 +24,15 @@ namespace SafeDriver.UI
         [Header("Botones")]
         [SerializeField] private Button retryButton;
         [SerializeField] private Button mainMenuButton;
+        [Tooltip("Boton 'Siguiente' — solo se muestra si hay proximo nivel y esta desbloqueado.")]
+        [SerializeField] private Button nextLevelButton;
         [SerializeField] private string mainMenuSceneName = "MainMenu";
 
         void Awake()
         {
             if (retryButton != null) retryButton.onClick.AddListener(OnRetryPressed);
             if (mainMenuButton != null) mainMenuButton.onClick.AddListener(OnMainMenuPressed);
+            if (nextLevelButton != null) nextLevelButton.onClick.AddListener(OnNextLevelPressed);
         }
 
         void OnEnable()
@@ -54,10 +58,25 @@ namespace SafeDriver.UI
                 SceneManager.LoadScene(mainMenuSceneName);
         }
 
+        private void OnNextLevelPressed()
+        {
+            Time.timeScale = 1f;
+            if (LevelManager.Instance != null) LevelManager.Instance.LoadNextLevel();
+        }
+
         public void Show()
         {
             if (rootPanel != null) rootPanel.SetActive(true);
             if (titleText != null) titleText.text = "FIN DEL NIVEL";
+
+            // "Siguiente" solo si hay proximo nivel y quedo desbloqueado (misiones completas).
+            if (nextLevelButton != null)
+            {
+                var lm = LevelManager.Instance;
+                bool hayNext = lm != null && lm.Level != null && lm.Level.nextLevel != null;
+                bool desbloqueado = hayNext && LevelProgress.IsUnlocked(lm.Level.nextLevel.levelId);
+                nextLevelButton.gameObject.SetActive(hayNext && desbloqueado);
+            }
 
             if (ScoreManager.Instance == null) return;
             LevelResult result = ScoreManager.Instance.GetLevelResult();
@@ -71,6 +90,22 @@ namespace SafeDriver.UI
             if (infractionsListText != null)
             {
                 var sb = new System.Text.StringBuilder();
+
+                // Que hiciste y que no: checklist de objetivos del nivel.
+                if (MissionManager.Instance != null && MissionManager.Instance.ActiveMissions.Count > 0)
+                {
+                    sb.AppendLine("<b>Objetivos:</b>");
+                    foreach (var m in MissionManager.Instance.ActiveMissions)
+                    {
+                        bool ok = m.Status == MissionStatus.Completed;
+                        sb.AppendLine((ok ? "<color=#4AC262>✔</color> " : "<color=#F16161>✘</color> ")
+                                      + m.Definition.title);
+                    }
+                    sb.AppendLine();
+                }
+
+                if (result.Infractions.Count > 0)
+                    sb.AppendLine("<b>Infracciones:</b>");
                 foreach (var inf in result.Infractions)
                 {
                     int min = Mathf.FloorToInt(inf.TimeSeconds / 60f);

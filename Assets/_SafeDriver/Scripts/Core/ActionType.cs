@@ -14,5 +14,6 @@ namespace SafeDriver.Core
         StoppedAtPareSign,         // +8:  detenerse completamente en senal PARE
         PassedGreenLight,          // +3:  cruzar el semaforo en verde correctamente
         PedestrianNotPresent,      // +3:  cruzar paso peatonal sin peatones (sin infraccion)
+        ReachedGoal,               // +10: llegar al ultimo checkpoint del recorrido (meta)
     }
 }

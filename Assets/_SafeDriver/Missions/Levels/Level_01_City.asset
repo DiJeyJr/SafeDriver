@@ -16,11 +16,7 @@ MonoBehaviour:
   displayName: Ciudad - Tutorial Basico
   description: "Recorre la ciudad cumpliendo peque\xF1as misiones para reconocer
     los controles y las reglas basicas"
-  sceneName: Level_01_City
-  missions:
-  - {fileID: 11400000, guid: d6cda5026e7158b4f8af6002ace8102d, type: 2}
-  - {fileID: 11400000, guid: 1bb5148137c0b2c47a9d2a94bd34c091, type: 2}
-  - {fileID: 11400000, guid: 25fae27d9f590f34fbb7894705de7f2d, type: 2}
-  - {fileID: 11400000, guid: cf206fb956d17b94786bb12819844e18, type: 2}
+  sceneName: Lvl_01
+  missions: []
   nextLevel: {fileID: 11400000, guid: cf88413be085e25419745d1cfb5a2729, type: 2}
   isFreeRoam: 0

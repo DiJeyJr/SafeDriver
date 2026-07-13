@@ -23,6 +23,18 @@ EditorBuildSettings:
   - enabled: 1
     path: Assets/_SafeDriver/Scenes/Level_03_City.unity
     guid: 23707666727951243b0314ac1a00a8ea
+  - enabled: 1
+    path: Assets/_SafeDriver/Scenes/Lvls/Lvl_01/Lvl_01.unity
+    guid: bcc3a587bfe40c642ab704fd671774e4
+  - enabled: 1
+    path: Assets/_SafeDriver/Scenes/Lvls/Lvl_02/Lvl_02.unity
+    guid: 87ea74ab120cec54fb3135ae7be46f1a
+  - enabled: 1
+    path: Assets/_SafeDriver/Scenes/Lvls/Lvl_03/Lvl_03.unity
+    guid: 4ec340733089fa6489c04c1cff97891c
+  - enabled: 1
+    path: Assets/_SafeDriver/Scenes/Lvls/Lvl_04/Lvl_04.unity
+    guid: 4711a5bb68c61d84b841f0bbc8c1c450
   m_configObjects:
     Unity.XR.Oculus.Settings: {fileID: 11400000, guid: a92facc819e31a14e9951f4485e4622f, type: 2}
     com.unity.input.settings.actions: {fileID: -944628639613478452, guid: 052faaac586de48259a63d0c4782560b, type: 3}

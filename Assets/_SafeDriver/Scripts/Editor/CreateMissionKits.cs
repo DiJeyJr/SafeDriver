@@ -131,6 +131,12 @@ namespace SafeDriver.EditorTools
             var zone = ZoneChild(root.transform, "Zone", Vector3.zero, new Vector3(0f, 2f, 0f), new Vector3(10f, 4f, 6f));
             var detector = zone.AddComponent<PedestrianCrossingDetector>();
 
+            // Zona de ESPERA antes de la cebra: donde el auto se detiene a ceder el paso.
+            // (El detector de arriba solo evalua sobre las rayas — nadie frena ahi arriba.)
+            var espera = ZoneChild(root.transform, "YieldZone", new Vector3(0f, 0f, -8f), new Vector3(0f, 2f, 0f), new Vector3(12f, 4f, 12f));
+            var yieldZone = espera.AddComponent<YieldZone>();
+            SetRef(yieldZone, "detector", detector);
+
             // Waypoints: vereda A -> borde cebra -> borde cebra -> vereda B (rebote, ida y vuelta).
             // Los indices 1 y 2 caen dentro de la senda (rango que notifica presencia).
             var wpRoot = new GameObject("Waypoints");
@@ -165,7 +171,9 @@ namespace SafeDriver.EditorTools
             box.size = new Vector3(0.8f, 2f, 0.8f);
             hitbox.AddComponent<PedestrianHitbox>();
 
-            var walker = peaton.AddComponent<TrafficPedestrian>();
+            // CrossingPedestrian = ciclo del diseño original (espera en vereda -> cruza ->
+            // espera -> vuelve), sin NavMesh. Reemplaza al TrafficPedestrian de loop continuo.
+            var walker = peaton.AddComponent<CrossingPedestrian>();
             SetRef(walker, "path", path);
             SetRef(walker, "crossingNotifierRef", detector);
             SetInt(walker, "crosswalkMinIndex", 1);

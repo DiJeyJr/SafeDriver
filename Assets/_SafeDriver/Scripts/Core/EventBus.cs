@@ -39,6 +39,7 @@ namespace SafeDriver.Core
         //   Eventos de caja / marcha
         // ==========================================================
         public static event Action<GearState> OnGearChanged;
+        public static event Action<bool>      OnHandbrakeChanged;   // true = freno de mano puesto
 
         // ==========================================================
         //   Eventos de estado del juego
@@ -73,6 +74,7 @@ namespace SafeDriver.Core
 
         // -- Marcha --
         public static void Dispatch_GearChanged(GearState gear) => OnGearChanged?.Invoke(gear);
+        public static void Dispatch_HandbrakeChanged(bool engaged) => OnHandbrakeChanged?.Invoke(engaged);
 
         // -- Estado del juego --
         public static void Dispatch_GameStateChanged(GameState previous, GameState current)
@@ -94,6 +96,7 @@ namespace SafeDriver.Core
             OnLevelFailed = null;
             OnTrafficLightChanged = null;
             OnGearChanged = null;
+            OnHandbrakeChanged = null;
             OnGameStateChanged = null;
         }
     }

@@ -68,7 +68,13 @@ namespace SafeDriver.Vehicle
 
         /// <summary>Pone/saca el freno de mano. Con el freno puesto: freno full en las 4 ruedas + motor
         /// cortado (el auto no acelera y queda retenido). Lo llama el HandbrakeController de la palanca.</summary>
-        public void SetHandbrake(bool engaged) => handbrakeEngaged = engaged;
+        public void SetHandbrake(bool engaged)
+        {
+            if (handbrakeEngaged == engaged) return;
+            handbrakeEngaged = engaged;
+            // La luz del tablero (HandbrakeLight) escucha este evento.
+            EventBus.Dispatch_HandbrakeChanged(engaged);
+        }
 
         private GearState currentGear = GearState.Drive;
         private float gearSwitchTimer;

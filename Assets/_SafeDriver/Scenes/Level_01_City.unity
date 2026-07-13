@@ -4318,6 +4318,7 @@ Transform:
   m_Children:
   - {fileID: 790105023}
   - {fileID: 1710931986}
+  - {fileID: 1359456169}
   m_Father: {fileID: 448988262}
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
 --- !u!114 &86640849
@@ -5820,6 +5821,70 @@ MeshCollider:
   m_Convex: 0
   m_CookingOptions: 30
   m_Mesh: {fileID: 4300000, guid: 736724502c2975348b2f19e5e99e1ec5, type: 3}
+--- !u!1 &116623900
+GameObject:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  serializedVersion: 6
+  m_Component:
+  - component: {fileID: 116623903}
+  - component: {fileID: 116623901}
+  - component: {fileID: 116623902}
+  m_Layer: 0
+  m_Name: TutorialHighlight
+  m_TagString: Untagged
+  m_Icon: {fileID: 0}
+  m_NavMeshLayer: 0
+  m_StaticEditorFlags: 0
+  m_IsActive: 1
+--- !u!114 &116623901
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 116623900}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 54b7e07e993a6894ea0cde0bb313c946, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: SafeDriver.Guidance::SafeDriver.Guidance.HighlightMarker
+  haloMaterial: {fileID: 2100000, guid: be231f5c0c89f2a4a8884caf80fc540d, type: 2}
+  target: {fileID: 0}
+  size: 0.4
+  offset: {x: 0, y: 0, z: 0}
+  showOnStart: 0
+  dismissAfterSeconds: 0
+--- !u!114 &116623902
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 116623900}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 2d3c839818ccc7e4cbcca1b4d98b94fa, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: SafeDriver.Guidance::SafeDriver.Guidance.DismissOnGrab
+  grabbable: {fileID: 0}
+--- !u!4 &116623903
+Transform:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 116623900}
+  serializedVersion: 2
+  m_LocalRotation: {x: 0, y: 0, z: 0, w: 1}
+  m_LocalPosition: {x: 0, y: 0, z: 0}
+  m_LocalScale: {x: 1, y: 1, z: 1}
+  m_ConstrainProportionsScale: 0
+  m_Children: []
+  m_Father: {fileID: 344144640}
+  m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
 --- !u!1 &117971249 stripped
 GameObject:
   m_CorrespondingSourceObject: {fileID: 100000, guid: c07ada992c3586e4dbf557bc4b8718cf, type: 3}
@@ -5940,6 +6005,56 @@ PrefabInstance:
       insertIndex: -1
       addedObject: {fileID: 616960120}
   m_SourcePrefab: {fileID: 100100000, guid: b8ee657c6800ab849bb30b4375d02323, type: 3}
+--- !u!1 &120077975
+GameObject:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  serializedVersion: 6
+  m_Component:
+  - component: {fileID: 120077976}
+  - component: {fileID: 120077977}
+  m_Layer: 0
+  m_Name: TutorialHighlight
+  m_TagString: Untagged
+  m_Icon: {fileID: 0}
+  m_NavMeshLayer: 0
+  m_StaticEditorFlags: 0
+  m_IsActive: 1
+--- !u!4 &120077976
+Transform:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 120077975}
+  serializedVersion: 2
+  m_LocalRotation: {x: 0, y: 0, z: 0, w: 1}
+  m_LocalPosition: {x: 0, y: 0, z: 0}
+  m_LocalScale: {x: 1, y: 1, z: 1}
+  m_ConstrainProportionsScale: 0
+  m_Children: []
+  m_Father: {fileID: 229489881}
+  m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
+--- !u!114 &120077977
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 120077975}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 54b7e07e993a6894ea0cde0bb313c946, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: SafeDriver.Guidance::SafeDriver.Guidance.HighlightMarker
+  haloMaterial: {fileID: 2100000, guid: be231f5c0c89f2a4a8884caf80fc540d, type: 2}
+  target: {fileID: 0}
+  size: 0.35
+  offset: {x: 0, y: 0, z: 0}
+  showOnStart: 0
+  dismissAfterSeconds: 5
 --- !u!1001 &120607072
 PrefabInstance:
   m_ObjectHideFlags: 0
@@ -6677,6 +6792,7 @@ Transform:
   m_Children:
   - {fileID: 1730237637}
   - {fileID: 1416166417}
+  - {fileID: 1270768895}
   m_Father: {fileID: 448988262}
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
 --- !u!114 &134997607
@@ -10777,6 +10893,7 @@ Transform:
   m_Children:
   - {fileID: 303972501}
   - {fileID: 1735234302}
+  - {fileID: 120077976}
   m_Father: {fileID: 448988262}
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
 --- !u!114 &229489882
@@ -16328,6 +16445,7 @@ Transform:
   m_Children:
   - {fileID: 46773366}
   - {fileID: 228062690}
+  - {fileID: 116623903}
   m_Father: {fileID: 448988262}
   m_LocalEulerAnglesHint: {x: 0, y: 93.96, z: 0}
 --- !u!114 &344144641
@@ -18761,6 +18879,70 @@ MeshCollider:
   m_Convex: 0
   m_CookingOptions: 30
   m_Mesh: {fileID: 4300000, guid: b8b93a0c79396d54ea72d1eecb7bf246, type: 3}
+--- !u!1 &398356929
+GameObject:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  serializedVersion: 6
+  m_Component:
+  - component: {fileID: 398356930}
+  - component: {fileID: 398356932}
+  - component: {fileID: 398356931}
+  m_Layer: 0
+  m_Name: TutorialHighlight
+  m_TagString: Untagged
+  m_Icon: {fileID: 0}
+  m_NavMeshLayer: 0
+  m_StaticEditorFlags: 0
+  m_IsActive: 1
+--- !u!4 &398356930
+Transform:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 398356929}
+  serializedVersion: 2
+  m_LocalRotation: {x: 0, y: 0, z: 0, w: 1}
+  m_LocalPosition: {x: 0, y: 0, z: 0}
+  m_LocalScale: {x: 1, y: 1, z: 1}
+  m_ConstrainProportionsScale: 0
+  m_Children: []
+  m_Father: {fileID: 761714126}
+  m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
+--- !u!114 &398356931
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 398356929}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 2d3c839818ccc7e4cbcca1b4d98b94fa, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: SafeDriver.Guidance::SafeDriver.Guidance.DismissOnGrab
+  grabbable: {fileID: 0}
+--- !u!114 &398356932
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 398356929}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 54b7e07e993a6894ea0cde0bb313c946, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: SafeDriver.Guidance::SafeDriver.Guidance.HighlightMarker
+  haloMaterial: {fileID: 2100000, guid: be231f5c0c89f2a4a8884caf80fc540d, type: 2}
+  target: {fileID: 0}
+  size: 0.4
+  offset: {x: 0, y: 0, z: 0}
+  showOnStart: 0
+  dismissAfterSeconds: 0
 --- !u!1 &399207769 stripped
 GameObject:
   m_CorrespondingSourceObject: {fileID: 100000, guid: b8ee657c6800ab849bb30b4375d02323, type: 3}
@@ -35783,6 +35965,7 @@ Transform:
   m_Children:
   - {fileID: 719320196}
   - {fileID: 1351407724}
+  - {fileID: 398356930}
   m_Father: {fileID: 448988262}
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
 --- !u!114 &761714127
@@ -58433,6 +58616,56 @@ PrefabInstance:
       insertIndex: -1
       addedObject: {fileID: 1257921265}
   m_SourcePrefab: {fileID: 100100000, guid: 8b680e0f7699a254c84ed6737b7eb53d, type: 3}
+--- !u!1 &1270768894
+GameObject:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  serializedVersion: 6
+  m_Component:
+  - component: {fileID: 1270768895}
+  - component: {fileID: 1270768896}
+  m_Layer: 0
+  m_Name: TutorialHighlight
+  m_TagString: Untagged
+  m_Icon: {fileID: 0}
+  m_NavMeshLayer: 0
+  m_StaticEditorFlags: 0
+  m_IsActive: 1
+--- !u!4 &1270768895
+Transform:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 1270768894}
+  serializedVersion: 2
+  m_LocalRotation: {x: 0, y: 0, z: 0, w: 1}
+  m_LocalPosition: {x: 0, y: 0, z: 0}
+  m_LocalScale: {x: 1, y: 1, z: 1}
+  m_ConstrainProportionsScale: 0
+  m_Children: []
+  m_Father: {fileID: 134997606}
+  m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
+--- !u!114 &1270768896
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 1270768894}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 54b7e07e993a6894ea0cde0bb313c946, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: SafeDriver.Guidance::SafeDriver.Guidance.HighlightMarker
+  haloMaterial: {fileID: 2100000, guid: be231f5c0c89f2a4a8884caf80fc540d, type: 2}
+  target: {fileID: 0}
+  size: 0.35
+  offset: {x: 0, y: 0, z: 0}
+  showOnStart: 0
+  dismissAfterSeconds: 5
 --- !u!1 &1271650274 stripped
 GameObject:
   m_CorrespondingSourceObject: {fileID: 100000, guid: 31bbda51eeab02f44a8e92a7da2f5ff8, type: 3}
@@ -61404,6 +61637,7 @@ Transform:
   m_Children:
   - {fileID: 691447805}
   - {fileID: 752008608}
+  - {fileID: 2102800792}
   m_Father: {fileID: 448988262}
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
 --- !u!114 &1329720216
@@ -63131,6 +63365,56 @@ MeshCollider:
   m_Convex: 0
   m_CookingOptions: 30
   m_Mesh: {fileID: 4300000, guid: c7327ddbb4f55824eb37461c53fdd55d, type: 3}
+--- !u!1 &1359456168
+GameObject:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  serializedVersion: 6
+  m_Component:
+  - component: {fileID: 1359456169}
+  - component: {fileID: 1359456170}
+  m_Layer: 0
+  m_Name: TutorialHighlight
+  m_TagString: Untagged
+  m_Icon: {fileID: 0}
+  m_NavMeshLayer: 0
+  m_StaticEditorFlags: 0
+  m_IsActive: 1
+--- !u!4 &1359456169
+Transform:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 1359456168}
+  serializedVersion: 2
+  m_LocalRotation: {x: 0, y: 0, z: 0, w: 1}
+  m_LocalPosition: {x: 0, y: 0, z: 0}
+  m_LocalScale: {x: 1, y: 1, z: 1}
+  m_ConstrainProportionsScale: 0
+  m_Children: []
+  m_Father: {fileID: 86640848}
+  m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
+--- !u!114 &1359456170
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 1359456168}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 54b7e07e993a6894ea0cde0bb313c946, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: SafeDriver.Guidance::SafeDriver.Guidance.HighlightMarker
+  haloMaterial: {fileID: 2100000, guid: be231f5c0c89f2a4a8884caf80fc540d, type: 2}
+  target: {fileID: 0}
+  size: 0.35
+  offset: {x: 0, y: 0, z: 0}
+  showOnStart: 0
+  dismissAfterSeconds: 5
 --- !u!1 &1359800997 stripped
 GameObject:
   m_CorrespondingSourceObject: {fileID: 100000, guid: 120449a04911a924ca1239be382ff0be, type: 3}
@@ -64695,6 +64979,57 @@ PrefabInstance:
       insertIndex: -1
       addedObject: {fileID: 1373486222}
   m_SourcePrefab: {fileID: 100100000, guid: 2509cc5763ca17f4598bf61fd585a93e, type: 3}
+--- !u!1 &1390576565
+GameObject:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  serializedVersion: 6
+  m_Component:
+  - component: {fileID: 1390576567}
+  - component: {fileID: 1390576566}
+  m_Layer: 0
+  m_Name: CabinTutorial
+  m_TagString: Untagged
+  m_Icon: {fileID: 0}
+  m_NavMeshLayer: 0
+  m_StaticEditorFlags: 0
+  m_IsActive: 1
+--- !u!114 &1390576566
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 1390576565}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: ee695610bdb18584db28a1c06c7791c0, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: SafeDriver.Guidance::SafeDriver.Guidance.HighlightSequence
+  pasos:
+  - {fileID: 1359456170}
+  - {fileID: 1270768896}
+  - {fileID: 120077977}
+  - {fileID: 2102800794}
+  - {fileID: 398356932}
+  - {fileID: 116623901}
+--- !u!4 &1390576567
+Transform:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 1390576565}
+  serializedVersion: 2
+  m_LocalRotation: {x: 0, y: 0, z: 0, w: 1}
+  m_LocalPosition: {x: 0, y: 0, z: 0}
+  m_LocalScale: {x: 1, y: 1, z: 1}
+  m_ConstrainProportionsScale: 0
+  m_Children: []
+  m_Father: {fileID: 0}
+  m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
 --- !u!1 &1392928622 stripped
 GameObject:
   m_CorrespondingSourceObject: {fileID: 100000, guid: 31bbda51eeab02f44a8e92a7da2f5ff8, type: 3}
@@ -100552,6 +100887,70 @@ PrefabInstance:
       insertIndex: -1
       addedObject: {fileID: 1034973664}
   m_SourcePrefab: {fileID: 100100000, guid: b549b1699e4cdad44b2c014041303df4, type: 3}
+--- !u!1 &2102800791
+GameObject:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  serializedVersion: 6
+  m_Component:
+  - component: {fileID: 2102800792}
+  - component: {fileID: 2102800794}
+  - component: {fileID: 2102800793}
+  m_Layer: 0
+  m_Name: TutorialHighlight
+  m_TagString: Untagged
+  m_Icon: {fileID: 0}
+  m_NavMeshLayer: 0
+  m_StaticEditorFlags: 0
+  m_IsActive: 1
+--- !u!4 &2102800792
+Transform:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 2102800791}
+  serializedVersion: 2
+  m_LocalRotation: {x: 0, y: 0, z: 0, w: 1}
+  m_LocalPosition: {x: 0, y: 0, z: 0}
+  m_LocalScale: {x: 1, y: 1, z: 1}
+  m_ConstrainProportionsScale: 0
+  m_Children: []
+  m_Father: {fileID: 1329720215}
+  m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
+--- !u!114 &2102800793
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 2102800791}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 2d3c839818ccc7e4cbcca1b4d98b94fa, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: SafeDriver.Guidance::SafeDriver.Guidance.DismissOnGrab
+  grabbable: {fileID: 0}
+--- !u!114 &2102800794
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 2102800791}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 54b7e07e993a6894ea0cde0bb313c946, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: SafeDriver.Guidance::SafeDriver.Guidance.HighlightMarker
+  haloMaterial: {fileID: 2100000, guid: be231f5c0c89f2a4a8884caf80fc540d, type: 2}
+  target: {fileID: 0}
+  size: 0.4
+  offset: {x: 0, y: 0, z: 0}
+  showOnStart: 0
+  dismissAfterSeconds: 0
 --- !u!1 &2102843373
 GameObject:
   m_ObjectHideFlags: 0
@@ -101844,3 +102243,4 @@ SceneRoots:
   - {fileID: 79112280}
   - {fileID: 2037910377}
   - {fileID: 637058487}
+  - {fileID: 1390576567}

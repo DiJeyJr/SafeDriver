@@ -15,14 +15,7 @@ MonoBehaviour:
   levelId: Level_02_city
   displayName: Ciudad - Basico
   description: Recorre la ciudad respetando senales, semaforos y peatones.
-  sceneName: Level_02_City
-  missions:
-  - {fileID: 11400000, guid: 2c34e7a5b01b9574783666a9112c183d, type: 2}
-  - {fileID: 11400000, guid: 559e60e7d17ae8a4baed27dbc68789ef, type: 2}
-  - {fileID: 11400000, guid: d8141d395f94a20489e1df3a47f70210, type: 2}
-  - {fileID: 11400000, guid: 5d741364212dc134cbfc3ebea7a8658d, type: 2}
-  - {fileID: 11400000, guid: be28c79abdee53f44a58340e7824932e, type: 2}
-  - {fileID: 11400000, guid: f6fed896c52f14e47a74198f53926584, type: 2}
-  - {fileID: 11400000, guid: cf206fb956d17b94786bb12819844e18, type: 2}
+  sceneName: Lvl_02
+  missions: []
   nextLevel: {fileID: 11400000, guid: 6806777ba0cfc2b42ba3aaef1bd825dd, type: 2}
   isFreeRoam: 0

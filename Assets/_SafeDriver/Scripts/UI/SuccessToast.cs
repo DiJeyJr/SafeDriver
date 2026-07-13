@@ -7,10 +7,11 @@ using SafeDriver.Core;
 namespace SafeDriver.UI
 {
     /// <summary>
-    /// Notificacion breve de "accion bien hecha" que aparece apenas arriba del volante y
-    /// se desvanece sola en unos segundos. Escucha EventBus.OnCorrectActionPerformed.
-    /// Solo visual (no requiere interaccion). Reemplaza al viejo popup del HUD, ahora
-    /// dedicado solo a aciertos, con estilo lindo y mensajes amigables.
+    /// Notificacion breve que aparece apenas arriba del volante y se desvanece sola.
+    /// Escucha EventBus.OnCorrectActionPerformed (acierto, verde) y tambien
+    /// OnInfractionDetected (advertencia, rojo) — salvo las infracciones graves, que ya
+    /// tienen su pantalla SafeFail y no necesitan toast.
+    /// Solo visual (no requiere interaccion).
     /// </summary>
     public class SuccessToast : MonoBehaviour
     {
@@ -32,6 +33,27 @@ namespace SafeDriver.UI
             { ActionType.PedestrianNotPresent,     "Cruce despejado" },
             { ActionType.CheckedMirrorsBeforeTurn, "Chequeaste los espejos" },
             { ActionType.MaintainedLegalSpeed,     "Velocidad correcta" },
+            { ActionType.ReachedGoal,              "Llegaste a la meta" },
+        };
+
+        // Advertencias cortas por infraccion (el mensaje pedagogico completo queda para
+        // el resumen de fin de nivel / SafeFail).
+        private static readonly Dictionary<InfractionType, string> Warnings = new()
+        {
+            { InfractionType.FailedToStopAtSign, "No paraste en el PARE" },
+            { InfractionType.Speeding,           "Exceso de velocidad" },
+            { InfractionType.NoMirrorCheck,      "No chequeaste los espejos" },
+            { InfractionType.DangerousManeuver,  "Maniobra peligrosa" },
+            { InfractionType.WrongWay,           "Vas en contramano" },
+        };
+
+        // Estas ya muestran la pantalla SafeFail completa: sin toast para no duplicar.
+        private static readonly HashSet<InfractionType> Graves = new()
+        {
+            InfractionType.RanRedLight,
+            InfractionType.PedestrianNotYielded,
+            InfractionType.HitPedestrian,
+            InfractionType.SevereCollision,
         };
 
         private Coroutine active;
@@ -41,8 +63,29 @@ namespace SafeDriver.UI
             if (canvasGroup != null) canvasGroup.alpha = 0f;
         }
 
-        void OnEnable()  => EventBus.OnCorrectActionPerformed += Show;
-        void OnDisable() => EventBus.OnCorrectActionPerformed -= Show;
+        void OnEnable()
+        {
+            EventBus.OnCorrectActionPerformed += Show;
+            EventBus.OnInfractionDetected += ShowWarning;
+        }
+
+        void OnDisable()
+        {
+            EventBus.OnCorrectActionPerformed -= Show;
+            EventBus.OnInfractionDetected -= ShowWarning;
+        }
+
+        private void ShowWarning(InfractionType type, string message)
+        {
+            if (Graves.Contains(type)) return;
+
+            string body = Warnings.TryGetValue(type, out var w) ? w : "Infraccion";
+            if (messageText != null)
+                messageText.text = $"<color=#F16161><b>¡Ojo!</b>\n{body}</color>";
+
+            if (active != null) StopCoroutine(active);
+            active = StartCoroutine(Routine());
+        }
 
         private void Show(ActionType type, int bonus)
         {
