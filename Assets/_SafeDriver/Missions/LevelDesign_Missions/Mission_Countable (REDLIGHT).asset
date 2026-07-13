@@ -12,7 +12,7 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 357b3a97801d89445a3653a530b6108b, type: 3}
   m_Name: Mission_Countable (REDLIGHT)
   m_EditorClassIdentifier: SafeDriver.Missions::SafeDriver.Missions.CountableMissionDefinition
-  missionId: 1
+  missionId: Red
   title: RedLight
   description: Frenar en una luz roja
   points: 10

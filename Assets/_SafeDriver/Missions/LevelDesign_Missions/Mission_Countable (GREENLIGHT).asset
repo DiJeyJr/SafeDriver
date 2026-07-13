@@ -12,7 +12,7 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 357b3a97801d89445a3653a530b6108b, type: 3}
   m_Name: Mission_Countable (GREENLIGHT)
   m_EditorClassIdentifier: SafeDriver.Missions::SafeDriver.Missions.CountableMissionDefinition
-  missionId: 1
+  missionId: Green
   title: GreenLigtht
   description: Avanzar cuando la luz este en verde
   points: 5

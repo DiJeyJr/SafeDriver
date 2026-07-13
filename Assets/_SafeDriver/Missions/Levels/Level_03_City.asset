@@ -10,17 +10,19 @@ MonoBehaviour:
   m_Enabled: 1
   m_EditorHideFlags: 0
   m_Script: {fileID: 11500000, guid: 6c7a50c241564164d97c770468e0385c, type: 3}
-  m_Name: Level_01_City
+  m_Name: Level_03_City
   m_EditorClassIdentifier: SafeDriver.Missions::SafeDriver.Missions.LevelDefinition
-  levelId: Level_01_City
-  displayName: Ciudad - Tutorial Basico
-  description: "Recorre la ciudad cumpliendo peque\xF1as misiones para reconocer
-    los controles y las reglas basicas"
-  sceneName: Level_01_City
+  levelId: Level_03_City
+  displayName: Ciudad - Medio
+  description: Cumple con los objetivos, ahora de dificultad media
+  sceneName: Level_03_City
   missions:
-  - {fileID: 11400000, guid: d6cda5026e7158b4f8af6002ace8102d, type: 2}
-  - {fileID: 11400000, guid: 1bb5148137c0b2c47a9d2a94bd34c091, type: 2}
+  - {fileID: 11400000, guid: e7209b360de1bab4a8d90dd63fc13776, type: 2}
+  - {fileID: 11400000, guid: 99aad15065264b04985a94e84f881d50, type: 2}
   - {fileID: 11400000, guid: 25fae27d9f590f34fbb7894705de7f2d, type: 2}
+  - {fileID: 11400000, guid: 1bb5148137c0b2c47a9d2a94bd34c091, type: 2}
+  - {fileID: 11400000, guid: d6cda5026e7158b4f8af6002ace8102d, type: 2}
   - {fileID: 11400000, guid: cf206fb956d17b94786bb12819844e18, type: 2}
-  nextLevel: {fileID: 11400000}
-  isFreeRoam: 0
+  - {fileID: 11400000, guid: d6cda5026e7158b4f8af6002ace8102d, type: 2}
+  nextLevel: {fileID: 0}
+  isFreeRoam: 1

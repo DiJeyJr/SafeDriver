@@ -15,7 +15,7 @@ MonoBehaviour:
   missionId: m_senda
   title: Cruzar senda sin peatones
   description: 
-  points: 3
+  points: 5
   isOptional: 0
   action: 6
   requiredCount: 1
