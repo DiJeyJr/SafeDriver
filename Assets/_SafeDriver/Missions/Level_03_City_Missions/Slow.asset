@@ -1,0 +1,27 @@
+%YAML 1.1
+%TAG !u! tag:unity3d.com,2011:
+--- !u!114 &11400000
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: e534593bb5fc8314eaa1879969bcbaa5, type: 3}
+  m_Name: Slow
+  m_EditorClassIdentifier: SafeDriver.Missions::SafeDriver.Missions.CompoundMissionDefinition
+  missionId: LowSpeed
+  title: Tortuga
+  description: Manten una velocidad baja al mismo tiempo dejando pasar peatones y
+    frenando cuando se deba
+  points: 50
+  isOptional: 0
+  subMissions:
+  - {fileID: 11400000, guid: 25fae27d9f590f34fbb7894705de7f2d, type: 2}
+  - {fileID: 11400000, guid: d6cda5026e7158b4f8af6002ace8102d, type: 2}
+  - {fileID: 11400000, guid: 1bb5148137c0b2c47a9d2a94bd34c091, type: 2}
+  - {fileID: 11400000, guid: f6fed896c52f14e47a74198f53926584, type: 2}
+  - {fileID: 11400000, guid: cf206fb956d17b94786bb12819844e18, type: 2}
+  failOnAnySubFailure: 1

@@ -9,13 +9,13 @@ MonoBehaviour:
   m_GameObject: {fileID: 0}
   m_Enabled: 1
   m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: e534593bb5fc8314eaa1879969bcbaa5, type: 3}
-  m_Name: Mission_Compound
-  m_EditorClassIdentifier: SafeDriver.Missions::SafeDriver.Missions.CompoundMissionDefinition
-  missionId: 
-  title: 
+  m_Script: {fileID: 11500000, guid: 357b3a97801d89445a3653a530b6108b, type: 3}
+  m_Name: Kit_Meta
+  m_EditorClassIdentifier: SafeDriver.Missions::SafeDriver.Missions.CountableMissionDefinition
+  missionId: kit_meta
+  title: Llegar a la meta
   description: 
   points: 10
   isOptional: 0
-  subMissions: []
-  failOnAnySubFailure: 1
+  action: 7
+  requiredCount: 1

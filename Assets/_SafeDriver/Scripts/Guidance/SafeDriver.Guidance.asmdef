@@ -1,0 +1,17 @@
+{
+    "name": "SafeDriver.Guidance",
+    "rootNamespace": "SafeDriver.Guidance",
+    "references": [
+        "Oculus.Interaction",
+        "SafeDriver.Core"
+    ],
+    "includePlatforms": [],
+    "excludePlatforms": [],
+    "allowUnsafeCode": false,
+    "overrideReferences": false,
+    "precompiledReferences": [],
+    "autoReferenced": true,
+    "defineConstraints": [],
+    "versionDefines": [],
+    "noEngineReferences": false
+}

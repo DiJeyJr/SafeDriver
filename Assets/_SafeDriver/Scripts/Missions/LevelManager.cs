@@ -25,6 +25,7 @@ namespace SafeDriver.Missions
         public LevelDefinition Level => level;
 
         private int lastScore;
+        private bool levelEnded; // evita doble cierre (misiones completas + llegada a la meta)
 
         void Awake()
         {
@@ -37,10 +38,16 @@ namespace SafeDriver.Missions
             if (Instance == this) Instance = null;
         }
 
-        void OnEnable()  => EventBus.OnScoreChanged += HandleScoreChanged;
+        void OnEnable()
+        {
+            EventBus.OnScoreChanged += HandleScoreChanged;
+            EventBus.OnCorrectActionPerformed += HandleCorrectAction;
+        }
+
         void OnDisable()
         {
             EventBus.OnScoreChanged -= HandleScoreChanged;
+            EventBus.OnCorrectActionPerformed -= HandleCorrectAction;
             if (MissionManager.Instance != null)
                 MissionManager.Instance.AllRequiredCompleted -= HandleAllRequiredCompleted;
         }
@@ -64,14 +71,39 @@ namespace SafeDriver.Missions
 
         private void HandleScoreChanged(int score) => lastScore = score;
 
-        private void HandleAllRequiredCompleted()
+        // Llegar a la meta (ultimo checkpoint) termina el nivel SI O SI, aunque queden
+        // misiones sin hacer: el resumen final muestra que se hizo y que no. El desbloqueo
+        // del siguiente nivel sigue exigiendo completar las misiones obligatorias.
+        private void HandleCorrectAction(SafeDriver.Core.ActionType type, int bonus)
         {
+            if (type == SafeDriver.Core.ActionType.ReachedGoal && !levelEnded && level != null)
+                StartCoroutine(EndByGoalDeferred());
+        }
+
+        // Un frame de espera: deja que la mision "Llegar a la meta" procese este mismo
+        // evento y, si con eso quedan todas completas, gane el cierre CON desbloqueo.
+        private System.Collections.IEnumerator EndByGoalDeferred()
+        {
+            yield return null;
+            EndLevel(unlock: false);
+        }
+
+        private void HandleAllRequiredCompleted() => EndLevel(unlock: true);
+
+        private void EndLevel(bool unlock)
+        {
+            if (levelEnded) return;
+            levelEnded = true;
+
             LevelProgress.ReportScore(level.levelId, lastScore);
 
-            if (level.nextLevel != null)
-                LevelProgress.Unlock(level.nextLevel.levelId);
-            else
-                LevelProgress.MarkCampaignComplete();
+            if (unlock)
+            {
+                if (level.nextLevel != null)
+                    LevelProgress.Unlock(level.nextLevel.levelId);
+                else
+                    LevelProgress.MarkCampaignComplete();
+            }
 
             // UIManager escucha OnLevelComplete y muestra el LevelEndPanel.
             EventBus.Dispatch_LevelComplete();

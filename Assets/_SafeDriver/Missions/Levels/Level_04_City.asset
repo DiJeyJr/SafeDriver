@@ -10,15 +10,12 @@ MonoBehaviour:
   m_Enabled: 1
   m_EditorHideFlags: 0
   m_Script: {fileID: 11500000, guid: 6c7a50c241564164d97c770468e0385c, type: 3}
-  m_Name: Level_Design_Missions
+  m_Name: Level_04_City
   m_EditorClassIdentifier: SafeDriver.Missions::SafeDriver.Missions.LevelDefinition
-  levelId: LevelDesign_Missions
-  displayName: Ciudad - Basico
-  description: Recorre la ciudad respetando senales, semaforos y peatones.
-  sceneName: LevelDesign_Level
-  missions:
-  - {fileID: 11400000, guid: d6cda5026e7158b4f8af6002ace8102d, type: 2}
-  - {fileID: 11400000, guid: 1bb5148137c0b2c47a9d2a94bd34c091, type: 2}
-  - {fileID: 11400000, guid: 25fae27d9f590f34fbb7894705de7f2d, type: 2}
+  levelId: Level_04
+  displayName: Ciudad - Avanzado
+  description: Recorre la ciudad y cumpli los objetivos, dificultad avanzada
+  sceneName: Lvl_04
+  missions: []
   nextLevel: {fileID: 0}
-  isFreeRoam: 1
+  isFreeRoam: 0

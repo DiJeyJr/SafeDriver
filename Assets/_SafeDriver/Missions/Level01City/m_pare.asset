@@ -15,7 +15,7 @@ MonoBehaviour:
   missionId: m_pare
   title: Detenerse en la senal PARE
   description: 
-  points: 8
+  points: 10
   isOptional: 0
   action: 4
   requiredCount: 1

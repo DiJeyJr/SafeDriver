@@ -52,6 +52,18 @@ namespace SafeDriver.UI
         /// <summary>Cierra el panel (boton Volver).</summary>
         public void Hide() => gameObject.SetActive(false);
 
+        /// <summary>
+        /// Desbloquea todos los niveles de la lista y refresca el panel.
+        /// Boton admin/testeo — permite probar cualquier nivel sin jugar la progresion.
+        /// </summary>
+        public void UnlockAll()
+        {
+            if (niveles == null) return;
+            foreach (var def in niveles)
+                if (def != null) LevelProgress.Unlock(def.levelId);
+            Rebuild();
+        }
+
         private void Rebuild()
         {
             if (content == null || buttonTemplate == null)

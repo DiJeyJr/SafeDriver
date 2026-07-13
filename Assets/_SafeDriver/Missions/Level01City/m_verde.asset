@@ -15,7 +15,7 @@ MonoBehaviour:
   missionId: m_verde
   title: Pasar el semaforo en verde
   description: 
-  points: 3
+  points: 5
   isOptional: 0
   action: 5
   requiredCount: 1
