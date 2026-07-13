@@ -17,6 +17,12 @@ EditorBuildSettings:
   - enabled: 1
     path: Assets/_SafeDriver/Scenes/Level_01_Basics.unity
     guid: db7e51fb3197ebd4fafed34a63477005
+  - enabled: 1
+    path: Assets/_SafeDriver/Scenes/Level_02_City.unity
+    guid: 5e9a54d65b4070248a478b7be724ac34
+  - enabled: 1
+    path: Assets/_SafeDriver/Scenes/Level_03_City.unity
+    guid: 23707666727951243b0314ac1a00a8ea
   m_configObjects:
     Unity.XR.Oculus.Settings: {fileID: 11400000, guid: a92facc819e31a14e9951f4485e4622f, type: 2}
     com.unity.input.settings.actions: {fileID: -944628639613478452, guid: 052faaac586de48259a63d0c4782560b, type: 3}

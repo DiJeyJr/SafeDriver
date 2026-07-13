@@ -187,6 +187,19 @@ namespace SafeDriver.EditorTools
                 UnityEventTools.RemovePersistentListener(volverBtn.onClick, i);
             UnityEventTools.AddPersistentListener(volverBtn.onClick, new UnityAction(panel.Hide));
 
+            // Boton admin/testeo: desbloquea todos los niveles. Chico y abajo a la izquierda.
+            var adminBtn = UIComposer.RoundButton(card, "UnlockAllButton", "Desbloquear todo", t,
+                UIThemeUtil.Role.Warning, Vector2.zero, new Vector2(190f, 48f));
+            var aRt = adminBtn.GetComponent<RectTransform>();
+            aRt.anchorMin = aRt.anchorMax = new Vector2(0f, 0f);
+            aRt.pivot = new Vector2(0f, 0f);
+            aRt.anchoredPosition = new Vector2(16f, 16f);
+            var aLbl = adminBtn.GetComponentInChildren<TMPro.TextMeshProUGUI>();
+            if (aLbl != null) { aLbl.fontSize = 16f; aLbl.enableAutoSizing = false; }
+            for (int i = adminBtn.onClick.GetPersistentEventCount() - 1; i >= 0; i--)
+                UnityEventTools.RemovePersistentListener(adminBtn.onClick, i);
+            UnityEventTools.AddPersistentListener(adminBtn.onClick, new UnityAction(panel.UnlockAll));
+
             // Jugar abre el panel: asignar la referencia en MainMenuController.
             var menuCtrl = Object.FindFirstObjectByType<MainMenuController>(FindObjectsInactive.Include);
             if (menuCtrl != null)
@@ -252,6 +265,38 @@ namespace SafeDriver.EditorTools
             AssetDatabase.SaveAssets();
             EditorApplication.ExecuteMenuItem("File/Save Project"); // persiste Build Settings a disco
             Debug.Log("[LevelSelect] Cadena sincronizada (" + niveles.Count + " niveles). Escenas agregadas al build: " + agregadas + ".");
+        }
+
+        /// <summary>
+        /// Llena la lista del panel con TODOS los LevelDefinition de Missions/Levels,
+        /// ordenados por nombre de archivo (Level_01, Level_02, ...), y corre el sync
+        /// de cadena + Build Settings. Correr con la escena MainMenu abierta.
+        /// </summary>
+        [MenuItem("SafeDriver/UI/Level Select/3. Autollenar lista con los niveles")]
+        public static void AutoFillLevels()
+        {
+            var panel = Object.FindFirstObjectByType<LevelSelectPanel>(FindObjectsInactive.Include);
+            if (panel == null) { Debug.LogError("[LevelSelect] No hay LevelSelectPanel — abrir la escena MainMenu."); return; }
+
+            var defs = new List<LevelDefinition>();
+            foreach (var guid in AssetDatabase.FindAssets("t:LevelDefinition", new[] { "Assets/_SafeDriver/Missions/Levels" }))
+            {
+                var def = AssetDatabase.LoadAssetAtPath<LevelDefinition>(AssetDatabase.GUIDToAssetPath(guid));
+                if (def != null) defs.Add(def);
+            }
+            defs.Sort((a, b) => string.Compare(a.name, b.name, System.StringComparison.OrdinalIgnoreCase));
+
+            var so = new SerializedObject(panel);
+            var arr = so.FindProperty("niveles");
+            arr.arraySize = defs.Count;
+            for (int i = 0; i < defs.Count; i++)
+                arr.GetArrayElementAtIndex(i).objectReferenceValue = defs[i];
+            so.ApplyModifiedPropertiesWithoutUndo();
+
+            EditorSceneManager.MarkSceneDirty(SceneManager.GetActiveScene());
+            Debug.Log("[LevelSelect] Lista autollenada con " + defs.Count + " niveles: " +
+                      string.Join(", ", defs.ConvertAll(d => d.name)) + ". Corriendo sync de cadena...");
+            SyncChain();
         }
 
         /// <summary>Abre el panel a mano (util para probar en play mode sin visor).</summary>

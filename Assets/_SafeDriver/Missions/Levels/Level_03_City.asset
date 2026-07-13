@@ -25,4 +25,4 @@ MonoBehaviour:
   - {fileID: 11400000, guid: cf206fb956d17b94786bb12819844e18, type: 2}
   - {fileID: 11400000, guid: d6cda5026e7158b4f8af6002ace8102d, type: 2}
   nextLevel: {fileID: 0}
-  isFreeRoam: 1
+  isFreeRoam: 0
