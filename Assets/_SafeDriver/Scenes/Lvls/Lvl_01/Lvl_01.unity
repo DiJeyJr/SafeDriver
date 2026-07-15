@@ -26944,6 +26944,10 @@ PrefabInstance:
       value: SafeDriver_Exterior_v1
       objectReference: {fileID: 0}
     - target: {fileID: 919132149155446097, guid: 67b8190c32d25b14a903ac21f3b2f156, type: 3}
+      propertyPath: m_IsActive
+      value: 1
+      objectReference: {fileID: 0}
+    - target: {fileID: 919132149155446097, guid: 67b8190c32d25b14a903ac21f3b2f156, type: 3}
       propertyPath: m_TagString
       value: PlayerVehicle
       objectReference: {fileID: 0}
