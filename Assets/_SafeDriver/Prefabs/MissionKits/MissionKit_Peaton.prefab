@@ -13,7 +13,7 @@ GameObject:
   - component: {fileID: 5444096854952490561}
   m_Layer: 0
   m_Name: Hitbox
-  m_TagString: Untagged
+  m_TagString: Pedestrian
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
   m_StaticEditorFlags: 0
@@ -419,8 +419,11 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: SafeDriver.Traffic::SafeDriver.Traffic.CrossingPedestrian
   path: {fileID: 1560521325608033223}
-  idleMinSeconds: 2
-  idleMaxSeconds: 8
+  idleMinSeconds: 10
+  idleMaxSeconds: 14
+  safeDistance: 12
+  stoppedThresholdKmh: 3
+  playerTag: PlayerVehicle
   speed: 1.5
   arriveThreshold: 0.25
   turnSpeed: 360

@@ -1,0 +1,260 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="utf-8" />
+<title>Referencia de Scripts - SafeDriver</title>
+<style>
+  body { font-family: Calibri, sans-serif; font-size: 11pt; color: #1a1a1a; max-width: 50em; margin: 0 auto; padding: 30px; }
+  h1 { font-size: 20pt; color: #1f4e79; border-bottom: 2px solid #1f4e79; padding-bottom: 6px; }
+  h2 { font-size: 15pt; color: #1f4e79; margin-top: 28px; }
+  h3 { font-size: 12pt; color: #2e74b5; }
+  p, li { line-height: 1.35; }
+  code { font-family: Consolas, monospace; font-size: 10pt; background: #f2f2f2; padding: 0 3px; }
+  pre { font-family: Consolas, monospace; font-size: 10pt; background: #f2f2f2; padding: 10px; border: 1px solid #d9d9d9; }
+  table { border-collapse: collapse; width: 100%; margin: 10px 0; }
+  th, td { border: 1px solid #8c8c8c; padding: 5px 8px; vertical-align: top; font-size: 10.5pt; }
+  th { background: #dbe5f1; text-align: left; }
+  hr { border: none; border-top: 1px solid #bfbfbf; margin: 24px 0; }
+  .nota { color: #595959; font-style: italic; }
+</style>
+</head>
+<body>
+
+<h1>Referencia de Scripts — SafeDriver</h1>
+
+<p>Mapa rápido de todo el código del juego: qué hace cada script, cómo se conectan y
+qué optimizaciones sostienen el framerate en Quest. Para armar niveles/misiones,
+ver la <b>Guía del Level Designer</b> (GuiaLevelDesigner.docx) — esto es la referencia técnica.</p>
+
+<hr />
+
+<h2>1. Arquitectura en una pantalla</h2>
+
+<p><b>Todo pasa por el EventBus.</b> Ningún sistema referencia a otro hacia arriba: el auto
+publica eventos, y scoring/UI/audio/haptics reaccionan. Eso permite agregar features
+sin tocar el código existente.</p>
+
+<pre>Vehicle ──publica──▶ EventBus ◀──publica── Scoring / Traffic
+                        │
+        escuchan: UI, Audio, Haptics, Missions, GameManager</pre>
+
+<ul>
+  <li><b><code>EventBus</code></b> (Core) — eventos estáticos + un <code>Dispatch_*</code> por evento. Los importantes:
+    <ul>
+      <li><code>OnSpeedChanged</code>, <code>OnSteeringChanged</code>, <code>OnGearChanged</code>, <code>OnHandbrakeChanged</code> (vehículo)</li>
+      <li><code>OnInfractionDetected(tipo, msg)</code> / <code>OnCorrectActionPerformed(acción, bonus)</code> (scoring)</li>
+      <li><code>OnScoreChanged</code>, <code>OnScoreDelta</code>, <code>OnLevelComplete</code>, <code>OnLevelFailed</code> (progresión)</li>
+      <li><code>OnTrafficLightChanged</code>, <code>OnSpeedLimitChanged</code>, <code>OnGameStateChanged</code></li>
+      <li><code>Clear()</code> resetea todos los subscribers al cambiar de escena (evita callbacks a objetos muertos).</li>
+    </ul>
+  </li>
+  <li><b><code>GameManager</code></b> (singleton) — máquina de estados del juego: <code>MainMenu → Driving → SafeFail / LevelEnd / Paused</code>.
+    Controla <code>Time.timeScale</code> por estado. <code>TriggerSafeFail(tipo, msg)</code> setea la infracción
+    y transiciona en el mismo call (evita el race donde la pantalla leía la infracción equivocada).</li>
+  <li><b>Asmdefs por carpeta</b> (<code>SafeDriver.Core/Vehicle/Scoring/Traffic/UI/VR/Audio/Missions</code>):
+    las interfaces compartidas (ej. <code>IPedestrianCrossingNotifier</code>) viven en Core para
+    romper dependencias circulares entre capas.</li>
+</ul>
+
+<hr />
+
+<h2>2. Vehicle — el auto</h2>
+
+<table>
+  <tr><th>Script</th><th>Qué hace</th></tr>
+  <tr><td><code>VehicleController</code></td><td>Núcleo: WheelColliders, motor/freno/dirección, máquina de marchas D/N/R. Publica velocidad y marcha al bus. <code>SmoothStop()</code> frena suave (~1.5s) al entrar en SafeFail — nada de frenadas bruscas en VR.</td></tr>
+  <tr><td><code>VehiclePhysics</code></td><td>Baja el centro de masa (anti-vuelco) y downforce opcional. No toca input.</td></tr>
+  <tr><td><code>VehicleInput</code></td><td>Lee gatillos XR (derecho=acelerar, izquierdo=frenar) vía Input System. El volante le inyecta el steering con <code>SetSteering()</code>.</td></tr>
+  <tr><td><code>GearShifter</code></td><td>Palanca de cambios VR (D/N/R por ángulo). Histéresis anti-flicker, snap al soltar, y se traba en su zona si el auto está en movimiento.</td></tr>
+  <tr><td><code>HandbrakeController</code></td><td>Palanca de freno de mano de 2 posiciones. Arriba=puesto (freno full + corta motor).</td></tr>
+  <tr><td><code>TurnSignalController</code> + <code>TurnSignalStalk</code></td><td>Guiños: la palanca (stalk) mapea su ángulo a Off/Left/Right y el controller parpadea los materiales de las luces.</td></tr>
+</table>
+
+<p><b>Flujo de marchas:</b> sin palanca, D↔R se arma frenando 2 segundos (estados
+<code>DriveArming</code>/<code>ReverseArming</code>, la <code>GearIndicator</code> parpadea). Con <code>GearShifter</code> en escena,
+la palanca es la única autoridad y esa lógica se apaga.</p>
+
+<hr />
+
+<h2>3. VR — interacción y confort</h2>
+
+<table>
+  <tr><th>Script</th><th>Qué hace</th></tr>
+  <tr><td><code>SteeringWheelController</code></td><td>Volante agarrable (Meta ISDK). Sin Rigidbody propio — su collider pertenece al Rigidbody del auto, lo que eliminó el jitter de Rigidbodies anidados. Convierte la rotación en <code>VehicleInput.SetSteering()</code>.</td></tr>
+  <tr><td><code>SteeringWheelHandFollower</code> / <code>GrabbableHandFollower</code></td><td>Pegan la mano virtual al objeto agarrado (snapshot del pose + LateUpdate), en vez de que la mano flote donde está el tracking real.</td></tr>
+  <tr><td><code>WheelGrabProximityFilter</code> / <code>GrabProximityFilter</code></td><td>Solo se puede agarrar si la mano está realmente cerca del objeto (evita agarrar el volante desde el asiento de atrás).</td></tr>
+  <tr><td><code>GrabLimitFeedback</code></td><td>Vibración escalonada al forzar una palanca más allá de su límite; el último tier suelta el agarre y sacude la cámara.</td></tr>
+  <tr><td><code>GrabHaptics</code> / <code>HapticsController</code></td><td>Vibración de controles (API XR estándar). <code>HapticsController</code> reacciona solo al bus: infracción → patrón de error, acierto → patrón de éxito.</td></tr>
+  <tr><td><code>MirrorCamera</code></td><td>Espejos retrovisores — ver sección de optimizaciones.</td></tr>
+  <tr><td><code>HeadTrackingDetector</code> / <code>GazeMirrorDetector</code></td><td>Detectan que el jugador miró un espejo (por rotación de cabeza, o por raycast de mirada a colliders con tag "Mirror") y premian el chequeo.</td></tr>
+  <tr><td><code>CameraShake</code></td><td>Shake corto y chico (&lt;5 cm) — más que eso marea en VR.</td></tr>
+  <tr><td><code>DisplayRefreshRate</code></td><td>Sube el visor de 72 a 90 Hz (persistido; el slider de opciones lo cambia en vivo).</td></tr>
+  <tr><td><code>ControllerOnlyHands</code>, <code>HeadPoseFollower</code>, <code>HandGrabRigidbodyTracker</code>, <code>ClipboardHolster</code>, <code>XRDiagnostic</code></td><td>Workarounds del SDK: apagar manos trackeadas duplicadas, fallback de pose de HMD, sincronizar el Rigidbody de la mano para que ISDK detecte overlaps, tablilla que vuelve sola a su lugar, y logger de diagnóstico XR.</td></tr>
+</table>
+
+<hr />
+
+<h2>4. Scoring — puntaje e infracciones</h2>
+
+<p><b>Flujo:</b> arrancás con <b>1000 puntos</b> (se aprueba con 600). Cada detector es un
+trigger collider en la escena que, según lo que hagas, dispara
+<code>Dispatch_Infraction</code> (resta) o <code>Dispatch_CorrectAction</code> (suma, tabla <code>ActionPoints</code>:
+frenar en rojo +10, ceder al peatón +15, espejos +5, etc.). <code>ScoreManager</code> lleva la
+cuenta, guarda el historial (<code>InfractionRecord</code>) y si la infracción es <b>grave</b>
+(cruzar en rojo, no ceder al peatón, atropello, choque fuerte) llama
+<code>GameManager.TriggerSafeFail</code> → el auto frena suave y aparece la pantalla pedagógica.
+<b>Nunca se muestra el accidente.</b></p>
+
+<table>
+  <tr><th>Script</th><th>Qué detecta</th></tr>
+  <tr><td><code>TrafficLightStopZone</code> + <code>TrafficLightCrossLine</code></td><td>Semáforo: premio por frenar en rojo; infracción/premio al cruzar la línea según la luz. (Reemplazan al viejo <code>TrafficLightDetector</code>, obsoleto.)</td></tr>
+  <tr><td><code>StopSignDetector</code></td><td>Detención completa en el PARE.</td></tr>
+  <tr><td><code>SpeedLimitZone</code></td><td>Exceso de velocidad en la zona; premia mantener velocidad legal (publica el límite al HUD).</td></tr>
+  <tr><td><code>PedestrianCrossingDetector</code> + <code>YieldZone</code></td><td>Ceder el paso en la senda: infracción si pasás con peatones cruzando, premio si frenás y esperás.</td></tr>
+  <tr><td><code>PedestrianHitbox</code></td><td>Atropello → SafeFail directo.</td></tr>
+  <tr><td><code>DirectionZone</code></td><td>Circular en contramano (eje Z local de la zona = sentido legal).</td></tr>
+  <tr><td><code>RedLightStopZone</code></td><td>Zona de frenado previa a la línea (separada para que frenar bien no cuente como infracción).</td></tr>
+  <tr><td><code>VehicleIntegrity</code></td><td>Daño del auto en 8 zonas (carrocería + 4 ruedas, 0–100). Golpes fuertes → SafeFail por <code>SevereCollision</code>. Aditivo: solo escucha triggers, no toca la física.</td></tr>
+  <tr><td><code>LevelTimer</code></td><td>Cuenta regresiva del nivel; a 0 dispara <code>LevelFailed</code>.</td></tr>
+  <tr><td><code>VehicleSensor</code> / <code>CrossingLineSensor</code> / <code>InfractionDetector</code></td><td>Clases base de todos los detectores (filtran que sea el auto del player, detectan cruce de línea con dirección).</td></tr>
+</table>
+
+<hr />
+
+<h2>5. Missions — objetivos por nivel</h2>
+
+<p>Sistema data-driven con <b>ScriptableObjects</b> (menú <code>Create &gt; SafeDriver</code>):</p>
+
+<ul>
+  <li><b><code>LevelDefinition</code></b> — un nivel: qué escena carga, qué misiones tiene, cuál sigue.</li>
+  <li>Tipos de misión (<code>MissionDefinition</code> + su runtime):
+    <ul>
+      <li><b>Contable</b> — hacer una acción N veces ("frenar en rojo x2").</li>
+      <li><b>Con tiempo</b> — contable + límite; se agota → falla.</li>
+      <li><b>Secuencia</b> — acciones en orden estricto (ruta A→B→C); fuera de orden se ignora.</li>
+      <li><b>Compuesta</b> — se completa cuando todas sus sub-misiones se completan.</li>
+    </ul>
+  </li>
+  <li><b><code>MissionManager</code></b> escucha las acciones del EventBus y avanza las misiones; la UI
+    (<code>ObjectivesController</code>) se redibuja con sus eventos <code>MissionsLoaded</code>/<code>MissionChanged</code>.</li>
+  <li><b><code>LevelManager</code></b> (corre antes, <code>DefaultExecutionOrder(-60)</code>) inyecta las misiones del
+    <code>LevelDefinition</code> activo y marca el nivel completado en <b><code>LevelProgress</code></b> (PlayerPrefs:
+    desbloqueo, mejor score, modo libre).</li>
+  <li><b><code>MissionKit</code></b> — prefab drag-and-drop que trae zona de detección + misión juntas.
+    Ojo: las contables cuentan acciones <i>globales</i> — para exigir N paradas usar un kit con
+    requiredCount N, no N kits.</li>
+</ul>
+
+<p class="nota">Detalle fino en CrearMisiones.md.</p>
+
+<hr />
+
+<h2>6. Traffic — NPCs</h2>
+
+<p>Los NPC <b>no usan física real ni NavMesh</b> (los principales): waypoints + Rigidbody
+kinematic. Barato y determinista.</p>
+
+<table>
+  <tr><th>Script</th><th>Qué hace</th></tr>
+  <tr><td><code>TrafficWaypointPath</code></td><td>Path de waypoints (children de un GO vacío), cerrado (loop) o abierto (rebota).</td></tr>
+  <tr><td><code>TrafficVehicle</code></td><td>Auto NPC: sigue el path con <code>MovePosition</code> en FixedUpdate + interpolación → velocidad consistente (no depende del framerate, clave en VR) y movimiento suave. Frena ante <code>TrafficStopLine</code> en rojo; si ya pasó la línea, termina de cruzar (no se planta en el medio).</td></tr>
+  <tr><td><code>TrafficPedestrian</code> / <code>CrossingPedestrian</code></td><td>Peatones por waypoints/lerp, sin NavMesh. Al cruzar la senda notifican al detector de scoring (<code>NotifyByInstance</code> — varios peatones no se pisan el estado).</td></tr>
+  <tr><td><code>TrafficLightController</code></td><td>Ciclo Verde→Amarillo→Rojo, swap de materiales, publica cada cambio al bus (NPCs y detectores reaccionan).</td></tr>
+  <tr><td><code>TrafficLightStopZone</code> / <code>TrafficStopLine</code></td><td>Dónde frenan: el player (trigger de scoring) y los NPC (por distancia a la línea).</td></tr>
+  <tr><td><code>CrosswalkTrafficGate</code></td><td>Frena a player y NPCs cuando hay peatones en la senda (chequeo por distancia, cachea referencias en Start).</td></tr>
+  <tr><td><code>TrafficLayerIsolator</code></td><td>Mete los NPC en la capa "Traffic" y desactiva su colisión contra todo lo demás por código — chocan con el player pero no se enganchan con calles/edificios.</td></tr>
+  <tr><td><code>TrafficProfile</code></td><td>ScriptableObject de dificultad: velocidad/densidad del tráfico por nivel sin tocar la escena.</td></tr>
+  <tr><td><code>NPCVehicleAI</code> / <code>NPCPedestrianAI</code> / <code>DemoPedestrianFaker</code></td><td>Versiones viejas (NavMesh / demo); las escenas nuevas usan los de arriba.</td></tr>
+</table>
+
+<hr />
+
+<h2>7. UI — todo World Space en VR</h2>
+
+<p>Patrón de canvas: World Space + <code>PointableCanvas</code> + BB Ray Interaction + un EventSystem
+con <code>PointableCanvasModule</code> (sin eso los botones no clickean). Escala 0.001. Ver CLAUDE.md.</p>
+
+<table>
+  <tr><th>Script</th><th>Qué hace</th></tr>
+  <tr><td><code>UIManager</code></td><td>Orquestador: escucha <code>OnGameStateChanged</code> y muestra el panel que toca. No conoce Vehicle ni Scoring.</td></tr>
+  <tr><td><code>HUDController</code> + <code>SpeedometerNeedle</code> + <code>GearIndicator</code> + <code>HandbrakeLight</code> + <code>VehicleDamageSymbol</code></td><td>Tablero diegético: velocímetro de aguja, marcha D/N/R (parpadea en arming), testigo de freno de mano, símbolo de daño de 8 zonas. Todo alimentado por el bus.</td></tr>
+  <tr><td><code>SafeFailScreen</code></td><td>Pantalla pedagógica de infracción grave: qué hiciste mal + referencia a la Ley 24.449. Reintentar / Menú.</td></tr>
+  <tr><td><code>LevelEndPanel</code></td><td>Resumen de fin de nivel (score, infracciones, aprobado/reprobado) desde <code>ScoreManager.GetLevelResult()</code>.</td></tr>
+  <tr><td><code>ObjectivesController</code></td><td>Lista de objetivos del tablero, generada en runtime a partir de las misiones activas.</td></tr>
+  <tr><td><code>SuccessToast</code></td><td>Toast breve sobre el volante: verde en acierto, rojo en infracción leve (las graves ya tienen SafeFail).</td></tr>
+  <tr><td><code>PauseMenuController</code></td><td>Pausa (<code>timeScale=0</code>) y reposiciona el canvas frente a la cabeza al abrir.</td></tr>
+  <tr><td><code>MainMenuController</code> + <code>LevelSelectPanel</code></td><td>Menú principal y selección de niveles con desbloqueo progresivo (<code>LevelProgress</code>).</td></tr>
+  <tr><td><code>FpsCounter</code> / <code>FpsToggleButton</code> / <code>RefreshRateSlider</code></td><td>Contador de FPS flotante (auto-instanciado, coloreado según target) y opciones de refresco 72/80/90/120.</td></tr>
+  <tr><td><code>Theme/UITheme</code> + <code>UIThemeUtil</code></td><td>Tema visual central (un solo asset "EduTheme"): colores de señalética vial, tipografía legible en VR. Ninguna pantalla inventa sus colores.</td></tr>
+  <tr><td><code>VRCanvasSetup</code></td><td>Valida/configura los parámetros de canvas VR (font mínimo, distancia de confort 0.8–1.2 m).</td></tr>
+</table>
+
+<hr />
+
+<h2>8. Audio</h2>
+
+<table>
+  <tr><th>Script</th><th>Qué hace</th></tr>
+  <tr><td><code>AudioManager</code></td><td>Crea sus AudioSources por código: motor 3D (pitch según velocidad, volumen según acelerador), ambience de ciudad 2D, SFX. Todo disparado por el bus (infracción, acierto, nivel completo).</td></tr>
+  <tr><td><code>MasterVolumeController</code></td><td>Volumen master vía AudioMixer, conversión lineal→dB (perceptual), persistido en PlayerPrefs.</td></tr>
+  <tr><td><code>SpatialAudioEmitter</code></td><td>Emisor 3D reutilizable para NPCs/semáforos (spatialBlend=1, HRTF lo pone Meta XR).</td></tr>
+</table>
+
+<hr />
+
+<h2>9. Editor utilities (Scripts/Editor/)</h2>
+
+<p>~50 scripts <b>one-shot</b> que se corren desde el menú <code>SafeDriver/...</code> del editor. No
+compilan al build. Existen porque <code>execute_code</code> de MCP falla en esta máquina, así que
+todo setup pesado se hace con scripts persistentes. Grupos:</p>
+
+<ul>
+  <li><b>Setup de escena/nivel:</b> <code>Level01CitySetup</code>, <code>SetupCityTraffic</code>, <code>SetupDetectionV2</code>, <code>CreateMissionZonePrefabs</code>, <code>MissionSystemSetup</code>, <code>AddNpcStopZones</code>, <code>SetupCrossingPedestrians</code>…</li>
+  <li><b>Palancas VR (clonando el volante — patrón probado):</b> <code>CloneWheelAsShifter</code>, <code>CloneWheelAsHandbrake</code>, <code>SetupTurnSignals</code>, <code>ReplaceShifterCollider</code>…</li>
+  <li><b>UI/tema:</b> <code>EduThemeSetup</code>, <code>GenerateThemeAssets</code>, <code>RestyleHUD</code>, <code>RestyleDashboard</code>, <code>BuildFeedbackScreens</code>, <code>CreatePauseMenu</code>, <code>CreateSuccessToast</code>, <code>UIComposer</code>…</li>
+  <li><b>Building Blocks / wiring:</b> <code>MainMenuBuildingBlocks</code> (instala BBs de Meta por reflection), <code>MainMenuWiring</code> (Button.onClick por <code>UnityEventTools</code> — set_property de MCP no sirve para eso).</li>
+  <li><b>Fixes puntuales:</b> <code>FixAndroidXRLoader</code>, <code>FindBlockingColliders</code>, <code>EyeGazeSetup</code>…</li>
+</ul>
+
+<hr />
+
+<h2>10. Optimizaciones esenciales (Quest 3)</h2>
+
+<p>Las que sostienen el framerate — no tocar sin medir con el <code>FpsCounter</code>:</p>
+
+<ol>
+  <li><b>Espejos a media velocidad</b> (<code>MirrorCamera</code>): las 3 cámaras de espejo están
+    deshabilitadas y se llama <code>Render()</code> a mano cada 2 frames → <b>~50% menos costo</b> de
+    la feature más cara del juego. Además: render monoscópico (<code>targetEye=None</code>),
+    culling mask acotado (sin UI/manos/interior), far clip 40–60 m, FOV chico.</li>
+  <li><b>Tráfico kinematic, sin física real:</b> los NPC se mueven con <code>MovePosition</code> +
+    interpolación en FixedUpdate. Cero WheelColliders extra, velocidad estable ante
+    drops de framerate. Los peatones son lerp puro, sin NavMesh que bakear.</li>
+  <li><b>Capa "Traffic" aislada</b> (<code>TrafficLayerIsolator</code>): la matriz de colisiones se
+    recorta por código — menos pares de colisión que evaluar por frame.</li>
+  <li><b>Detección por triggers, no por polling:</b> todo el scoring son <code>OnTriggerEnter/Exit</code>;
+    nada escanea la escena en Update.</li>
+  <li><b>Sin allocations en el hot path:</b> delegates cacheados para suscribir/desuscribir
+    al bus (AudioManager), <code>FieldInfo</code> de reflection cacheados estáticos (palancas),
+    <code>InfractionRecord</code> como <code>readonly struct</code>, <code>sharedMaterial</code> en los guiños (no
+    instancia materiales), early-returns en Update cuando no hay trabajo.</li>
+  <li><b>Refresco configurable</b> (<code>DisplayRefreshRate</code>): default 90 Hz con fallback a la
+    frecuencia más alta soportada; el usuario puede bajar a 72 si un nivel pesa.</li>
+  <li><b>Confort VR como regla:</b> frenado suave en SafeFail, shake &lt; 5 cm, doppler bajo en
+    el motor, UI a 0.8–1.2 m — no es framerate, pero evita mareo igual que los FPS altos.</li>
+  <li><b>Build:</b> occlusion culling bakeado + URP configurado para Quest.</li>
+</ol>
+
+<hr />
+
+<h2>11. Dónde tocar qué</h2>
+
+<ul>
+  <li><b>Feature nueva que habla con el auto</b> → suscribite/publicá en <code>EventBus</code>. No referencies <code>Vehicle*</code> directo.</li>
+  <li><b>Nuevo detector de scoring</b> → heredá de <code>InfractionDetector</code> o <code>VehicleSensor</code>, trigger collider, y despachá al bus.</li>
+  <li><b>Nuevo nivel/misión</b> → assets <code>LevelDefinition</code> + misiones, sin código (ver GuiaLevelDesigner.docx).</li>
+  <li><b>Vehículo, volante, física, espejos, scoring, tráfico</b> → finalizados; no se tocan.</li>
+</ul>
+
+</body>
+</html>

@@ -86,6 +86,14 @@ namespace SafeDriver.EditorTools
             var npc = ZoneChild(root.transform, "NpcStopZone", new Vector3(0f, 0f, -3f), new Vector3(0f, 1f, 0f), new Vector3(8f, 2f, 6f));
             SetRef(npc.AddComponent<TrafficLightStopZone>(), "trafficLight", tlc);
 
+            // Linea de stop para NPCs: el punto que TrafficVehicle consulta para frenar en rojo
+            // (sin esto los autos NPC cruzan el semaforo del kit como si nada).
+            var stopLine = new GameObject("NpcStopLine");
+            stopLine.transform.SetParent(root.transform, false);
+            stopLine.transform.localPosition = new Vector3(0f, 0f, -3f);
+            var tsl = stopLine.AddComponent<TrafficStopLine>();
+            SetRef(tsl, "trafficLight", tlc);
+
             AddKit(root, tpl);
             SavePrefab(root, "MissionKit_Semaforo");
         }
@@ -165,6 +173,7 @@ namespace SafeDriver.EditorTools
 
             var hitbox = new GameObject("Hitbox");
             hitbox.transform.SetParent(peaton.transform, false);
+            hitbox.tag = "Pedestrian"; // los TrafficVehicle frenan por este tag (SphereCast)
             var box = hitbox.AddComponent<BoxCollider>();
             box.isTrigger = true;
             box.center = new Vector3(0f, 1f, 0f);

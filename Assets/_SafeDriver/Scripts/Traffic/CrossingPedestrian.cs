@@ -20,10 +20,19 @@ namespace SafeDriver.Traffic
 
         [Header("Ciclo")]
         [Tooltip("Espera minima en la vereda antes de volver a cruzar.")]
-        [SerializeField] private float idleMinSeconds = 2f;
+        [SerializeField] private float idleMinSeconds = 10f;
 
         [Tooltip("Espera maxima en la vereda antes de volver a cruzar.")]
-        [SerializeField] private float idleMaxSeconds = 8f;
+        [SerializeField] private float idleMaxSeconds = 14f;
+
+        [Header("Mirar antes de cruzar")]
+        [Tooltip("No empieza a cruzar si el auto del jugador esta a menos de esta distancia Y en movimiento. Si el auto esta detenido (cediendo el paso), cruza igual.")]
+        [SerializeField] private float safeDistance = 12f;
+
+        [Tooltip("Velocidad (km/h) por debajo de la cual el auto cuenta como detenido.")]
+        [SerializeField] private float stoppedThresholdKmh = 3f;
+
+        [SerializeField] private string playerTag = "PlayerVehicle";
 
         [Header("Movimiento")]
         [SerializeField] private float speed = 1.5f;
@@ -43,6 +52,8 @@ namespace SafeDriver.Traffic
         private int currentIndex;
         private int direction = 1; // 1 = ida, -1 = vuelta
         private bool crossing;
+        private Transform player;
+        private Rigidbody playerRb;
         private IPedestrianCrossingNotifier notifier;
         private IPedestrianCrossingMultiNotifier multiNotifier;
         private int notifierId;
@@ -55,6 +66,13 @@ namespace SafeDriver.Traffic
             notifier = crossingNotifierRef as IPedestrianCrossingNotifier;
             multiNotifier = crossingNotifierRef as IPedestrianCrossingMultiNotifier;
             notifierId = GetInstanceID();
+
+            var playerGo = GameObject.FindWithTag(playerTag);
+            if (playerGo != null)
+            {
+                player = playerGo.transform;
+                playerRb = playerGo.GetComponent<Rigidbody>();
+            }
 
             // Arranca parado en la vereda (primer waypoint).
             currentIndex = 0;
@@ -72,9 +90,26 @@ namespace SafeDriver.Traffic
         {
             crossing = false;
             yield return new WaitForSeconds(Random.Range(idleMinSeconds, idleMaxSeconds));
+
+            // Mirar antes de cruzar: si el auto viene cerca y en movimiento, esperar.
+            // Si esta detenido cerca (cediendo el paso), cruzar — es el escenario de la mision.
+            while (PlayerApproaching())
+                yield return new WaitForSeconds(0.4f);
+
             crossing = true;
             currentIndex += direction;
             UpdateCrosswalkState();
+        }
+
+        private bool PlayerApproaching()
+        {
+            if (player == null) return false;
+            Vector3 to = player.position - transform.position;
+            to.y = 0f;
+            if (to.magnitude > safeDistance) return false;
+
+            float speedKmh = playerRb != null ? playerRb.linearVelocity.magnitude * 3.6f : 0f;
+            return speedKmh > stoppedThresholdKmh;
         }
 
         void Update()

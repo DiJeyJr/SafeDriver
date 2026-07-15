@@ -12,6 +12,9 @@ Guías para extender el juego sin tocar el código core.
 - **[Cómo crear niveles](CrearNiveles.md)** — teoría de escenas/progresión y modo
   libre (complemento de la guía principal). *Nota: la parte de "colocar detectores a
   mano" quedó vieja — usá los prefabs de la Guía del Level Designer.*
+- **[Referencia de Scripts](Referencia_Scripts.md)** — mapa técnico de todo el código:
+  qué hace cada script, cómo se conectan vía EventBus, y las optimizaciones
+  esenciales para Quest.
 
 ## Sobre las imágenes
 
