@@ -40,7 +40,10 @@ namespace SafeDriver.Traffic
         [Tooltip("PedestrianCrossingDetector (o cualquier IPedestrianCrossingNotifier).")]
         [SerializeField] private MonoBehaviour crossingNotifierRef;
 
-        private int currentIndex;
+		[Header("Animación")]
+		[SerializeField] private Animator animator;
+
+		private int currentIndex;
         private int direction = 1; // 1 = ida, -1 = vuelta
         private bool crossing;
         private IPedestrianCrossingNotifier notifier;
@@ -56,8 +59,13 @@ namespace SafeDriver.Traffic
             multiNotifier = crossingNotifierRef as IPedestrianCrossingMultiNotifier;
             notifierId = GetInstanceID();
 
-            // Arranca parado en la vereda (primer waypoint).
-            currentIndex = 0;
+			if (animator == null)
+				animator = GetComponent<Animator>();
+
+			animator.SetBool("Walk", false);
+
+			// Arranca parado en la vereda (primer waypoint).
+			currentIndex = 0;
             transform.position = path.GetPosition(0);
             StartCoroutine(IdleThenCross());
         }
@@ -71,8 +79,10 @@ namespace SafeDriver.Traffic
         private IEnumerator IdleThenCross()
         {
             crossing = false;
-            yield return new WaitForSeconds(Random.Range(idleMinSeconds, idleMaxSeconds));
+			animator.SetBool("Walk", false);
+			yield return new WaitForSeconds(Random.Range(idleMinSeconds, idleMaxSeconds));
             crossing = true;
+            animator.SetBool("Walk", true);
             currentIndex += direction;
             UpdateCrosswalkState();
         }
@@ -95,7 +105,8 @@ namespace SafeDriver.Traffic
                     // Cruce terminado: dar vuelta para la proxima y descansar en la vereda.
                     direction = -direction;
                     if (inCrosswalk) { inCrosswalk = false; NotifyPresence(false); }
-                    StartCoroutine(IdleThenCross());
+					animator.SetBool("Walk", false);
+					StartCoroutine(IdleThenCross());
                     return;
                 }
 
