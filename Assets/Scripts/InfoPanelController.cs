@@ -8,6 +8,7 @@ public class InfoPanelController : MonoBehaviour
     [SerializeField] private bool startVisible = true;
 
     private bool isVisible;
+    private Coroutine scaleRoutine;
 
     private void Start()
     {
@@ -43,12 +44,8 @@ public class InfoPanelController : MonoBehaviour
 
     public void ToggleVisibility()
     {
-        if (isVisible)
-            StartCoroutine(AnimateScale(Vector3.one, Vector3.zero));
-        else
-            StartCoroutine(AnimateScale(Vector3.zero, Vector3.one));
-
         isVisible = !isVisible;
+        PlayScale(isVisible ? Vector3.one : Vector3.zero);
     }
 
     public void Show()
@@ -56,7 +53,7 @@ public class InfoPanelController : MonoBehaviour
         if (!isVisible)
         {
             isVisible = true;
-            StartCoroutine(AnimateScale(Vector3.zero, Vector3.one));
+            PlayScale(Vector3.one);
         }
     }
 
@@ -65,8 +62,15 @@ public class InfoPanelController : MonoBehaviour
         if (isVisible)
         {
             isVisible = false;
-            StartCoroutine(AnimateScale(Vector3.one, Vector3.zero));
+            PlayScale(Vector3.zero);
         }
+    }
+
+    // Corta la animación anterior para que toggles rápidos no peleen entre sí
+    private void PlayScale(Vector3 to)
+    {
+        if (scaleRoutine != null) StopCoroutine(scaleRoutine);
+        scaleRoutine = StartCoroutine(AnimateScale(transform.localScale, to));
     }
 
     private IEnumerator AnimateScale(Vector3 from, Vector3 to)

@@ -43,6 +43,13 @@ public class IntersectionManager : MonoBehaviour
         UpdatePermissions();
     }
 
+    private void OnDisable()
+    {
+        // Si Vuforia oculta el contenido a mitad de la transición la corrutina muere;
+        // sin esto el botón quedaría bloqueado para siempre.
+        isTransitioning = false;
+    }
+
     /// <summary>
     /// Called by the UI button. Starts the transition sequence.
     /// </summary>
@@ -72,15 +79,16 @@ public class IntersectionManager : MonoBehaviour
         {
             // E/W green → yellow → red, then N/S → green
             // (first time: all red → just go green)
-            if (eastLight.CurrentState == TrafficLightController.LightState.Green)
+            if (eastLight != null && eastLight.CurrentState == TrafficLightController.LightState.Green)
             {
                 SetLights(eastLight, westLight, TrafficLightController.LightState.Yellow);
                 UpdatePermissions();
 
                 yield return new WaitForSeconds(yellowDuration);
-
-                SetLights(eastLight, westLight, TrafficLightController.LightState.Red);
             }
+
+            // Siempre a rojo (si quedó en amarillo por una transición cortada, también se apaga)
+            SetLights(eastLight, westLight, TrafficLightController.LightState.Red);
 
             SetLights(northLight, southLight, TrafficLightController.LightState.Green);
             nsIsGreen = true;

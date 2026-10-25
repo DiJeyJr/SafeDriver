@@ -53,8 +53,8 @@ public class TrafficLightController : MonoBehaviour
 
     private void ApplyState()
     {
-        if (redLight) redLight.material = currentState == LightState.Red ? matRedOn : matRedOff;
-        if (yellowLight) yellowLight.material = currentState == LightState.Yellow ? matYellowOn : matYellowOff;
-        if (greenLight) greenLight.material = currentState == LightState.Green ? matGreenOn : matGreenOff;
+        if (redLight) redLight.sharedMaterial = currentState == LightState.Red ? matRedOn : matRedOff;
+        if (yellowLight) yellowLight.sharedMaterial = currentState == LightState.Yellow ? matYellowOn : matYellowOff;
+        if (greenLight) greenLight.sharedMaterial = currentState == LightState.Green ? matGreenOn : matGreenOff;
     }
 }

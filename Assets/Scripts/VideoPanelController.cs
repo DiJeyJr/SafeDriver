@@ -16,6 +16,7 @@ public class VideoPanelController : MonoBehaviour
         if (panel == null || videoPlayer == null) return;
 
         panel.SetActive(true);
+        videoPlayer.prepareCompleted -= OnPrepared;
         videoPlayer.prepareCompleted += OnPrepared;
         videoPlayer.Prepare();
     }

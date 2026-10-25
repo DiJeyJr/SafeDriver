@@ -179,7 +179,10 @@ public class SetupInteractions
         var linked = new System.Collections.Generic.List<Transform>();
         foreach (Transform child in miniCity)
         {
-            if (child.name.StartsWith(carPrefix + "_") && child != carBody)
+            // Saltear el auto opuesto (*_Opp) y los contenedores *_Body_TurnWP / *_Body_WP_Opp,
+            // que tambien cuelgan de MiniCity con el mismo prefijo
+            if (child.name.StartsWith(carPrefix + "_") && child != carBody
+                && !child.name.StartsWith(carPrefix + "_Body") && !child.name.EndsWith("_Opp"))
                 linked.Add(child);
         }
 
@@ -273,7 +276,7 @@ public class SetupInteractions
             var pedLinked = new System.Collections.Generic.List<Transform>();
             foreach (Transform child in miniCity.transform)
             {
-                if (child.name.StartsWith(pedName + "_") && child != pedTorsoT)
+                if (child.name.StartsWith(pedName + "_") && !child.name.StartsWith(pedName + "_Torso"))
                     pedLinked.Add(child);
             }
 
@@ -329,19 +332,9 @@ public class SetupInteractions
         Transform carBlue = FindDeep(miniCityObj.transform, "Car_Blue_Body");
         Transform carRed = FindDeep(miniCityObj.transform, "Car_Red_Body");
 
-        SerializedProperty nsCars = so.FindProperty("northSouthCars");
-        if (carBlue != null && nsCars != null)
-        {
-            nsCars.arraySize = 1;
-            nsCars.GetArrayElementAtIndex(0).objectReferenceValue = carBlue.GetComponent<CarController>();
-        }
-
-        SerializedProperty ewCars = so.FindProperty("eastWestCars");
-        if (carRed != null && ewCars != null)
-        {
-            ewCars.arraySize = 1;
-            ewCars.GetArrayElementAtIndex(0).objectReferenceValue = carRed.GetComponent<CarController>();
-        }
+        // Agregar sin pisar: los autos *_Opp se wirearon a mano en estos mismos arrays
+        if (carBlue) AddIfMissing(so.FindProperty("northSouthCars"), carBlue.GetComponent<CarController>());
+        if (carRed) AddIfMissing(so.FindProperty("eastWestCars"), carRed.GetComponent<CarController>());
 
         // Pedestrians - wire to IntersectionManager
         // Ped 1 & 2 cross N-S crosswalks (affected by N-S traffic)
@@ -351,24 +344,22 @@ public class SetupInteractions
         Transform ped3 = FindDeep(miniCityObj.transform, "Pedestrian_3_Torso");
         Transform ped4 = FindDeep(miniCityObj.transform, "Pedestrian_4_Torso");
 
-        SerializedProperty nsPeds = so.FindProperty("northSouthPedestrians");
-        if (nsPeds != null)
-        {
-            nsPeds.arraySize = 2;
-            if (ped1) nsPeds.GetArrayElementAtIndex(0).objectReferenceValue = ped1.GetComponent<PedestrianController>();
-            if (ped2) nsPeds.GetArrayElementAtIndex(1).objectReferenceValue = ped2.GetComponent<PedestrianController>();
-        }
-
-        SerializedProperty ewPeds = so.FindProperty("eastWestPedestrians");
-        if (ewPeds != null)
-        {
-            ewPeds.arraySize = 2;
-            if (ped3) ewPeds.GetArrayElementAtIndex(0).objectReferenceValue = ped3.GetComponent<PedestrianController>();
-            if (ped4) ewPeds.GetArrayElementAtIndex(1).objectReferenceValue = ped4.GetComponent<PedestrianController>();
-        }
+        if (ped1) AddIfMissing(so.FindProperty("northSouthPedestrians"), ped1.GetComponent<PedestrianController>());
+        if (ped2) AddIfMissing(so.FindProperty("northSouthPedestrians"), ped2.GetComponent<PedestrianController>());
+        if (ped3) AddIfMissing(so.FindProperty("eastWestPedestrians"), ped3.GetComponent<PedestrianController>());
+        if (ped4) AddIfMissing(so.FindProperty("eastWestPedestrians"), ped4.GetComponent<PedestrianController>());
 
         so.ApplyModifiedProperties();
         Debug.Log("[Setup] IntersectionManager wired (cars + pedestrians)");
+    }
+
+    static void AddIfMissing(SerializedProperty array, Object value)
+    {
+        if (array == null || value == null) return;
+        for (int i = 0; i < array.arraySize; i++)
+            if (array.GetArrayElementAtIndex(i).objectReferenceValue == value) return;
+        array.arraySize++;
+        array.GetArrayElementAtIndex(array.arraySize - 1).objectReferenceValue = value;
     }
 
     static void SetupTouchInteraction()
@@ -437,8 +428,13 @@ public class SetupInteractions
 
     static void SetupTrafficLightUI()
     {
-        var oldUI = GameObject.Find("TrafficLightUI");
-        if (oldUI != null) Object.DestroyImmediate(oldUI);
+        // No destruir la UI existente: tiene cosas agregadas a mano (PedestrianButton,
+        // TrackingUIController) y DestroyImmediate sin Undo no se puede deshacer
+        if (GameObject.Find("TrafficLightUI") != null)
+        {
+            Debug.Log("[Setup] TrafficLightUI ya existe, no se regenera (borrala a mano para recrearla)");
+            return;
+        }
 
         // EventSystem
         if (UnityEngine.Object.FindFirstObjectByType<UnityEngine.EventSystems.EventSystem>() == null)

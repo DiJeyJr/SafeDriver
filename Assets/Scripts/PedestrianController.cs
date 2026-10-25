@@ -31,7 +31,6 @@ public class PedestrianController : MonoBehaviour
 
     private Vector3 wpPosition;
     private Vector3 myOffset;
-    private Vector3[] partOffsets;
 
     private Vector3 paceTarget;
     private float paceTimer;
@@ -49,16 +48,6 @@ public class PedestrianController : MonoBehaviour
         {
             wpPosition = transform.localPosition;
             myOffset = Vector3.zero;
-        }
-
-        if (linkedParts != null)
-        {
-            partOffsets = new Vector3[linkedParts.Length];
-            for (int i = 0; i < linkedParts.Length; i++)
-            {
-                if (linkedParts[i] != null)
-                    partOffsets[i] = linkedParts[i].localPosition - transform.localPosition;
-            }
         }
 
         paceTarget = wpPosition;
@@ -121,6 +110,7 @@ public class PedestrianController : MonoBehaviour
     {
         isCrossing = false;
         returningToStart = false;
+        waitTimer = 0f;
         paceTarget = wpPosition;
         paused = true;
         paceTimer = Random.Range(paceWaitMin, paceWaitMax);

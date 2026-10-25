@@ -19,12 +19,27 @@ public class SceneBuilder : EditorWindow
             "Sí", "Cancelar"))
             return;
 
+        // Si ya se corrio antes, no duplicar toda la ciudad/UI/managers
+        if (GameObject.Find("ImageTarget_SafeDriver") != null)
+        {
+            EditorUtility.DisplayDialog("Build AR Scene",
+                "La escena ya tiene un ImageTarget_SafeDriver. Borralo a mano si queres regenerarla.", "OK");
+            return;
+        }
+
+        Undo.IncrementCurrentGroup();
+        Undo.SetCurrentGroupName("Build AR Scene");
+
+        // La capa tiene que existir antes de armar la LayerMask del ARTouchInteraction
+        SetupLayers();
         DisableMainCamera();
         CreateMaterials();
         SetupMiniCity();
         CreateUI();
         CreateManagers();
-        SetupLayers();
+
+        UnityEditor.SceneManagement.EditorSceneManager.MarkSceneDirty(
+            UnityEditor.SceneManagement.EditorSceneManager.GetActiveScene());
 
         EditorUtility.DisplayDialog("Done", "Escena AR armada. Configurá el Image Target manualmente desde Vuforia.", "OK");
     }
@@ -57,6 +72,7 @@ public class SceneBuilder : EditorWindow
         var mainCam = GameObject.Find("Main Camera");
         if (mainCam != null)
         {
+            Undo.RecordObject(mainCam, "Disable Main Camera");
             mainCam.SetActive(false);
             Debug.Log("[SceneBuilder] Main Camera disabled");
         }
@@ -126,6 +142,8 @@ public class SceneBuilder : EditorWindow
         // Create ImageTarget placeholder (user will replace with real Vuforia ImageTarget)
         GameObject imageTarget = new GameObject("ImageTarget_SafeDriver");
         imageTarget.transform.position = Vector3.zero;
+        // Todo lo demas cuelga de este root, asi un Ctrl+Z se lleva todo
+        Undo.RegisterCreatedObjectUndo(imageTarget, "Build AR Scene");
 
         // Instantiate city as child
         GameObject miniCity = (GameObject)PrefabUtility.InstantiatePrefab(cityPrefab);
@@ -167,38 +185,29 @@ public class SceneBuilder : EditorWindow
                 col.size = Vector3.one * 3f; // Larger for easier tapping
                 housing.gameObject.layer = interactableLayer;
 
-                // Add TrafficLightController to a parent group
-                Transform pole = FindDeep(city.transform, $"{name}_Pole");
-                if (pole != null)
-                {
-                    // Create a parent for the traffic light group
-                    GameObject tlGroup = new GameObject(name);
-                    tlGroup.transform.SetParent(city.transform);
-                    tlGroup.transform.localPosition = pole.localPosition;
-                    tlGroup.transform.localScale = Vector3.one;
+                // El controller va en el housing: ARTouchInteraction lo busca con
+                // GetComponentInParent desde el collider, y SetupInteractions lo reusa ahi
+                var controller = housing.gameObject.AddComponent<TrafficLightController>();
 
-                    var controller = tlGroup.AddComponent<TrafficLightController>();
+                // Assign light renderers
+                Transform redLight = FindDeep(city.transform, $"{name}_Red");
+                Transform yellowLight = FindDeep(city.transform, $"{name}_Yellow");
+                Transform greenLight = FindDeep(city.transform, $"{name}_Green");
 
-                    // Assign light renderers
-                    Transform redLight = FindDeep(city.transform, $"{name}_Red");
-                    Transform yellowLight = FindDeep(city.transform, $"{name}_Yellow");
-                    Transform greenLight = FindDeep(city.transform, $"{name}_Green");
+                if (redLight) SetSerializedField(controller, "redLight", redLight.GetComponent<Renderer>());
+                if (yellowLight) SetSerializedField(controller, "yellowLight", yellowLight.GetComponent<Renderer>());
+                if (greenLight) SetSerializedField(controller, "greenLight", greenLight.GetComponent<Renderer>());
 
-                    if (redLight) SetSerializedField(controller, "redLight", redLight.GetComponent<Renderer>());
-                    if (yellowLight) SetSerializedField(controller, "yellowLight", yellowLight.GetComponent<Renderer>());
-                    if (greenLight) SetSerializedField(controller, "greenLight", greenLight.GetComponent<Renderer>());
+                // Assign materials
+                SetSerializedField(controller, "matRedOn", LoadMat("Light_Red_On"));
+                SetSerializedField(controller, "matRedOff", LoadMat("Light_Red_Off"));
+                SetSerializedField(controller, "matYellowOn", LoadMat("Light_Yellow_On"));
+                SetSerializedField(controller, "matYellowOff", LoadMat("Light_Yellow_Off"));
+                SetSerializedField(controller, "matGreenOn", LoadMat("Light_Green_On"));
+                SetSerializedField(controller, "matGreenOff", LoadMat("Light_Green_Off"));
 
-                    // Assign materials
-                    SetSerializedField(controller, "matRedOn", LoadMat("Light_Red_On"));
-                    SetSerializedField(controller, "matRedOff", LoadMat("Light_Red_Off"));
-                    SetSerializedField(controller, "matYellowOn", LoadMat("Light_Yellow_On"));
-                    SetSerializedField(controller, "matYellowOff", LoadMat("Light_Yellow_Off"));
-                    SetSerializedField(controller, "matGreenOn", LoadMat("Light_Green_On"));
-                    SetSerializedField(controller, "matGreenOff", LoadMat("Light_Green_Off"));
-
-                    // Set collider layer on all children
-                    SetLayerRecursive(housing.gameObject, interactableLayer);
-                }
+                // Set collider layer on all children
+                SetLayerRecursive(housing.gameObject, interactableLayer);
             }
         }
     }
@@ -313,7 +322,7 @@ public class SceneBuilder : EditorWindow
 
         // Background
         GameObject bgObj = new GameObject("Background");
-        bgObj.transform.SetParent(infoPanel.transform);
+        bgObj.transform.SetParent(infoPanel.transform, false); // false: si no hereda la escala inversa del canvas (x50/x100)
         var bgImage = bgObj.AddComponent<UnityEngine.UI.Image>();
         bgImage.color = new Color(0.1f, 0.15f, 0.3f, 0.85f);
         RectTransform bgRect = bgObj.GetComponent<RectTransform>();
@@ -324,7 +333,7 @@ public class SceneBuilder : EditorWindow
 
         // Title
         GameObject titleObj = new GameObject("Title");
-        titleObj.transform.SetParent(infoPanel.transform);
+        titleObj.transform.SetParent(infoPanel.transform, false); // false: si no hereda la escala inversa del canvas (x50/x100)
         var titleText = titleObj.AddComponent<TextMeshProUGUI>();
         titleText.text = "SafeDriver VR";
         titleText.fontSize = 48;
@@ -339,7 +348,7 @@ public class SceneBuilder : EditorWindow
 
         // Description
         GameObject descObj = new GameObject("Description");
-        descObj.transform.SetParent(infoPanel.transform);
+        descObj.transform.SetParent(infoPanel.transform, false); // false: si no hereda la escala inversa del canvas (x50/x100)
         var descText = descObj.AddComponent<TextMeshProUGUI>();
         descText.text = "Simulador de manejo seguro\nen Realidad Virtual\n\nTocá los semáforos para interactuar";
         descText.fontSize = 22;
@@ -366,7 +375,7 @@ public class SceneBuilder : EditorWindow
         tipRect.sizeDelta = new Vector2(500, 50);
 
         GameObject tipTextObj = new GameObject("TipText");
-        tipTextObj.transform.SetParent(tooltip.transform);
+        tipTextObj.transform.SetParent(tooltip.transform, false); // false: si no hereda la escala inversa del canvas (x50/x100)
         var tipText = tipTextObj.AddComponent<TextMeshProUGUI>();
         tipText.text = "Tocá los semáforos para cambiar la luz";
         tipText.fontSize = 30;
@@ -468,9 +477,9 @@ public class SceneBuilder : EditorWindow
     {
         string[] parts = s.Split(',');
         return new Vector3(
-            float.Parse(parts[0]),
-            float.Parse(parts[1]),
-            float.Parse(parts[2])
+            float.Parse(parts[0], System.Globalization.CultureInfo.InvariantCulture),
+            float.Parse(parts[1], System.Globalization.CultureInfo.InvariantCulture),
+            float.Parse(parts[2], System.Globalization.CultureInfo.InvariantCulture)
         );
     }
 }
